@@ -6,6 +6,7 @@ call plug#begin('~/.vim/plugged')
 Plug 'janko/vim-test'
 Plug 'vim-syntastic/syntastic'
 Plug 'kien/ctrlp.vim'
+Plug 'mileszs/ack.vim'
 
 call plug#end()
 
@@ -18,10 +19,10 @@ syntax on
 "
 " Vim-Test config
 "
-nmap <silent> <C-F10> :TestNearest<CR>
-nmap <silent> <C-S-F10> :TestFile<CR>
+nmap <silent> <C-S-F5> :TestNearest<CR>
+nmap <silent> <C-T> :TestFile<CR>
 nmap <silent> t<C-s> :TestSuite<CR>
-nmap <silent> <F5> :TestLast<CR>
+nmap <silent> <C-F5> :TestLast<CR>
 nmap <silent> t<C-g> :TestVisit<CR>
 
 
@@ -45,6 +46,12 @@ function! SyntasticCheckHook(errors)
         let g:syntastic_loc_list_height = min([len(a:errors), 10])
     endif
 endfunction
+
+" Toggle Syntastic on/off with Ctrl+w E
+let g:syntastic_mode_map = { 'mode': 'passive', 'active_filetypes': [],'passive_filetypes': [] }
+nnoremap <leader>lt :SyntasticToggleMode<CR>
+nnoremap <leader>ll :SyntasticCheck<CR>
+nnoremap <leader>lr :SyntasticReset<CR>
 
 "
 " CTRLP Config
@@ -106,7 +113,7 @@ nnoremap <C-Right> :tabnext<CR>
 nnoremap <S-Left> :-tabm<CR>
 nnoremap <S-Right> :+tabm<CR>
 
-" Ctrl + Tab to go to last active tab
+" Leader + Tab to go to last active tab
 if !exists('g:lasttab')
   let g:lasttab = 1
 endif
@@ -114,8 +121,14 @@ nmap <leader><Tab> :exe "tabn ".g:lasttab<CR>
 au TabLeave * let g:lasttab = tabpagenr()
 
 nnoremap <leader>p :PlugInstall<CR>
-nnoremap <leader>s :so ~/.vimrc<CR>
+nnoremap <leader>s :so ~/.vimrc<CR><CR>
 :map <C-m> i<CR><Esc>
+
+" Search globally with <leader>aa
+nnoremap <leader>aa :Ack! <space>
+
+" Save with Leader+l
+nnoremap <leader>w :w<CR>
 
 set updatetime=100
 
@@ -128,20 +141,7 @@ let &t_SR.="\e[4 q"
 let &t_EI.="\e[1 q"
 hi MatchParen cterm=bold ctermbg=none ctermfg=magenta
 
-" Removes trailing spaces
-function TrimWhiteSpace()
-  %s/\s*$//
-  ''
-endfunction
-
 set list listchars=trail:.,extends:>
-autocmd FileWritePre * call TrimWhiteSpace()
-autocmd FileAppendPre * call TrimWhiteSpace()
-autocmd FilterWritePre * call TrimWhiteSpace()
-autocmd BufWritePre * call TrimWhiteSpace()
-
-map <F2> :call TrimWhiteSpace()<CR>
-map! <F2> :call TrimWhiteSpace()<CR>
 
 " tree
 autocmd StdinReadPre * let s:std_in=1
