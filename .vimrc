@@ -1,6 +1,6 @@
-:let mapleader = ","
-
+"
 " Plugin Installation
+"
 call plug#begin('~/.vim/plugged')
 
 Plug 'janko/vim-test'
@@ -91,6 +91,8 @@ autocmd vimenter * NERDTree
 "
 " General config
 "
+:let mapleader = ","
+
 :color lucius
 :syntax on
 :set number
