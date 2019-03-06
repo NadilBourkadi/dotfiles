@@ -8,10 +8,9 @@ Plug 'vim-syntastic/syntastic'
 Plug 'kien/ctrlp.vim'
 Plug 'mileszs/ack.vim'
 Plug 'neomake/neomake'
+Plug 'scrooloose/nerdtree'
 
 call plug#end()
-
-execute pathogen#infect()
 
 filetype plugin indent on
 syntax on
@@ -71,7 +70,7 @@ function! NERDTreeHighlightFile(extension, fg, bg, guifg, guibg)
  exec 'autocmd filetype nerdtree syn match ' . a:extension .' #^\s\+.*'. a:extension .'$#'
 endfunction
 
-nnoremap <leader>n :NERDTree %<CR>
+nnoremap <leader>m :NERDTree %<CR>
 map <C-n> :NERDTreeToggle<CR>
 
 call NERDTreeHighlightFile('jade', 'green', 'none', 'green', '#151515')
@@ -126,7 +125,7 @@ nmap <leader><Tab> :exe "tabn ".g:lasttab<CR>
 au TabLeave * let g:lasttab = tabpagenr()
 
 nnoremap <leader>p :PlugInstall<CR>
-nnoremap <leader>s :so ~/.vimrc<CR><CR>
+nnoremap <leader>s :so ~/.config/nvim/init.vim<CR><CR>
 :map <C-m> i<CR><Esc>
 
 " Search globally with <leader>aa
