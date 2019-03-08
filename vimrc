@@ -8,26 +8,109 @@ Plug 'vim-syntastic/syntastic'
 Plug 'kien/ctrlp.vim'
 Plug 'mileszs/ack.vim'
 Plug 'neomake/neomake'
+Plug 'tpope/vim-fugitive'
+Plug 'itchyny/lightline.vim'
+Plug 'scrooloose/nerdtree'
+Plug 'wavded/vim-stylus'
 
 call plug#end()
-
-execute pathogen#infect()
-
 filetype plugin indent on
+
+
+"
+" General config
+"
+:let mapleader = ","
+
+:color lucius
+:syntax on
+:set number
+:set relativenumber
+:set tabstop=4
+:set shiftwidth=4
+:set expandtab
+:set ruler
+:set nolist
+:set autoindent
+:set ignorecase
+
 syntax on
+
+" Display status bar regardless of windows
+set laststatus=2
+
+
+" Navigate tabs with Ctrl + Left/Right
+nnoremap <C-h> :tabprevious<CR>
+nnoremap <C-l> :tabnext<CR>
+
+" Move tabs with Shift + Left/Right
+nnoremap <S-Left> :-tabm<CR>
+nnoremap <S-Right> :+tabm<CR>
+
+" Leader + Tab to go to last active tab
+if !exists('g:lasttab')
+  let g:lasttab = 1
+endif
+nmap <leader><Tab> :exe "tabn ".g:lasttab<CR>
+au TabLeave * let g:lasttab = tabpagenr()
+
+nnoremap <leader>p :PlugInstall<CR>
+
+" .vimrc mappings
+nnoremap <leader>ss :so ~/.vimrc<CR><CR>
+nnoremap <leader>se :tabe ~/.vimrc<CR>
+
+:map <C-m> i<CR><Esc>
+
+" Search globally with <leader>aa
+nnoremap <leader>aa :Ack! <space>
+
+" Save with Leader+l
+nnoremap <leader>w :w<CR>
+
+set updatetime=100
+
+autocmd StdinReadPre * let s:std_in=1
+autocmd VimEnter * if argc() == 1 && isdirectory(argv()[0]) && !exists("s:std_in") | exe 'NERDTree' argv()[0] | wincmd p | ene | endif
+
+" Cursor change
+let &t_SI.="\e[5 q"
+let &t_SR.="\e[4 q"
+let &t_EI.="\e[1 q"
+hi MatchParen cterm=bold ctermbg=none ctermfg=magenta
+
+set list listchars=trail:.,extends:>
+
+" tree
+autocmd StdinReadPre * let s:std_in=1
 
 
 "
 " Vim-Test config
 "
 
-nmap <silent> <leader>tn :TestNearest<CR>
-nmap <silent> <leader>tt :TestFile<CR>
-nmap <silent> <leader>ts :TestSuite<CR>
-nmap <silent> <leader>tl :TestLast<CR>
-nmap <silent> <leader>tv :TestVisit<CR>
+map <leader>tn :TestNearest<CR>
+map <leader>tt :TestFile<CR>
+map <leader>ts :TestSuite<CR>
+map <leader>tl :TestLast<CR>
+map <leader>tv :TestVisit<CR>
 
-let test#strategy = "neomake"
+
+"
+" Lightline Config
+"
+
+let g:lightline = {
+      \ 'colorscheme': 'seoul256',
+      \ 'active': {
+      \   'left': [ [ 'mode', 'paste' ],
+      \             [ 'gitbranch', 'readonly', 'filename', 'modified' ] ]
+      \ },
+      \ 'component_function': {
+      \   'gitbranch': 'fugitive#head'
+      \ },
+      \ }
 
 "
 " Syntastic Config
@@ -90,63 +173,3 @@ call NERDTreeHighlightFile('php', 'Magenta', 'none', '#ff00ff', '#151515')
 
 autocmd vimenter * NERDTree
 
-
-"
-" General config
-"
-:let mapleader = ","
-
-:color lucius
-:syntax on
-:set number
-:set relativenumber
-:set tabstop=4
-:set shiftwidth=4
-:set expandtab
-:set ruler
-:set nolist
-:set autoindent
-:set colorcolumn=100
-:set ignorecase
-highlight ColorColumn ctermbg=7
-
-" Navigate tabs with Ctrl + Left/Right
-nnoremap <C-Left> :tabprevious<CR>
-nnoremap <C-Right> :tabnext<CR>
-
-" Move tabs with Shift + Left/Right
-nnoremap <S-Left> :-tabm<CR>
-nnoremap <S-Right> :+tabm<CR>
-
-" Leader + Tab to go to last active tab
-if !exists('g:lasttab')
-  let g:lasttab = 1
-endif
-nmap <leader><Tab> :exe "tabn ".g:lasttab<CR>
-au TabLeave * let g:lasttab = tabpagenr()
-
-nnoremap <leader>p :PlugInstall<CR>
-nnoremap <leader>s :so ~/.vimrc<CR><CR>
-:map <C-m> i<CR><Esc>
-
-" Search globally with <leader>aa
-nnoremap <leader>aa :Ack! <space>
-
-" Save with Leader+l
-nnoremap <leader>w :w<CR>
-
-set updatetime=100
-
-autocmd StdinReadPre * let s:std_in=1
-autocmd VimEnter * if argc() == 1 && isdirectory(argv()[0]) && !exists("s:std_in") | exe 'NERDTree' argv()[0] | wincmd p | ene | endif
-
-" Cursor change
-let &t_SI.="\e[5 q"
-let &t_SR.="\e[4 q"
-let &t_EI.="\e[1 q"
-hi MatchParen cterm=bold ctermbg=none ctermfg=magenta
-
-set list listchars=trail:.,extends:>
-
-" tree
-autocmd StdinReadPre * let s:std_in=1
