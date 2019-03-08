@@ -1,14 +1,15 @@
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
+export TERM=xterm-256color
 # Path to your oh-my-zsh installation.
-  export ZSH="/home/dil/.oh-my-zsh"
+export ZSH="/home/dil/.oh-my-zsh"
 
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
 # See https://github.com/robbyrussell/oh-my-zsh/wiki/Themes
-ZSH_THEME="avit"
+ZSH_THEME="wezm"
 
 # Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
@@ -94,3 +95,80 @@ source $ZSH/oh-my-zsh.sh
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
+
+get-image() {
+    k describe deploy $1 | grep Image
+}
+
+function forward {
+    port=$2
+    service=$(k get pods | grep $1 | head -1 | cut -d ' ' -f1)
+    echo "Forwarding pod $service on port $port"
+    kubectl port-forward "$service" $port
+}
+
+function delete {
+ service=$(k get -n staging pods | grep $1 | head -1 | cut -d ' ' -f1)
+    echo "Deleting pod on staging $service"
+    kubectl delete pod "$service"
+}
+
+function logs {
+    service=$1
+    shift
+    kubectl logs --tail=100 -f "deployment/$service" $@
+}
+
+function kbash {
+    service=$(k get pods | grep $1 | grep Running | head -1 | cut -d ' ' -f1)
+    echo "Executing bash on $service"
+    shift
+    kubectl exec "$service" -it bash $@
+}
+
+function ksh {
+    service=$(k get pods | grep $1 | grep Running | head -1 | cut -d ' ' -f1)
+    echo "Executing bash on $service"
+    shift
+    kubectl exec "$service" -it sh $@
+}
+function describe {
+    service=$(k get pods | grep $1 | head -1 | cut -d ' ' -f1)
+    echo "Executing describe on $service"
+    k describe pod "$service"
+}
+function namespace {
+    echo "Setting namespace $1"
+    kubectl config set-context $(kubectl config current-context) --namespace=$1
+}
+
+function dc-test {
+    (cd ~/Dev/lantum/stack && docker-compose run $1 python manage.py test $2)
+}
+
+function dc-up-d {
+    (cd ~/Dev/lantum/stack && docker-compose up -d $1)
+}
+
+function dc-up {
+    (cd ~/Dev/lantum/stack && docker-compose up $1)
+}
+
+function dc-man {
+    service=$1
+    shift
+    (cd ~/Dev/lantum/stack && docker-compose run "$service" python manage.py "$@")
+}
+
+build-dh ()
+{
+  project=$1;
+  cd $project;
+  version=`git log -1 --pretty=oneline | cut -d' ' -f1`;
+  docker build -t networklocum/$project:$version .;
+  docker push networklocum/$project:$version;
+  cd ..;
+}
+
+alias start-react='sudo service nginx start && (cd ~/Dev/react-web-app && npm start)'
+alias start-bart='sudo service nginx start && (cd ~/Dev/bart && npm run watch)'
