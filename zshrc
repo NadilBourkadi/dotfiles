@@ -9,8 +9,9 @@ export ZSH="/home/dil/.oh-my-zsh"
 # load a random theme each time oh-my-zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
 # See https://github.com/robbyrussell/oh-my-zsh/wiki/Themes
-ZSH_THEME="wezm"
+ZSH_THEME="bureau"
 
+# ZSH_THEME="wezm"
 # Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
 # a theme from this variable instead of looking in ~/.oh-my-zsh/themes/
@@ -75,11 +76,11 @@ source $ZSH/oh-my-zsh.sh
 # export LANG=en_US.UTF-8
 
 # Preferred editor for local and remote sessions
-# if [[ -n $SSH_CONNECTION ]]; then
-#   export EDITOR='vim'
-# else
-#   export EDITOR='mvim'
-# fi
+if [[ -n $SSH_CONNECTION ]]; then
+  export EDITOR='vim'
+else
+  export EDITOR='mvim'
+fi
 
 # Compilation flags
 # export ARCHFLAGS="-arch x86_64"
@@ -170,5 +171,13 @@ build-dh ()
   cd ..;
 }
 
-alias start-react='sudo service nginx start && (cd ~/Dev/react-web-app && npm start)'
-alias start-bart='sudo service nginx start && (cd ~/Dev/bart && npm run watch)'
+alias start-react='(cd ~/Dev/react-web-app && npm start)'
+alias start-bart='(cd ~/Dev/bart && npm run watch)'
+
+# TMUX
+if which tmux >/dev/null 2>&1; then
+    #if not inside a tmux session, and if no session is started, start a new session
+    # test -z "$TMUX" && (tmux attach || tmux new-session)
+    tmux new-session -s bart -A -d 
+    tmux new-session -s react -A -d
+fi
