@@ -144,21 +144,21 @@ function namespace {
 }
 
 function dc-test {
-    (cd ~/Dev/lantum/stack && docker-compose run $1 python manage.py test $2)
+    (cd ~/Dev/stack && docker-compose run $1 python manage.py test $2)
 }
 
 function dc-up-d {
-    (cd ~/Dev/lantum/stack && docker-compose up -d $1)
+    (cd ~/Dev/stack && docker-compose up -d $1)
 }
 
 function dc-up {
-    (cd ~/Dev/lantum/stack && docker-compose up $1)
+    (cd ~/Dev/stack && docker-compose up $1)
 }
 
 function dc-man {
     service=$1
     shift
-    (cd ~/Dev/lantum/stack && docker-compose run "$service" python manage.py "$@")
+    (cd ~/Dev/stack && docker-compose run "$service" python manage.py "$@")
 }
 
 build-dh ()
@@ -175,9 +175,11 @@ alias start-react='(cd ~/Dev/react-web-app && npm start)'
 alias start-bart='(cd ~/Dev/bart && npm run watch)'
 
 # TMUX
-if which tmux >/dev/null 2>&1; then
-    #if not inside a tmux session, and if no session is started, start a new session
-    # test -z "$TMUX" && (tmux attach || tmux new-session)
-    tmux new-session -s bart -A -d 
-    tmux new-session -s react -A -d
-fi
+# if which tmux >/dev/null 2>&1; then
+#     #if not inside a tmux session, and if no session is started, start a new session
+#    # test -z "$TMUX" && (tmux attach || tmux new-session)
+#   tmux new-session -s bart -A -d 
+#  tmux new-session -s react -A -d
+# fi
+
+tmux

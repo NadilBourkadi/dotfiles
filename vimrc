@@ -154,6 +154,8 @@ function! NERDTreeHighlightFile(extension, fg, bg, guifg, guibg)
  exec 'autocmd filetype nerdtree syn match ' . a:extension .' #^\s\+.*'. a:extension .'$#'
 endfunction
 
+let NERDTreeShowHidden=1
+
 nnoremap <leader>n :NERDTree %<CR>
 map <C-n> :NERDTreeToggle<CR>
 
