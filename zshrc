@@ -194,4 +194,4 @@ alias start-bart='(cd ~/Dev/bart && npm run watch)'
 #  tmux new-session -s react -A -d
 # fi
 
-tmux
+tmux attach-session
