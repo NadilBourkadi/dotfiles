@@ -97,6 +97,18 @@ fi
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
+alias pods='k get pods'
+alias p='k get pods'
+alias wp='while true; do clear; k get pods; sleep 5; done'
+alias k=kubectl
+alias n=namespace
+alias docker-killall='docker kill $(docker ps -q)'
+
+export KOPS_STATE_STORE=s3://lantum-kops
+export NAME=k.lantum.com
+
+export KUBE_EDITOR='vim'
+
 get-image() {
     k describe deploy $1 | grep Image
 }
