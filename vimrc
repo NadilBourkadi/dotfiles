@@ -12,6 +12,7 @@ Plug 'tpope/vim-fugitive'
 Plug 'itchyny/lightline.vim'
 Plug 'scrooloose/nerdtree'
 Plug 'wavded/vim-stylus'
+Plug 'mboughaba/i3config.vim'
 
 call plug#end()
 filetype plugin indent on
