@@ -96,6 +96,8 @@ function namespace {
 # Docker Compose
 #
 
+alias dc='docker-compose'
+
 function dc-test {
     (cd ~/Dev/stack && docker-compose run $1 python manage.py test $2)
 }

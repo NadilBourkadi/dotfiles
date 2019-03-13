@@ -37,6 +37,9 @@ filetype plugin indent on
 
 syntax on
 
+set splitbelow
+set splitright
+
 " Display status bar regardless of windows
 set laststatus=2
 
@@ -70,6 +73,10 @@ nnoremap <leader>aa :Ack! <space>
 " Save with Leader+l
 nnoremap <leader>w :w<CR>
 
+" Persist undos
+set undodir=~/.vim/undodir
+set undofile
+
 set updatetime=100
 
 autocmd StdinReadPre * let s:std_in=1
@@ -85,6 +92,8 @@ set list listchars=trail:.,extends:>
 
 " tree
 autocmd StdinReadPre * let s:std_in=1
+
+set clipboard+=unnamed
 
 
 "
@@ -112,6 +121,7 @@ let g:lightline = {
       \   'gitbranch': 'fugitive#head'
       \ },
       \ }
+
 
 "
 " Syntastic Config
