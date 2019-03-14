@@ -93,7 +93,8 @@ set list listchars=trail:.,extends:>
 " tree
 autocmd StdinReadPre * let s:std_in=1
 
-set clipboard+=unnamed
+" Leader + c to paste from global clipboard
+vnoremap <leader>y "+y
 
 
 "
