@@ -73,6 +73,10 @@ nnoremap <leader>aa :Ack! <space>
 " Save with Leader+l
 nnoremap <leader>w :w<CR>
 
+" Open/Close Quickfix window
+nnoremap <leader>co :copen<CR>
+nnoremap <leader>cc :cclose<CR>
+
 " Persist undos
 set undodir=~/.vim/undodir
 set undofile
@@ -123,6 +127,8 @@ let g:lightline = {
       \ },
       \ }
 
+" Transparent background
+hi Normal guibg=NONE ctermbg=NONE 
 
 "
 " Syntastic Config

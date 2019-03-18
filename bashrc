@@ -1,6 +1,7 @@
+
+
 export TERM=xterm-256color
 export EDITOR='vim'
-
 
 #
 # Kubernetes
@@ -120,3 +121,51 @@ if which tmux >/dev/null 2>&1; then
 fi
 
 tmux attach-session
+
+
+
+    __kube_ps1() {
+      ns=$(cat ~/.kube/config | grep 'namespace:' | cut -d':' -f2)
+    case $(echo $ns) in
+    dev)
+        echo "\033[38;5;254m\]" $ns"\["
+    ;;
+    staging)
+        echo "\033[38;5;062m\]" $ns"\["
+    ;;
+    prod)
+        echo "\033[38;5;196m\]"$ns"\["
+    ;;
+    *)
+        echo $ns
+    ;;
+
+    esac
+    }
+
+    __git_ps1(){
+    case $(if [[ $(ls -a) != *".gitconfig"* && $(ls -a) = *".git"* ]]; then git status -b -s; fi)  in
+    *master*)
+        echo "\033[38;5;177m|"
+    ;;
+    *feature/*)
+        echo "\033[38;5;121m|/F"
+    ;;
+    *hotfix/*)
+        echo "\033[38;5;162m|/H"
+    ;;
+    "")
+        echo ""
+    ;;
+    *)
+        echo "|/"
+    esac
+
+    }
+    PROMPT_COMMAND=$"__updatePS1"
+    __updatePS1(){
+    export PS1="\[\033[01;32m\]\[[K8S:$(__kube_ps1)\033[01;32m\]] $(__git_ps1) ${debian_chroot:+($debian_chroot)}\u:\[\033[38;5;27m\]\w\$\[\033[0m\] "
+    }
+    __updatePS1
+
+
