@@ -21,6 +21,7 @@ filetype plugin indent on
 "
 " General config
 "
+
 :let mapleader = ","
 
 :color lucius
@@ -68,7 +69,7 @@ nnoremap <leader>se :tabe ~/.vimrc<CR>
 :map <C-m> i<CR><Esc>
 
 " Search globally with <leader>aa
-nnoremap <leader>aa :Ack! <space>
+nnoremap <leader>aa :Ack!<space>
 
 " Save with Leader+l
 nnoremap <leader>w :w<CR>
@@ -111,6 +112,8 @@ map <leader>ts :TestSuite<CR>
 map <leader>tl :TestLast<CR>
 map <leader>tv :TestVisit<CR>
 
+let test#python#djangotest#executable = 'cd ~/Dev/stack/ && docker-compose run timesheet python manage.py test'
+let test#python#runner = 'djangotest'
 
 "
 " Lightline Config
