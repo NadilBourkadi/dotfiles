@@ -1,4 +1,7 @@
-
+parse_git_branch() {
+     git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ (\1)/'
+}
+export PS1="\n\u@\h \[\033[32m\]\w\[\033[33m\]\$(parse_git_branch)\[\033[00m\] $ "
 
 export TERM=xterm-256color
 export EDITOR='vim'
@@ -13,6 +16,7 @@ alias wp='while true; do clear; k get pods; sleep 5; done'
 alias k=kubectl
 alias n=namespace
 alias docker-killall='docker kill $(docker ps -q)'
+alias g=grep
 
 export KOPS_STATE_STORE=s3://lantum-kops
 export NAME=k.lantum.com
@@ -123,49 +127,8 @@ fi
 tmux attach-session
 
 
-
-    __kube_ps1() {
-      ns=$(cat ~/.kube/config | grep 'namespace:' | cut -d':' -f2)
-    case $(echo $ns) in
-    dev)
-        echo "\033[38;5;254m\]" $ns"\["
-    ;;
-    staging)
-        echo "\033[38;5;062m\]" $ns"\["
-    ;;
-    prod)
-        echo "\033[38;5;196m\]"$ns"\["
-    ;;
-    *)
-        echo $ns
-    ;;
-
-    esac
-    }
-
-    __git_ps1(){
-    case $(if [[ $(ls -a) != *".gitconfig"* && $(ls -a) = *".git"* ]]; then git status -b -s; fi)  in
-    *master*)
-        echo "\033[38;5;177m|"
-    ;;
-    *feature/*)
-        echo "\033[38;5;121m|/F"
-    ;;
-    *hotfix/*)
-        echo "\033[38;5;162m|/H"
-    ;;
-    "")
-        echo ""
-    ;;
-    *)
-        echo "|/"
-    esac
-
-    }
-    PROMPT_COMMAND=$"__updatePS1"
-    __updatePS1(){
-    export PS1="\[\033[01;32m\]\[[K8S:$(__kube_ps1)\033[01;32m\]] $(__git_ps1) ${debian_chroot:+($debian_chroot)}\u:\[\033[38;5;27m\]\w\$\[\033[0m\] "
-    }
-    __updatePS1
-
-
+fab-bd(){
+    environment=$1
+    service=$2
+    (cd ~/Dev/stack && fab $environment build_and_deploy:$service)
+}

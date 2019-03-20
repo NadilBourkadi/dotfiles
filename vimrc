@@ -132,6 +132,7 @@ let g:lightline = {
 
 " Transparent background
 hi Normal guibg=NONE ctermbg=NONE 
+hi LineNr guibg=NONE ctermbg=NONE
 
 "
 " Syntastic Config
