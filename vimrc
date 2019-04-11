@@ -77,8 +77,12 @@ nnoremap <leader>w :w<CR>
 
 " Open/Close Quickfix window
 nnoremap <leader>cv :vert copen85<CR>
-nnoremap <leader>co :copen<CR>
+nnoremap <leader>co :copen15<CR>
 nnoremap <leader>cc :cclose<CR>
+
+" Move by line on the screen rather than by line in the file
+nnoremap <buffer> k gk
+nnoremap <buffer> j gj
 
 " Persist undos
 set undodir=~/.vim/undodir
