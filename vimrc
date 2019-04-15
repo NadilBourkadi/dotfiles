@@ -69,6 +69,10 @@ nnoremap <leader>se :tabe ~/.vimrc<CR>
 
 :map <C-m> i<CR><Esc>
 
+" Match bash file completion
+set wildmenu
+set wildmode=longest,list
+
 " Search globally with <leader>aa
 nnoremap <leader>aa :Ack!<space>
 
@@ -79,6 +83,10 @@ nnoremap <leader>w :w<CR>
 nnoremap <leader>cv :vert copen85<CR>
 nnoremap <leader>co :copen15<CR>
 nnoremap <leader>cc :cclose<CR>
+
+" Trim whitespace with leader+dw
+:nnoremap <leader>dw :let _s=@/ <Bar> :%s/\s\+$//e <Bar> :let @/=_s <Bar> :nohl <Bar> :unlet _s <CR>
+
 
 " Move by line on the screen rather than by line in the file
 nnoremap <buffer> k gk
@@ -139,8 +147,9 @@ let g:lightline = {
       \ }
 
 " Transparent background
-hi Normal guibg=NONE ctermbg=NONE 
+hi Normal guibg=NONE ctermbg=NONE
 hi LineNr guibg=NONE ctermbg=NONE
+
 
 "
 " Syntastic Config
@@ -163,7 +172,7 @@ function! SyntasticCheckHook(errors)
     endif
 endfunction
 
-" Toggle Syntastic on/off with Ctrl+w E
+" Syntastic mappings
 let g:syntastic_mode_map = { 'mode': 'passive', 'active_filetypes': [],'passive_filetypes': [] }
 nnoremap <leader>lt :SyntasticToggleMode<CR>
 nnoremap <leader>ll :SyntasticCheck<CR>
