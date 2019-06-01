@@ -3,7 +3,13 @@ source ~/git-completion.bash
 parse_git_branch() {
      git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ (\1)/'
 }
-export PS1="\n\u@\h \[\033[32m\]\w\[\033[33m\]\$(parse_git_branch)\[\033[00m\] $ "
+
+__kube_ps1() {
+    CONTEXT=$(cat ~/.kube/config | grep 'namespace:' | cut -d':' -f2)
+    echo "[k8s$CONTEXT]"
+}
+
+export PS1="\n\u@\h \$(__kube_ps1) \[\033[32m\]\w\[\033[33m\]\$(parse_git_branch)\[\033[00m\] $ "
 
 export TERM=xterm-256color
 export EDITOR='vim'
@@ -15,6 +21,7 @@ export EDITOR='vim'
 alias pods='k get pods'
 alias p='k get pods'
 alias wp='while true; do clear; k get pods; sleep 5; done'
+alias wt='while true; do clear; k top pods; sleep 5; done'
 alias k=kubectl
 alias n=namespace
 alias docker-killall='docker kill $(docker ps -q)'
@@ -73,8 +80,14 @@ function namespace {
     kubectl config set-context $(kubectl config current-context) --namespace=$1
 }
 
+function kimage {
+    for service in $*
+    do
+        k describe deploy $service | grep Image | sed "1q;d"
+    done
+}
 
-# 
+#
 # Docker Compose
 #
 
@@ -108,6 +121,8 @@ build-dh ()
   cd ..;
 }
 
+alias ng-res='sudo service nginx restart'
+alias ng-rel='sudo service nginx rel'
 
 #
 # NPM
@@ -132,5 +147,6 @@ tmux attach-session
 fab-bd(){
     environment=$1
     service=$2
-    (cd ~/Dev/stack && fab $environment build_and_deploy:$service)
+    tag=$3
+    (cd ~/Dev/stack && fab $environment build_and_deploy:$service $tag)
 }

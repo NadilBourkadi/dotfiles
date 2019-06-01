@@ -14,6 +14,7 @@ Plug 'scrooloose/nerdtree'
 Plug 'wavded/vim-stylus'
 Plug 'mboughaba/i3config.vim'
 Plug 'skywind3000/asyncrun.vim'
+Plug 'tell-k/vim-autopep8'
 
 call plug#end()
 filetype plugin indent on
@@ -61,7 +62,7 @@ endif
 nmap <leader><Tab> :exe "tabn ".g:lasttab<CR>
 au TabLeave * let g:lasttab = tabpagenr()
 
-nnoremap <leader>p :PlugInstall<CR>
+nnoremap <leader>pi :PlugInstall<CR>
 
 " .vimrc mappings
 nnoremap <leader>ss :so ~/.vimrc<CR><CR>
@@ -76,7 +77,7 @@ set wildmode=longest,list
 " Search globally with <leader>aa
 nnoremap <leader>aa :Ack!<space>
 
-" Save with Leader+l
+" Save with Leader+w
 nnoremap <leader>w :w<CR>
 
 " Open/Close Quickfix window
@@ -87,7 +88,6 @@ nnoremap <leader>cc :cclose<CR>
 " Trim whitespace with leader+dw
 " see: https://vim.fandom.com/wiki/Remove_unwanted_spaces
 :nnoremap <leader>dw :let _s=@/ <Bar> :%s/\s\+$//e <Bar> :let @/=_s <Bar> :nohl <Bar> :unlet _s <CR>
-
 
 " Move by line on the screen rather than by line in the file
 nnoremap <buffer> k gk
@@ -118,6 +118,14 @@ vnoremap <leader>y "+y
 
 
 "
+" Auto Pep8 conf
+"
+
+let g:autopep8_on_save = 1
+let g:autopep8_disable_show_diff=1
+map <leader>pp :Autopep8<CR>
+
+"
 " Vim-Test config
 "
 
@@ -129,7 +137,7 @@ map <leader>tv :TestVisit<CR>
 
 let test#strategy = "asyncrun"
 
-let test#python#djangotest#executable = 'cd ~/Dev/stack/ && docker-compose run timesheet python manage.py test'
+let test#python#djangotest#executable = 'cd ~/Dev/stack/ && docker-compose run locum python manage.py test'
 let test#python#runner = 'djangotest'
 
 "
