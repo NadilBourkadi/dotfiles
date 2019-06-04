@@ -143,10 +143,21 @@ fi
 
 tmux attach-session
 
+# Grep for tmux session
+tmux-ls(){
+    if [ -z "$1" ]; then
+        tmux ls
+    else
+        tmux ls | grep -i $1 | sed 's/:.*//';
+    fi
+}
+
+tmux-a(){
+   tmux-ls $1 | xargs tmux switch -t
+}
 
 fab-bd(){
     environment=$1
     service=$2
-    tag=$3
-    (cd ~/Dev/stack && fab $environment build_and_deploy:$service $tag)
+    (cd ~/Dev/stack && fab $environment build_and_deploy:$service)
 }
