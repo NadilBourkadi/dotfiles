@@ -11,10 +11,13 @@ Plug 'neomake/neomake'
 Plug 'tpope/vim-fugitive'
 Plug 'itchyny/lightline.vim'
 Plug 'scrooloose/nerdtree'
+Plug 'airblade/vim-gitgutter'
 Plug 'wavded/vim-stylus'
 Plug 'mboughaba/i3config.vim'
 Plug 'skywind3000/asyncrun.vim'
 Plug 'tell-k/vim-autopep8'
+Plug 'joegesualdo/jsdoc.vim'
+Plug 'jremmen/vim-ripgrep'
 
 call plug#end()
 filetype plugin indent on
@@ -37,11 +40,19 @@ filetype plugin indent on
 :set nolist
 :set autoindent
 :set ignorecase
+:set backspace=indent,eol,start
 
 syntax on
-
 set splitbelow
 set splitright
+
+au BufRead,BufNewFile,BufEnter ~/Dev/react-web-app/* setlocal ts=2 sts=2 sw=2
+au BufRead,BufNewFile,BufEnter ~/Dev/lantum-native/* setlocal ts=2 sts=2 sw=2
+
+nnoremap <leader>sa :Rg<space>
+
+" Fold python files on indents
+autocmd FileType py set foldmethod=indent
 
 " Display status bar regardless of windows
 set laststatus=2
@@ -81,7 +92,7 @@ nnoremap <leader>aa :Ack!<space>
 nnoremap <leader>w :w<CR>
 
 " Open/Close Quickfix window
-nnoremap <leader>cv :vert copen85<CR>
+nnoremap <leader>cv :vert copen70<CR>
 nnoremap <leader>co :copen15<CR>
 nnoremap <leader>cc :cclose<CR>
 
@@ -121,7 +132,7 @@ vnoremap <leader>y "+y
 " Auto Pep8 conf
 "
 
-let g:autopep8_on_save = 1
+let g:autopep8_on_save = 0
 let g:autopep8_disable_show_diff=1
 map <leader>pp :Autopep8<CR>
 
@@ -137,7 +148,7 @@ map <leader>tv :TestVisit<CR>
 
 let test#strategy = "asyncrun"
 
-let test#python#djangotest#executable = 'cd ~/Dev/stack/ && docker-compose run locum python manage.py test'
+let test#python#djangotest#executable = 'cd ~/Dev/stack/ && docker-compose run billing python manage.py test'
 let test#python#runner = 'djangotest'
 
 "
@@ -155,11 +166,6 @@ let g:lightline = {
       \ },
       \ }
 
-" Transparent background
-hi Normal guibg=NONE ctermbg=NONE
-hi LineNr guibg=NONE ctermbg=NONE
-
-
 "
 " Syntastic Config
 "
@@ -169,7 +175,7 @@ set statusline+=%*
 let g:syntastic_always_populate_loc_list = 1
 let g:syntastic_auto_loc_list = 1
 let g:syntastic_check_on_open = 1
-let g:syntastic_check_on_wq = 0
+let g:syntastic_check_on_wq = 1
 let g:syntastic_javascript_checkers = ['eslint']
 let g:syntastic_javascript_eslint_exe='$(npm bin)/eslint'
 let g:syntastic_ignore_files = ['/node_modules/']
@@ -180,6 +186,10 @@ function! SyntasticCheckHook(errors)
         let g:syntastic_loc_list_height = min([len(a:errors), 10])
     endif
 endfunction
+
+" Transparent background
+hi Normal guibg=NONE ctermbg=NONE
+hi LineNr guibg=NONE ctermbg=NONE
 
 " Syntastic mappings
 let g:syntastic_mode_map = { 'mode': 'passive', 'active_filetypes': [],'passive_filetypes': [] }
@@ -222,3 +232,5 @@ call NERDTreeHighlightFile('js', 'Red', 'none', '#ffa500', '#151515')
 call NERDTreeHighlightFile('php', 'Magenta', 'none', '#ff00ff', '#151515')
 
 autocmd vimenter * NERDTree
+
+set clipboard=unnamed
