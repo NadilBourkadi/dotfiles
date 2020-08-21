@@ -1,17 +1,12 @@
-source ~/git-completion.bash
+zsh ~/init.zsh
 
 alias python=python3
-
-parse_git_branch() {
-     git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ (\1)/'
-}
+alias vim=/usr/local/bin/vim
 
 __kube_ps1() {
     CONTEXT=$(cat ~/.kube/config | grep 'namespace:' | cut -d':' -f2)
     echo "[k8s$CONTEXT]"
 }
-
-export PS1="\n\u@\h \[\033[32m\]\w\[\033[33m\]\$(parse_git_branch)\[\033[00m\] $ "
 
 export TERM=xterm-256color
 export EDITOR='vim'
@@ -58,7 +53,7 @@ function logs {
 }
 
 function kbash {
-    service=$(k get pods | grep $1 | grep Running | head -1 | cut -d ' ' -f1)
+    service=$(kubectl get pods | grep $1 | grep Running | head -1 | cut -d ' ' -f1)
     echo "Executing bash on $service"
     shift
     kubectl exec "$service" -it bash $@
@@ -126,6 +121,8 @@ build-dh ()
 alias ng-res='sudo service nginx restart'
 alias ng-rel='sudo service nginx rel'
 
+alias vimrc='vim ~/.vimrc'
+
 #
 # NPM
 #
@@ -133,17 +130,9 @@ alias ng-rel='sudo service nginx rel'
 alias start-react='(cd ~/Dev/react-web-app && npm start)'
 alias start-bart='(cd ~/Dev/bart && npm run watch)'
 
-
 #
 # Tmux
 #
-
-if which tmux >/dev/null 2>&1; then
-    #if not inside a tmux session, and if no session is started, start a new session
-    test -z "$TMUX" && (tmux attach || tmux new-session)
-fi
-
-tmux attach-session
 
 # Grep for tmux session
 tmux-ls(){
@@ -154,11 +143,9 @@ tmux-ls(){
     fi
 }
 
-
 tmux-a(){
    tmux-ls $1 | xargs tmux switch -t
 }
-
 
 fab-bd(){
     environment=$1
@@ -166,6 +153,7 @@ fab-bd(){
     (cd ~/Dev/stack && fab $environment build_and_deploy:$service)
 }
 
+export PATH="/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
 
 context ()
 {
@@ -173,14 +161,23 @@ context ()
         kubectl config current-context;
         return 0;
     fi;
-    if [ "$1" == "e8s.lantum.com" ]; then
-        export KOPS_STATE_STORE="s3://clusters.e8s.lantum.com";
-    fi;
-    if [ "$1" == "k.lantum.com" ]; then
-        export KOPS_STATE_STORE="s3://lantum-kops";
-    fi;
-    if [ "$1" == "us-1.staging.lantum.com" ]; then
-        export KOPS_STATE_STORE="s3://clusters.us-1.staging.lantum.com";
-    fi;
     kubectl config use-context $1
 }
+
+source ~/.zsh/antigen.zsh
+
+# Load the oh-my-zsh's library.
+antigen use oh-my-zsh
+
+antigen bundle git
+antigen bundle heroku
+antigen bundle command-not-found
+antigen bundle last-working-dir
+antigen bundle kube-ps1
+
+antigen bundle zsh-users/zsh-syntax-highlighting
+
+antigen apply
+
+source ~/dotfiles/dil.zsh-theme
+ZSH_AUTOSUGGEST_STRATEGY=completion
