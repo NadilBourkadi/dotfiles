@@ -3,21 +3,21 @@ export EDITOR='nvim'
 
 # Dotfiles bootstrap
 alias dotfiles='zsh ~/Dev/dotfiles/init.zsh'
+alias reload='source ~/.zshrc && echo "zshrc reloaded"'
 alias reload-alacritty='touch ~/.config/alacritty/alacritty.toml'
 
-source ~/.zsh/antigen.zsh
-
-# Load the oh-my-zsh's library.
-antigen use oh-my-zsh
-
-antigen bundle git
-antigen bundle command-not-found
-antigen bundle last-working-dir
-antigen bundle zsh-users/zsh-syntax-highlighting
-
-antigen theme robbyrussell
-
-antigen apply
+# Antigen (skip on reload - already loaded)
+if [[ -z "$_ANTIGEN_LOADED" ]]; then
+  source ~/.zsh/antigen.zsh
+  antigen use oh-my-zsh
+  antigen bundle git
+  antigen bundle command-not-found
+  antigen bundle last-working-dir
+  antigen bundle zsh-users/zsh-syntax-highlighting
+  antigen theme robbyrussell
+  antigen apply
+  _ANTIGEN_LOADED=1
+fi
 
 ZSH_AUTOSUGGEST_STRATEGY=completion
 
@@ -32,6 +32,31 @@ function av() {
   aws-vault exec "${profile}" -- aws "$@"
 }
 compdef _aws av   # enables tab-completion like the real aws CLI
+
+# Claude AI helpers
+# Usage: ask "question" or pipe: cat file | ask "explain this"
+function ask() {
+  if [ -t 0 ]; then
+    claude --print "$*"
+  else
+    local input=$(cat)
+    claude --print "$input
+
+$*"
+  fi
+}
+
+# Quick code explanation
+# Usage: explain file.py
+function explain() {
+  if [ -n "$1" ]; then
+    cat "$1" | claude --print "Explain this code concisely:"
+  elif [ ! -t 0 ]; then
+    cat | claude --print "Explain this code concisely:"
+  else
+    echo "Usage: explain <file> OR cat file | explain"
+  fi
+}
 
 git config --global core.autocrlf false
 

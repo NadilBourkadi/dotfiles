@@ -46,14 +46,18 @@ The script will:
 - **Antigen** - Zsh plugin manager (install to `~/.zsh/antigen.zsh`)
 - **aws-vault** - For AWS credential management
 - **ripgrep** - For fast searching in Neovim
+- **Claude CLI** - For shell `ask`/`explain` functions and tmux popup (uses OAuth, no API key needed)
 
 ## Shell Aliases
 
 | Alias | Action |
 |-------|--------|
 | `dotfiles` | Re-run the bootstrap script |
+| `reload` | Reload zshrc |
 | `reload-alacritty` | Reload Alacritty config |
 | `av <profile> <cmd>` | Run AWS CLI with aws-vault |
+| `ask "question"` | Ask Claude a question (supports piped input) |
+| `explain <file>` | Get Claude to explain code (supports piped input) |
 
 ## Neovim
 
@@ -98,6 +102,12 @@ Run `nvim` after setup - lazy.nvim will automatically install all plugins.
 - **Prefix**: `Ctrl+a` (not `Ctrl+b`)
 - **Mouse**: Enabled
 - **Copy mode**: Vi keybindings
+
+| Binding | Action |
+|---------|--------|
+| `Ctrl+a r` | Reload tmux config |
+| `Ctrl+a j` | Open Claude popup |
+| `Escape` | Close Claude popup |
 
 ## File Structure
 
