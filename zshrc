@@ -1,5 +1,9 @@
 export TERM=xterm-256color
-export EDITOR='vim'
+export EDITOR='nvim'
+
+# Dotfiles bootstrap
+alias dotfiles='zsh ~/Dev/dotfiles/init.zsh'
+alias reload-alacritty='touch ~/.config/alacritty/alacritty.toml'
 
 source ~/.zsh/antigen.zsh
 

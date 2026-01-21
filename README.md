@@ -6,120 +6,133 @@ Personal dotfiles for a development environment.
 
 One-time setup for a new machine:
 
-1. Clone this repository to your home directory:
+1. Clone this repository:
 ```bash
-git clone <repository-url> ~/dotfiles
+git clone <repository-url> ~/Dev/dotfiles
 ```
 
-2. Run the bootstrap script to create symbolic links:
+2. Run the bootstrap script:
 ```bash
-cd ~/dotfiles
+cd ~/Dev/dotfiles
 zsh init.zsh
 ```
 
-This will create symbolic links for:
-- `~/.zshrc` → `~/dotfiles/zshrc`
-- `~/.vimrc` → `~/dotfiles/vimrc`
-- `~/.tmux.conf` → `~/dotfiles/tmux.conf`
-- `~/.gitignore` → `~/dotfiles/gitignore`
+The script will:
+- Create symbolic links for all config files
+- Configure git to use the global gitignore
+- Install Nerd Font for Neovim icons (macOS with Homebrew)
+
+## What Gets Symlinked
+
+| Source | Target |
+|--------|--------|
+| `zshrc` | `~/.zshrc` |
+| `vimrc` | `~/.vimrc` |
+| `tmux.conf` | `~/.tmux.conf` |
+| `gitignore_global` | `~/.gitignore_global` |
+| `nvim/` | `~/.config/nvim` |
+| `alacritty.toml` | `~/.config/alacritty/alacritty.toml` |
 
 ## Prerequisites
 
 ### Required
-- **Zsh** - Primary shell configuration
-- **Vim** - Text editor with extensive plugin setup
+- **Zsh** - Primary shell
+- **Neovim** (0.11+) - Primary editor with Lua configuration
 - **Tmux** - Terminal multiplexer
-- **Git** - Version control (for git-completion.bash)
+- **Git** - Version control
+- **Alacritty** - Terminal emulator
 
 ### Optional but Recommended
+- **Homebrew** - For automatic font installation
 - **Antigen** - Zsh plugin manager (install to `~/.zsh/antigen.zsh`)
-- **aws-vault** - For AWS credential management (used in zshrc)
+- **aws-vault** - For AWS credential management
+- **ripgrep** - For fast searching in Neovim
 
-## Features
+## Shell Aliases
 
-### Shell Configuration (Zsh)
-- **Antigen plugin manager** with oh-my-zsh integration
-- **Plugins**: git, command-not-found, last-working-dir, zsh-syntax-highlighting
-- **Theme**: robbyrussell
-- **AWS Vault integration**: `av` function for AWS profile management
-- **Tmux auto-attach**: Automatically connects to existing tmux sessions (skips IDE terminals)
+| Alias | Action |
+|-------|--------|
+| `dotfiles` | Re-run the bootstrap script |
+| `reload-alacritty` | Reload Alacritty config |
+| `av <profile> <cmd>` | Run AWS CLI with aws-vault |
 
-### Vim Configuration
-- **16 plugins** managed by vim-plug including:
-  - Syntax checking (Syntastic)
-  - File navigation (NERDTree, CtrlP)
-  - Git integration (Fugitive, GitGutter)
-  - Testing framework integration (vim-test)
-  - Code formatting (autopep8)
-- **Custom keybindings**: Leader-based workflow with comma as leader
-- **Project-specific settings**: Auto-configuration for React and React Native projects
-- **Visual enhancements**: Custom colors, transparent background, status line
+## Neovim
 
-### Tmux Configuration
-- **Custom prefix**: Ctrl+a instead of Ctrl+b
-- **Mouse support**: Enabled for scrolling and selection
-- **Vim keybindings**: Vi-mode for copy/paste operations
-- **Custom status bar**: Pink background styling
-- **Plugin support**: tmux-yank for system clipboard integration
+Modern Lua-based config using lazy.nvim for plugin management.
 
-## Key Aliases & Functions
+### Plugins
+- **telescope.nvim** - Fuzzy finder
+- **nvim-tree.lua** - File explorer
+- **Native LSP** - Language server support (Neovim 0.11+ API)
+- **nvim-treesitter** - Syntax highlighting
+- **gitsigns.nvim** - Git gutter signs
+- **lualine.nvim** - Status line
+- **vim-test** - Test runner
+- **conform.nvim** - Code formatting
+- **nvim-cmp** - Autocompletion
+- **catppuccin** - Colorscheme
+- **mini.icons** - File icons
+- **vim-fugitive** - Git commands
 
-### AWS
-```bash
-av <profile> <cmd>  # run AWS CLI command with aws-vault profile
-```
+### Key Bindings
 
-## Vim Keybindings
+Leader key is `,`
 
-### Leader Commands (`,` = leader)
-```vim
-,w             # Save file
-,n             # Open NERDTree for current file
-,sa            # Search with ripgrep
-,aa            # Search with Ack
-,tn            # Run nearest test
-,tt            # Run current test file
-,pp            # Auto-format with autopep8
-,se            # Edit .vimrc
-,ss            # Reload .vimrc
-```
+| Binding | Action |
+|---------|--------|
+| `,w` | Save file |
+| `,n` | Find current file in tree |
+| `,sa` | Live grep |
+| `,tn` | Run nearest test |
+| `,tt` | Run test file |
+| `,pp` | Format file |
+| `Ctrl+n` | Toggle file tree |
+| `Ctrl+p` | Find files |
+| `gd` | Go to definition |
+| `K` | Hover documentation |
 
-### Navigation
-```vim
-Ctrl+h/l       # Switch between tabs
-Ctrl+n         # Toggle NERDTree
-```
+### First Launch
+Run `nvim` after setup - lazy.nvim will automatically install all plugins.
 
-## Customization
+## Tmux
 
-### Adding New Aliases
-Add shell aliases to `zshrc`.
-
-### Vim Plugins
-Add new plugins to the vim-plug section in `vimrc`:
-```vim
-Plug 'author/plugin-name'
-```
-Then run `:PlugInstall` in Vim.
-
-### Tmux Plugins
-Add plugins to `tmux.conf`:
-```bash
-set -g @plugin 'author/plugin-name'
-```
+- **Prefix**: `Ctrl+a` (not `Ctrl+b`)
+- **Mouse**: Enabled
+- **Copy mode**: Vi keybindings
 
 ## File Structure
+
 ```
 dotfiles/
-├── README.md          # This file
-├── init.zsh          # Installation script
-├── zshrc             # Zsh configuration
-├── vimrc             # Vim configuration
-├── tmux.conf         # Tmux configuration
-└── gitignore         # Global git ignore patterns
+├── README.md           # This file
+├── CLAUDE.md           # Instructions for AI assistants
+├── init.zsh            # Bootstrap script
+├── zshrc               # Zsh configuration
+├── vimrc               # Legacy Vim configuration
+├── tmux.conf           # Tmux configuration
+├── alacritty.toml      # Alacritty terminal config
+├── gitignore_global    # Global git ignore patterns
+├── .gitignore          # Repo-specific ignores
+└── nvim/               # Neovim configuration
+    ├── init.lua
+    └── lua/
+        ├── options.lua
+        ├── keymaps.lua
+        └── plugins/
+            ├── init.lua
+            ├── catppuccin.lua
+            ├── telescope.lua
+            ├── nvim-tree.lua
+            ├── lsp.lua
+            ├── treesitter.lua
+            ├── gitsigns.lua
+            ├── lualine.lua
+            └── neotest.lua
 ```
 
 ## Notes
 
-- Vim automatically opens NERDTree on startup
-- Tmux auto-attach skips VS Code and Cursor integrated terminals
+- Neovim opens nvim-tree automatically when opening a directory
+- Tmux auto-attach skips VS Code and Cursor terminals
+- Run `:Lazy` in Neovim to manage plugins
+- Run `:Mason` in Neovim to install LSP servers

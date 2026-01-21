@@ -1,0 +1,16 @@
+# Global gitignore - applies to ALL git repos on this machine
+# Symlinked to ~/.gitignore_global via init.zsh
+
+# Editor
+*.sw*
+
+# OS
+.DS_Store
+
+# Claude
+CLAUDE.md
+AGENTS.md
+.claude/
+
+# Misc
+.ackrc

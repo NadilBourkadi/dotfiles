@@ -1,0 +1,5 @@
+# Local gitignore - applies to this repo only
+
+# Neovim
+nvim/lazy-lock.json
+nvim/nvim

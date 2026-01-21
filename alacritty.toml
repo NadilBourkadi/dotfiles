@@ -1,0 +1,12 @@
+[colors.primary]
+background = "#222222"  # Dark gray
+
+[font]
+size = 16.0
+
+[font.normal]
+family = "Hack Nerd Font"
+
+[window]
+opacity = 0.935
+
