@@ -27,9 +27,6 @@ return {
   -- Git integration (keeping vim-fugitive - it's excellent)
   { "tpope/vim-fugitive" },
 
-  -- i3 config syntax
-  { "mboughaba/i3config.vim" },
-
   -- JSDoc generation
   { "joegesualdo/jsdoc.vim" },
 

@@ -10,10 +10,6 @@ echo -n "Symlinking zshrc... "
 ln -sf ~/Dev/dotfiles/zshrc ~/.zshrc
 echo "${GREEN}Done${NC}"
 
-echo -n "Symlinking vimrc... "
-ln -sf ~/Dev/dotfiles/vimrc ~/.vimrc
-echo "${GREEN}Done${NC}"
-
 echo -n "Symlinking tmux.conf... "
 ln -sf ~/Dev/dotfiles/tmux.conf ~/.tmux.conf
 echo "${GREEN}Done${NC}"

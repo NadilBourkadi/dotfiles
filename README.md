@@ -27,7 +27,6 @@ The script will:
 | Source | Target |
 |--------|--------|
 | `zshrc` | `~/.zshrc` |
-| `vimrc` | `~/.vimrc` |
 | `tmux.conf` | `~/.tmux.conf` |
 | `gitignore_global` | `~/.gitignore_global` |
 | `nvim/` | `~/.config/nvim` |
@@ -108,7 +107,6 @@ dotfiles/
 ├── CLAUDE.md           # Instructions for AI assistants
 ├── init.zsh            # Bootstrap script
 ├── zshrc               # Zsh configuration
-├── vimrc               # Legacy Vim configuration
 ├── tmux.conf           # Tmux configuration
 ├── alacritty.toml      # Alacritty terminal config
 ├── gitignore_global    # Global git ignore patterns
