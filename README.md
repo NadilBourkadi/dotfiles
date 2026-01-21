@@ -4,12 +4,14 @@ Personal dotfiles for a development environment.
 
 ## Installation
 
+One-time setup for a new machine:
+
 1. Clone this repository to your home directory:
 ```bash
 git clone <repository-url> ~/dotfiles
 ```
 
-2. Run the installation script to create symbolic links:
+2. Run the bootstrap script to create symbolic links:
 ```bash
 cd ~/dotfiles
 zsh init.zsh
@@ -19,7 +21,7 @@ This will create symbolic links for:
 - `~/.zshrc` → `~/dotfiles/zshrc`
 - `~/.vimrc` → `~/dotfiles/vimrc`
 - `~/.tmux.conf` → `~/dotfiles/tmux.conf`
-- `~/init.zsh` → `~/dotfiles/init.zsh`
+- `~/.gitignore` → `~/dotfiles/gitignore`
 
 ## Prerequisites
 
