@@ -60,14 +60,6 @@ opt.clipboard = "unnamedplus"
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 
--- Filetype-specific settings
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = "python",
-  callback = function()
-    vim.opt_local.foldmethod = "indent"
-  end,
-})
-
 -- Project-specific tab settings
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile", "BufEnter" }, {
   pattern = { "*/react-web-app/*", "*/lantum-native/*" },

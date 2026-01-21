@@ -76,6 +76,7 @@ Modern Lua-based config using lazy.nvim for plugin management.
 - **catppuccin** - Colorscheme
 - **mini.icons** - File icons
 - **vim-fugitive** - Git commands
+- **nvim-ufo** - Better folding with preview
 
 ### Key Bindings
 
@@ -93,6 +94,9 @@ Leader key is `,`
 | `Ctrl+p` | Find files |
 | `gd` | Go to definition |
 | `K` | Hover documentation |
+| `zR` | Open all folds |
+| `zM` | Close all folds |
+| `zK` | Peek folded lines |
 
 ### First Launch
 Run `nvim` after setup - lazy.nvim will automatically install all plugins.
@@ -138,7 +142,8 @@ dotfiles/
             ├── treesitter.lua
             ├── gitsigns.lua
             ├── lualine.lua
-            └── neotest.lua
+            ├── neotest.lua
+            └── ufo.lua
 ```
 
 ## Notes

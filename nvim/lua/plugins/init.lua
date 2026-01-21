@@ -11,6 +11,7 @@ return {
   { import = "plugins.gitsigns" },
   { import = "plugins.lualine" },
   { import = "plugins.neotest" },
+  { import = "plugins.ufo" },
 
   -- Plugins that work with minimal or no config
 
