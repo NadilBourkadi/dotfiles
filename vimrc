@@ -234,3 +234,4 @@ call NERDTreeHighlightFile('php', 'Magenta', 'none', '#ff00ff', '#151515')
 autocmd vimenter * NERDTree
 
 set clipboard=unnamed
+
