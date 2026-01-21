@@ -105,6 +105,9 @@ Run `nvim` after setup - lazy.nvim will automatically install all plugins.
 
 | Binding | Action |
 |---------|--------|
+| `Ctrl+a "` | Split pane vertically (same directory) |
+| `Ctrl+a %` | Split pane horizontally (same directory) |
+| `Ctrl+a c` | New window (same directory) |
 | `Ctrl+a r` | Reload tmux config |
 | `Ctrl+a j` | Open Claude popup |
 | `Escape` | Close Claude popup |
