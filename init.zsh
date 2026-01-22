@@ -51,4 +51,13 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   fi
 fi
 
+# Install Neovim plugins
+if command -v nvim &> /dev/null; then
+  echo -n "Installing Neovim plugins (lazy.nvim)... "
+  nvim --headless "+Lazy! sync" +qa 2>/dev/null
+  echo "${GREEN}Done${NC}"
+else
+  echo "Neovim not found, skipping plugin installation"
+fi
+
 echo "${GREEN}Done.${NC} Restart your terminal or run: source ~/.zshrc"

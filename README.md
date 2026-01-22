@@ -70,7 +70,7 @@ Modern Lua-based config using lazy.nvim for plugin management.
 - **nvim-treesitter** - Syntax highlighting
 - **gitsigns.nvim** - Git gutter signs
 - **lualine.nvim** - Status line
-- **vim-test** - Test runner
+- **vim-test** - Test runner with gutter indicators
 - **conform.nvim** - Code formatting
 - **nvim-cmp** - Autocompletion
 - **catppuccin** - Colorscheme
@@ -91,7 +91,8 @@ Leader key is `,`
 | `,sa` | Live grep |
 | `,tn` | Run nearest test |
 | `,tt` | Run test file |
-| `,tc` | Close test pane |
+| `,tr` | Refresh test gutter signs |
+| `,tc` | Close test pane and clear signs |
 | `,pp` | Format file |
 | `Ctrl+n` | Toggle file tree |
 | `Ctrl+p` | Find files |
