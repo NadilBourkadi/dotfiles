@@ -77,6 +77,7 @@ Modern Lua-based config using lazy.nvim for plugin management.
 - **mini.icons** - File icons
 - **vim-fugitive** - Git commands
 - **nvim-ufo** - Better folding with preview
+- **persistence.nvim** - Session management
 
 ### Key Bindings
 
@@ -97,6 +98,11 @@ Leader key is `,`
 | `zR` | Open all folds |
 | `zM` | Close all folds |
 | `zK` | Peek folded lines |
+| `,sr` | Restore session (current directory) |
+| `,sl` | Restore last session |
+| `,sd` | Don't save current session |
+| `,qq` | Save all and quit |
+| `,rs` | Restart Neovim (tmux only) |
 
 ### First Launch
 Run `nvim` after setup - lazy.nvim will automatically install all plugins.
@@ -143,7 +149,8 @@ dotfiles/
             ├── gitsigns.lua
             ├── lualine.lua
             ├── neotest.lua
-            └── ufo.lua
+            ├── ufo.lua
+            └── persistence.lua
 ```
 
 ## Notes
