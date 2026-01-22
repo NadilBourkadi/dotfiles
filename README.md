@@ -78,6 +78,7 @@ Modern Lua-based config using lazy.nvim for plugin management.
 - **vim-fugitive** - Git commands
 - **nvim-ufo** - Better folding with preview
 - **persistence.nvim** - Session management
+- **copilot.vim** - GitHub Copilot AI autocomplete
 
 ### Key Bindings
 
@@ -150,7 +151,8 @@ dotfiles/
             ├── lualine.lua
             ├── neotest.lua
             ├── ufo.lua
-            └── persistence.lua
+            ├── persistence.lua
+            └── copilot.lua
 ```
 
 ## Notes

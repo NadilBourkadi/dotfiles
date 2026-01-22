@@ -12,6 +12,7 @@ return {
   { import = "plugins.lualine" },
   { import = "plugins.neotest" },
   { import = "plugins.ufo" },
+  { import = "plugins.copilot" },
 
   -- Plugins that work with minimal or no config
 
