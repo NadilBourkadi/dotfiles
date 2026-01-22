@@ -74,6 +74,7 @@ Modern Lua-based config using lazy.nvim for plugin management.
 - **conform.nvim** - Code formatting
 - **nvim-cmp** - Autocompletion
 - **catppuccin** - Colorscheme
+- **bufferline.nvim** - Prominent tab display
 - **mini.icons** - File icons
 - **vim-fugitive** - Git commands
 - **nvim-ufo** - Better folding with preview
@@ -144,6 +145,7 @@ dotfiles/
         ├── keymaps.lua
         └── plugins/
             ├── init.lua
+            ├── bufferline.lua
             ├── catppuccin.lua
             ├── telescope.lua
             ├── nvim-tree.lua

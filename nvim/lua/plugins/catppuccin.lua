@@ -11,6 +11,7 @@ return {
       transparent_background = true,
       term_colors = true,
       integrations = {
+        bufferline = true,
         gitsigns = true,
         nvimtree = true,
         treesitter = true,
