@@ -1,6 +1,9 @@
 -- Neovim Configuration
 -- Migrated from vimrc to Lua
 
+-- Neovim 0.11+ compatibility shim (must be before plugins load)
+vim.treesitter.language.ft_to_lang = vim.treesitter.language.ft_to_lang or vim.treesitter.language.get_lang
+
 -- Bootstrap lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
