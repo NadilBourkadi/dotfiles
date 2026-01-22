@@ -91,6 +91,7 @@ Leader key is `,`
 | `,sa` | Live grep |
 | `,tn` | Run nearest test |
 | `,tt` | Run test file |
+| `,tc` | Close test pane |
 | `,pp` | Format file |
 | `Ctrl+n` | Toggle file tree |
 | `Ctrl+p` | Find files |

@@ -7,6 +7,11 @@ return {
     vim.g["test#strategy"] = "neovim"
     -- Open terminal at bottom with 1/3 screen height
     vim.g["test#neovim#term_position"] = "botright " .. math.floor(vim.o.lines / 3)
+    -- Stay in normal mode after test finishes (allows scrolling without closing)
+    vim.g["test#neovim#start_normal"] = 1
+
+    -- Pytest: disable output capture for immediate feedback, shorter tracebacks
+    vim.g["test#python#pytest#options"] = "-s --tb=short -v --no-header"
 
     -- Close existing test terminal before running new test
     local function close_test_terminal()
@@ -23,6 +28,7 @@ return {
 
     local function run_test(cmd)
       close_test_terminal()
+      vim.notify("Running tests...", vim.log.levels.INFO)
       vim.cmd(cmd)
     end
 
@@ -34,5 +40,6 @@ return {
     map("n", "<leader>ts", function() run_test("TestSuite") end, opts)
     map("n", "<leader>tl", function() run_test("TestLast") end, opts)
     map("n", "<leader>tv", "<cmd>TestVisit<CR>", opts)
+    map("n", "<leader>tc", close_test_terminal, opts)  -- close test pane
   end,
 }
