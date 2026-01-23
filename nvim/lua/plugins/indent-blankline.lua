@@ -19,6 +19,15 @@ return {
         show_start = false,
         show_end = false,
         highlight = { "IblScopeSubtle" },
+        include = {
+          node_type = {
+            lua = { "table_constructor" },
+            python = { "dictionary", "list" },
+            javascript = { "object", "array" },
+            typescript = { "object", "array" },
+            json = { "object", "array" },
+          },
+        },
       },
       exclude = {
         filetypes = {
