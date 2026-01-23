@@ -65,6 +65,16 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   fi
 fi
 
+# Install TPM (Tmux Plugin Manager)
+if [[ ! -d ~/.tmux/plugins/tpm ]]; then
+  echo -n "Installing TPM (Tmux Plugin Manager)... "
+  git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm 2>/dev/null
+  echo "${GREEN}Done${NC}"
+  echo "Note: Press prefix + I in tmux to install plugins"
+else
+  echo "TPM already installed, ${GREEN}skipping${NC}"
+fi
+
 # Install Neovim plugins
 if command -v nvim &> /dev/null; then
   echo -n "Installing Neovim plugins (lazy.nvim)... "
