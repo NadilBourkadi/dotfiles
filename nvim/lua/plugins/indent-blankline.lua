@@ -22,7 +22,7 @@ return {
         include = {
           node_type = {
             lua = { "table_constructor" },
-            python = { "dictionary", "list" },
+            python = { "dictionary", "list", "if_statement", "for_statement", "while_statement", "with_statement", "try_statement", "class_definition", "function_definition" },
             javascript = { "object", "array" },
             typescript = { "object", "array" },
             json = { "object", "array" },
