@@ -10,9 +10,11 @@ return {
   { import = "plugins.treesitter" },
   { import = "plugins.gitsigns" },
   { import = "plugins.lualine" },
-  { import = "plugins.neotest" },
+  { import = "plugins.vim-test" },
   { import = "plugins.ufo" },
   { import = "plugins.copilot" },
+  { import = "plugins.bufferline" },
+  { import = "plugins.persistence" },
 
   -- Plugins that work with minimal or no config
 
@@ -27,7 +29,16 @@ return {
   },
 
   -- Git integration (keeping vim-fugitive - it's excellent)
-  { "tpope/vim-fugitive" },
+  {
+    "tpope/vim-fugitive",
+    cmd = { "Git", "G", "Gdiff", "Gblame" },
+    keys = {
+      { "<leader>gs", "<cmd>Git<CR>", desc = "Git status" },
+      { "<leader>gd", "<cmd>Gdiff<CR>", desc = "Git diff" },
+      { "<leader>gb", "<cmd>Git blame<CR>", desc = "Git blame" },
+      { "<leader>gl", "<cmd>Git log --oneline<CR>", desc = "Git log" },
+    },
+  },
 
   -- JSDoc generation
   { "joegesualdo/jsdoc.vim" },
@@ -43,6 +54,20 @@ return {
   {
     "folke/which-key.nvim",
     event = "VeryLazy",
-    opts = {},
+    config = function()
+      local wk = require("which-key")
+      wk.setup({})
+      wk.add({
+        { "<leader>c", group = "Quickfix" },
+        { "<leader>f", group = "Find" },
+        { "<leader>g", group = "Git" },
+        { "<leader>h", group = "Git Hunks" },
+        { "<leader>p", group = "Plugins/Format" },
+        { "<leader>q", group = "Quit" },
+        { "<leader>r", group = "Rename/Restart" },
+        { "<leader>s", group = "Search/Session" },
+        { "<leader>t", group = "Test/Toggle" },
+      })
+    end,
   },
 }
