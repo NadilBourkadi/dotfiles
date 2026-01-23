@@ -12,13 +12,7 @@ return {
 
     local map = vim.keymap.set
     local persistence = require("persistence")
-
-    -- Helper to get state file path for current directory
-    local function get_state_file()
-      local cwd = vim.fn.getcwd()
-      local name = cwd:gsub("/", "%%")
-      return vim.fn.stdpath("state") .. "/sessions/" .. name .. ".state"
-    end
+    local utils = require("core.utils")
 
     -- Save nvim-tree state before normal quit (skip if restarting via <leader>rs)
     vim.api.nvim_create_autocmd("VimLeavePre", {
@@ -26,12 +20,7 @@ return {
         if vim.g.nvim_restarting then
           return
         end
-        local ok, api = pcall(require, "nvim-tree.api")
-        if ok then
-          local state_file = get_state_file()
-          local was_open = api.tree.is_visible() and "1" or "0"
-          vim.fn.writefile({ was_open }, state_file)
-        end
+        utils.save_nvim_tree_state(utils.get_state_file())
       end,
     })
 
@@ -41,18 +30,9 @@ return {
       callback = function()
         if vim.fn.argc() == 0 and not vim.g.started_with_stdin then
           persistence.load()
-          -- Reopen nvim-tree if it was open before
+          -- Reopen nvim-tree if it was open before (defer to let session load first)
           vim.defer_fn(function()
-            local state_file = get_state_file()
-            if vim.fn.filereadable(state_file) == 1 then
-              local lines = vim.fn.readfile(state_file)
-              if lines[1] == "1" then
-                local ok, api = pcall(require, "nvim-tree.api")
-                if ok then
-                  api.tree.open()
-                end
-              end
-            end
+            utils.restore_nvim_tree_state(utils.get_state_file())
           end, 50)
         end
       end,
