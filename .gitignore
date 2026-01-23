@@ -2,4 +2,5 @@
 
 # Neovim
 nvim/lazy-lock.json
+# Catches circular symlinks from incorrect ln -sf on existing symlink
 nvim/nvim

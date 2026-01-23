@@ -42,11 +42,15 @@ The script will:
 - **Alacritty** - Terminal emulator
 
 ### Optional but Recommended
-- **Homebrew** - For automatic font installation
+- **Homebrew** - For automatic dependency installation
 - **Antigen** - Zsh plugin manager (install to `~/.zsh/antigen.zsh`)
 - **aws-vault** - For AWS credential management
 - **ripgrep** - For fast searching in Neovim
 - **Claude CLI** - For shell `ask`/`explain` functions and tmux popup (uses OAuth, no API key needed)
+
+### Auto-installed by init.zsh (macOS with Homebrew)
+- **Hack Nerd Font** - Icons in Neovim
+- **tree-sitter-cli** - Required by nvim-treesitter for compiling parsers
 
 ## Shell Aliases
 
@@ -85,28 +89,123 @@ Modern Lua-based config using lazy.nvim for plugin management.
 
 Leader key is `,`
 
+#### General
+
 | Binding | Action |
 |---------|--------|
 | `,w` | Save file |
+| `,qq` | Save all and quit |
+| `,rs` | Restart Neovim (preserves session, tmux only) |
+| `,se` | Edit init.lua config |
+| `,dw` | Delete trailing whitespace |
+| `,y` | Yank to system clipboard (visual mode) |
+| `,pi` | Open Lazy plugin manager |
+| `Ctrl+m` | Insert newline without entering insert mode |
+| `j/k` | Move by visual line (screen line) |
+
+#### File Navigation
+
+| Binding | Action |
+|---------|--------|
+| `Ctrl+p` | Find files |
+| `Ctrl+n` | Toggle file tree |
 | `,n` | Find current file in tree |
-| `,sa` | Live grep |
+| `,sa` | Live grep (search all) |
+| `,sw` | Grep word under cursor |
+| `,fb` | Find buffers |
+| `,fh` | Find help tags |
+| `,fr` | Find recent files |
+| `,gf` | Find git files |
+| `,sp` | Resume last search |
+
+#### Tab Navigation
+
+| Binding | Action |
+|---------|--------|
+| `Ctrl+h` | Previous tab |
+| `Ctrl+l` | Next tab |
+| `Shift+Left` | Move tab left |
+| `Shift+Right` | Move tab right |
+| `,<Tab>` | Last active tab |
+
+#### LSP
+
+| Binding | Action |
+|---------|--------|
+| `gd` | Go to definition |
+| `gD` | Go to declaration |
+| `gi` | Go to implementation |
+| `gr` | Find references |
+| `K` | Hover documentation |
+| `,rn` | Rename symbol |
+| `,ca` | Code action |
+| `,ll` | Show line diagnostics |
+| `[d` | Previous diagnostic |
+| `]d` | Next diagnostic |
+| `,pp` | Format file |
+
+#### Git (gitsigns)
+
+| Binding | Action |
+|---------|--------|
+| `]c` | Next hunk |
+| `[c` | Previous hunk |
+| `,hs` | Stage hunk |
+| `,hr` | Reset hunk |
+| `,hS` | Stage buffer |
+| `,hu` | Undo stage hunk |
+| `,hR` | Reset buffer |
+| `,hp` | Preview hunk |
+| `,hb` | Blame line (full) |
+| `,hd` | Diff this |
+| `,hD` | Diff this ~ |
+| `,tb` | Toggle line blame |
+| `,td` | Toggle deleted |
+
+#### Git (vim-fugitive)
+
+| Binding | Action |
+|---------|--------|
+| `,gs` | Git status |
+| `,gd` | Git diff |
+| `,gb` | Git blame |
+| `,gl` | Git log |
+
+#### Testing (vim-test)
+
+| Binding | Action |
+|---------|--------|
 | `,tn` | Run nearest test |
 | `,tt` | Run test file |
+| `,ts` | Run test suite |
+| `,tl` | Run last test |
+| `,tv` | Visit test file |
 | `,tr` | Refresh test gutter signs |
 | `,tc` | Close test pane and clear signs |
-| `,pp` | Format file |
-| `Ctrl+n` | Toggle file tree |
-| `Ctrl+p` | Find files |
-| `gd` | Go to definition |
-| `K` | Hover documentation |
-| `zR` | Open all folds |
-| `zM` | Close all folds |
-| `zK` | Peek folded lines |
+
+#### Sessions (persistence)
+
+| Binding | Action |
+|---------|--------|
 | `,sr` | Restore session (current directory) |
 | `,sl` | Restore last session |
 | `,sd` | Don't save current session |
-| `,qq` | Save all and quit |
-| `,rs` | Restart Neovim (tmux only) |
+
+#### Folding (nvim-ufo)
+
+| Binding | Action |
+|---------|--------|
+| `zR` | Open all folds |
+| `zM` | Close all folds |
+| `zK` | Peek folded lines |
+
+#### Quickfix
+
+| Binding | Action |
+|---------|--------|
+| `,cv` | Open quickfix vertically |
+| `,co` | Open quickfix horizontally |
+| `,cc` | Close quickfix |
 
 ### First Launch
 Run `nvim` after setup - lazy.nvim will automatically install all plugins.
@@ -153,7 +252,7 @@ dotfiles/
             ├── treesitter.lua
             ├── gitsigns.lua
             ├── lualine.lua
-            ├── neotest.lua
+            ├── vim-test.lua
             ├── ufo.lua
             ├── persistence.lua
             └── copilot.lua
