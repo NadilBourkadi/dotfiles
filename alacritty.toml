@@ -68,10 +68,16 @@ cyan = "#94e2d5"
 white = "#bac2de"
 
 [font]
-size = 16.0
+size = 15.5
 
 [font.normal]
 family = "Hack Nerd Font"
 
 [window]
 opacity = 0.95
+
+dynamic_padding = false
+
+[window.padding]
+x = 0
+y = 0
