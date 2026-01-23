@@ -51,6 +51,7 @@ The script will:
 ### Auto-installed by init.zsh (macOS with Homebrew)
 - **Hack Nerd Font** - Icons in Neovim
 - **tree-sitter-cli** - Required by nvim-treesitter for compiling parsers
+- **TPM** - Tmux Plugin Manager (press `prefix + I` in tmux to install plugins)
 
 ## Shell Aliases
 
@@ -240,9 +241,11 @@ dotfiles/
 └── nvim/               # Neovim configuration
     ├── init.lua
     └── lua/
-        ├── options.lua
-        ├── keymaps.lua
-        └── plugins/
+        ├── core/           # Core configuration
+        │   ├── options.lua     # Editor options
+        │   ├── keymaps.lua     # Global keybindings
+        │   └── utils.lua       # Shared utilities
+        └── plugins/        # Plugin configurations
             ├── init.lua
             ├── bufferline.lua
             ├── catppuccin.lua
