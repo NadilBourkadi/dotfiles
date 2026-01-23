@@ -32,18 +32,8 @@ fi
 # Yellow: #f9e2af | Teal: #94e2d5 | Pink: #f5c2e7 | Peach: #fab387
 # Text: #cdd6f4 | Overlay0: #6c7086 | Surface1: #45475a
 
-# Custom prompt with Catppuccin colors
-autoload -Uz vcs_info
-precmd() { vcs_info }
-zstyle ':vcs_info:git:*' formats '%F{#cba6f7} %b%f'  # mauve git branch
-zstyle ':vcs_info:git:*' actionformats '%F{#cba6f7} %b%f %F{#f9e2af}(%a)%f'
-setopt PROMPT_SUBST
-
-# Prompt: directory (blue) | git branch (mauve) | symbol (green/red based on exit code)
-PROMPT='%F{#89b4fa}%~%f${vcs_info_msg_0_} %(?.%F{#a6e3a1}.%F{#f38ba8})❯%f '
-
-# Right prompt: show time in subtle overlay color
-RPROMPT='%F{#6c7086}%T%f'
+# Starship prompt
+eval "$(starship init zsh)"
 
 # Autosuggestions color (subtle overlay)
 ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#6c7086'

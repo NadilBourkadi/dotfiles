@@ -12,7 +12,12 @@ return {
       term_colors = true,
       integrations = {
         bufferline = true,
+        dressing = true,
         gitsigns = true,
+        indent_blankline = {
+          enabled = true,
+          scope_color = "lavender",
+        },
         nvimtree = true,
         treesitter = true,
         telescope = {

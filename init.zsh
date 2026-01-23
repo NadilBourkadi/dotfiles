@@ -39,6 +39,11 @@ mkdir -p ~/.config/alacritty
 ln -sf ~/Dev/dotfiles/alacritty.toml ~/.config/alacritty/alacritty.toml
 echo "${GREEN}Done${NC}"
 
+# Starship prompt config
+echo -n "Symlinking starship config... "
+ln -sf ~/Dev/dotfiles/starship.toml ~/.config/starship.toml
+echo "${GREEN}Done${NC}"
+
 # Install dependencies (macOS only)
 if [[ "$OSTYPE" == "darwin"* ]]; then
   if command -v brew &> /dev/null; then
@@ -59,6 +64,15 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
       echo "${GREEN}Done${NC}"
     else
       echo "tree-sitter CLI already installed, ${GREEN}skipping${NC}"
+    fi
+
+    # Starship prompt
+    if ! command -v starship &> /dev/null; then
+      echo -n "Installing Starship prompt... "
+      brew install starship
+      echo "${GREEN}Done${NC}"
+    else
+      echo "Starship already installed, ${GREEN}skipping${NC}"
     fi
   else
     echo "Homebrew not found, skipping dependency installation"

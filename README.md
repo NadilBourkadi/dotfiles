@@ -31,6 +31,7 @@ The script will:
 | `gitignore_global` | `~/.gitignore_global` |
 | `nvim/` | `~/.config/nvim` |
 | `alacritty.toml` | `~/.config/alacritty/alacritty.toml` |
+| `starship.toml` | `~/.config/starship.toml` |
 
 ## Prerequisites
 
@@ -51,6 +52,7 @@ The script will:
 ### Auto-installed by init.zsh (macOS with Homebrew)
 - **Hack Nerd Font** - Icons in Neovim
 - **tree-sitter-cli** - Required by nvim-treesitter for compiling parsers
+- **Starship** - Cross-shell prompt
 - **TPM** - Tmux Plugin Manager (press `prefix + I` in tmux to install plugins)
 
 ## Shell Aliases
@@ -85,6 +87,9 @@ Modern Lua-based config using lazy.nvim for plugin management.
 - **nvim-ufo** - Better folding with preview
 - **persistence.nvim** - Session management
 - **copilot.vim** - GitHub Copilot AI autocomplete
+- **todo-comments.nvim** - Highlight and search TODO/FIXME comments
+- **indent-blankline.nvim** - Vertical indent guides
+- **dressing.nvim** - Improved vim.ui interfaces
 
 ### Key Bindings
 
@@ -160,8 +165,16 @@ Leader key is `,`
 | `,hb` | Blame line (full) |
 | `,hd` | Diff this |
 | `,hD` | Diff this ~ |
-| `,tb` | Toggle line blame |
+| `,tb` | Toggle line blame (enabled by default) |
 | `,td` | Toggle deleted |
+
+#### TODOs (todo-comments)
+
+| Binding | Action |
+|---------|--------|
+| `]t` | Next TODO |
+| `[t` | Previous TODO |
+| `,ft` | Find all TODOs |
 
 #### Git (vim-fugitive)
 
@@ -236,6 +249,7 @@ dotfiles/
 ├── zshrc               # Zsh configuration
 ├── tmux.conf           # Tmux configuration
 ├── alacritty.toml      # Alacritty terminal config
+├── starship.toml       # Starship prompt config
 ├── gitignore_global    # Global git ignore patterns
 ├── .gitignore          # Repo-specific ignores
 └── nvim/               # Neovim configuration
@@ -258,7 +272,10 @@ dotfiles/
             ├── vim-test.lua
             ├── ufo.lua
             ├── persistence.lua
-            └── copilot.lua
+            ├── copilot.lua
+            ├── todo-comments.lua
+            ├── indent-blankline.lua
+            └── dressing.lua
 ```
 
 ## Notes
