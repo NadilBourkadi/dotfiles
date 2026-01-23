@@ -6,6 +6,9 @@ return {
   main = "ibl",
   event = { "BufReadPost", "BufNewFile" },
   config = function()
+    -- Subtle scope highlight (between inactive and bright)
+    vim.api.nvim_set_hl(0, "IblScopeSubtle", { fg = "#7f849c" }) -- Catppuccin overlay1
+
     require("ibl").setup({
       indent = {
         char = "│",
@@ -15,7 +18,7 @@ return {
         enabled = true,
         show_start = false,
         show_end = false,
-        highlight = { "Function", "Label" },
+        highlight = { "IblScopeSubtle" },
       },
       exclude = {
         filetypes = {
