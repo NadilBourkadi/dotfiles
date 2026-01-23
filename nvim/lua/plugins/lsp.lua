@@ -7,6 +7,12 @@ return {
     config = function()
       require("mason").setup()
 
+      -- Add Mason bin to PATH so native LSP can find installed servers
+      local mason_bin = vim.fn.stdpath("data") .. "/mason/bin"
+      if not string.find(vim.env.PATH, mason_bin, 1, true) then
+        vim.env.PATH = mason_bin .. ":" .. vim.env.PATH
+      end
+
       -- Auto-install LSP servers on startup (only refresh registry if something is missing)
       local ensure_installed = { "lua-language-server", "pyright", "stylua", "black", "prettier" }
       local registry = require("mason-registry")
@@ -60,8 +66,30 @@ return {
         end,
       })
 
+      -- Helper: detect Poetry venv for a project
+      local function get_poetry_venv(root_dir)
+        local pyproject = root_dir .. "/pyproject.toml"
+        if vim.fn.filereadable(pyproject) == 0 then
+          return nil
+        end
+        -- Check if it's a Poetry project
+        local content = table.concat(vim.fn.readfile(pyproject), "\n")
+        if not content:match("%[tool%.poetry%]") then
+          return nil
+        end
+        -- Get venv path from Poetry
+        local result = vim.fn.system("cd " .. vim.fn.shellescape(root_dir) .. " && poetry env info --path 2>/dev/null")
+        if vim.v.shell_error == 0 and result and result ~= "" then
+          return vim.trim(result)
+        end
+        return nil
+      end
+
       -- Configure LSP servers (Neovim 0.11+ native)
       vim.lsp.config("lua_ls", {
+        cmd = { "lua-language-server" },
+        filetypes = { "lua" },
+        root_markers = { ".luarc.json", ".luarc.jsonc", ".git" },
         settings = {
           Lua = {
             diagnostics = { globals = { "vim" } },
@@ -70,7 +98,29 @@ return {
         },
       })
 
-      vim.lsp.config("pyright", {})
+      vim.lsp.config("pyright", {
+        cmd = { "pyright-langserver", "--stdio" },
+        filetypes = { "python" },
+        root_markers = { "pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", ".git", ".python-version" },
+        root_dir = function(bufnr, on_dir)
+          local fname = vim.api.nvim_buf_get_name(bufnr)
+          local markers = { "pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", ".git", ".python-version" }
+          local root = vim.fs.root(bufnr, markers) or vim.fn.fnamemodify(fname, ":h")
+          on_dir(root)
+        end,
+        on_init = function(client)
+          -- Auto-detect Poetry venv and configure pyright
+          local venv_path = get_poetry_venv(client.root_dir)
+          if venv_path then
+            client.settings = vim.tbl_deep_extend("force", client.settings or {}, {
+              python = {
+                pythonPath = venv_path .. "/bin/python",
+              },
+            })
+            client.notify("workspace/didChangeConfiguration", { settings = client.settings })
+          end
+        end,
+      })
 
       -- Enable LSP servers
       vim.lsp.enable({ "lua_ls", "pyright" })
