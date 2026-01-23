@@ -1,5 +1,4 @@
 -- General Neovim options
--- Ported from vimrc
 
 local opt = vim.opt
 
@@ -59,14 +58,3 @@ opt.clipboard = "unnamedplus"
 -- Disable netrw (using nvim-tree)
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
-
--- Project-specific tab settings
-vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile", "BufEnter" }, {
-  pattern = { "*/react-web-app/*", "*/lantum-native/*" },
-  callback = function()
-    vim.opt_local.tabstop = 2
-    vim.opt_local.softtabstop = 2
-    vim.opt_local.shiftwidth = 2
-  end,
-})
-

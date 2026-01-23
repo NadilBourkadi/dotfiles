@@ -1,7 +1,7 @@
 -- Neovim Configuration
--- Migrated from vimrc to Lua
 
--- Neovim 0.11+ compatibility shim (must be before plugins load)
+-- Neovim 0.11+ compatibility shim for plugins that use the old API
+-- The ft_to_lang function was renamed to get_lang in 0.11
 vim.treesitter.language.ft_to_lang = vim.treesitter.language.ft_to_lang or vim.treesitter.language.get_lang
 
 -- Bootstrap lazy.nvim
@@ -23,8 +23,8 @@ vim.g.mapleader = ","
 vim.g.maplocalleader = ","
 
 -- Load core configuration
-require("options")
-require("keymaps")
+require("core.options")
+require("core.keymaps")
 
 -- Load plugins
 require("lazy").setup("plugins", {
