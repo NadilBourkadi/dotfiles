@@ -55,7 +55,6 @@ return {
 
     -- Live grep (replaces :Rg and :Ack)
     map("n", "<leader>sa", builtin.live_grep, opts)
-    map("n", "<leader>aa", builtin.live_grep, opts)
 
     -- Grep word under cursor
     map("n", "<leader>sw", builtin.grep_string, opts)
@@ -73,6 +72,6 @@ return {
     map("n", "<leader>fr", builtin.oldfiles, opts)
 
     -- Resume last search
-    map("n", "<leader>sr", builtin.resume, opts)
+    map("n", "<leader>sp", builtin.resume, opts)
   end,
 }
