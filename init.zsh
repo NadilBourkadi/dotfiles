@@ -22,6 +22,10 @@ echo -n "Configuring git to use global gitignore... "
 git config --global core.excludesfile ~/.gitignore_global
 echo "${GREEN}Done${NC}"
 
+echo -n "Configuring git autocrlf... "
+git config --global core.autocrlf false
+echo "${GREEN}Done${NC}"
+
 # Neovim config (directory symlink)
 echo -n "Symlinking nvim config... "
 mkdir -p ~/.config
@@ -35,9 +39,10 @@ mkdir -p ~/.config/alacritty
 ln -sf ~/Dev/dotfiles/alacritty.toml ~/.config/alacritty/alacritty.toml
 echo "${GREEN}Done${NC}"
 
-# Install Nerd Font for Neovim icons (macOS only)
+# Install dependencies (macOS only)
 if [[ "$OSTYPE" == "darwin"* ]]; then
   if command -v brew &> /dev/null; then
+    # Nerd Font for Neovim icons
     if ! brew list --cask font-hack-nerd-font &> /dev/null; then
       echo -n "Installing Nerd Font for Neovim icons... "
       brew install --cask font-hack-nerd-font
@@ -46,8 +51,17 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     else
       echo "Nerd Font already installed, ${GREEN}skipping${NC}"
     fi
+
+    # tree-sitter CLI (required by nvim-treesitter for compiling parsers)
+    if ! command -v tree-sitter &> /dev/null; then
+      echo -n "Installing tree-sitter CLI... "
+      brew install tree-sitter-cli
+      echo "${GREEN}Done${NC}"
+    else
+      echo "tree-sitter CLI already installed, ${GREEN}skipping${NC}"
+    fi
   else
-    echo "Homebrew not found, skipping font installation"
+    echo "Homebrew not found, skipping dependency installation"
   fi
 fi
 

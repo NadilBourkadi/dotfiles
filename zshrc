@@ -8,6 +8,10 @@ alias reload-alacritty='touch ~/.config/alacritty/alacritty.toml'
 
 # Antigen (skip on reload - already loaded)
 if [[ -z "$_ANTIGEN_LOADED" ]]; then
+  # Set cache dir for oh-my-zsh plugins (required by last-working-dir)
+  export ZSH_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/oh-my-zsh"
+  [[ -d "$ZSH_CACHE_DIR" ]] || mkdir -p "$ZSH_CACHE_DIR"
+
   source ~/.zsh/antigen.zsh
   antigen use oh-my-zsh
   antigen bundle git
@@ -79,9 +83,6 @@ zstyle ':completion:*' list-colors '=*=38;2;148;226;213'   # teal completion ite
 zstyle ':completion:*:descriptions' format '%F{#cba6f7}── %d ──%f'
 zstyle ':completion:*:warnings' format '%F{#f38ba8}no matches%f'
 
-# Created by `pipx` on 2025-07-29 16:52:59
-export PATH="$PATH:/Users/nadil.bourkadi/.local/bin"
-
 export PATH="$HOME/.local/bin:$PATH"
 
 # Usage: av dev sts get-caller-identity
@@ -116,10 +117,8 @@ function explain() {
   fi
 }
 
-git config --global core.autocrlf false
-
 # opencode
-export PATH=/Users/nadil.bourkadi/.opencode/bin:$PATH
+export PATH="$HOME/.opencode/bin:$PATH"
 
 #
 # Tmux auto-attach (skip in IDE terminals and non-interactive shells)
