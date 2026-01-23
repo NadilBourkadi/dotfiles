@@ -7,18 +7,32 @@ return {
     config = function()
       require("mason").setup()
 
-      -- Auto-install LSP servers on startup
+      -- Auto-install LSP servers on startup (only refresh registry if something is missing)
       local ensure_installed = { "lua-language-server", "pyright", "stylua", "black", "prettier" }
       local registry = require("mason-registry")
 
-      registry.refresh(function()
+      local function install_missing()
         for _, name in ipairs(ensure_installed) do
-          local pkg = registry.get_package(name)
-          if not pkg:is_installed() then
+          local ok, pkg = pcall(registry.get_package, name)
+          if ok and not pkg:is_installed() then
             pkg:install()
           end
         end
-      end)
+      end
+
+      -- Check if any packages are missing before doing a network refresh
+      local needs_refresh = false
+      for _, name in ipairs(ensure_installed) do
+        local ok, pkg = pcall(registry.get_package, name)
+        if not ok or not pkg:is_installed() then
+          needs_refresh = true
+          break
+        end
+      end
+
+      if needs_refresh then
+        registry.refresh(install_missing)
+      end
 
       -- Configure diagnostic display
       vim.diagnostic.config({
@@ -84,6 +98,13 @@ return {
           ["<Tab>"] = cmp.mapping(function(fallback)
             if cmp.visible() then
               cmp.select_next_item()
+            else
+              fallback()
+            end
+          end, { "i", "s" }),
+          ["<S-Tab>"] = cmp.mapping(function(fallback)
+            if cmp.visible() then
+              cmp.select_prev_item()
             else
               fallback()
             end

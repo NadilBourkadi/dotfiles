@@ -40,8 +40,8 @@ return {
     },
   },
 
-  -- JSDoc generation
-  { "joegesualdo/jsdoc.vim" },
+  -- JSDoc generation (lazy-load for JS/TS files only)
+  { "joegesualdo/jsdoc.vim", ft = { "javascript", "typescript", "javascriptreact", "typescriptreact" } },
 
   -- Auto pairs
   {
