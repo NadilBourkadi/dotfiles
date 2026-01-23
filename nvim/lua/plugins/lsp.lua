@@ -14,7 +14,7 @@ return {
       end
 
       -- Auto-install LSP servers on startup (only refresh registry if something is missing)
-      local ensure_installed = { "lua-language-server", "pyright", "stylua", "black", "prettier" }
+      local ensure_installed = { "lua-language-server", "pyright", "stylua", "black", "prettier", "debugpy", "mypy", "flake8" }
       local registry = require("mason-registry")
 
       local function install_missing()
@@ -45,6 +45,14 @@ return {
         virtual_text = true,
         signs = true,
         underline = true,
+        float = { border = "rounded" },
+      })
+
+      -- Auto-show full diagnostic on cursor hold
+      vim.api.nvim_create_autocmd("CursorHold", {
+        callback = function()
+          vim.diagnostic.open_float(nil, { focus = false, scope = "cursor" })
+        end,
       })
 
       -- LSP keymaps on attach
@@ -63,6 +71,11 @@ return {
           map("n", "<leader>ll", vim.diagnostic.open_float, opts)
           map("n", "[d", vim.diagnostic.goto_prev, opts)
           map("n", "]d", vim.diagnostic.goto_next, opts)
+
+          -- Toggle inlay hints
+          map("n", "<leader>ih", function()
+            vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
+          end, opts)
         end,
       })
 
@@ -162,6 +175,7 @@ return {
         }),
         sources = cmp.config.sources({
           { name = "nvim_lsp" },
+          { name = "luasnip" },
           { name = "buffer" },
           { name = "path" },
         }),

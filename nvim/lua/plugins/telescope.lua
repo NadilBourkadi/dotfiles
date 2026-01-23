@@ -73,5 +73,19 @@ return {
 
     -- Resume last search
     map("n", "<leader>sp", builtin.resume, opts)
+
+    -- LSP symbol search
+    map("n", "<leader>fs", builtin.lsp_workspace_symbols, opts)
+    map("n", "<leader>fd", builtin.lsp_document_symbols, opts)
+
+    -- Call hierarchy
+    map("n", "<leader>ci", builtin.lsp_incoming_calls, opts)
+    map("n", "<leader>cr", builtin.lsp_outgoing_calls, opts)
+
+    -- Diagnostics
+    map("n", "<leader>xd", builtin.diagnostics, opts)
+    map("n", "<leader>xD", function()
+      builtin.diagnostics({ bufnr = 0 })
+    end, opts)
   end,
 }

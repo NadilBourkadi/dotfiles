@@ -47,7 +47,7 @@ The script will:
 - **Antigen** - Zsh plugin manager (install to `~/.zsh/antigen.zsh`)
 - **aws-vault** - For AWS credential management
 - **ripgrep** - For fast searching in Neovim
-- **Claude CLI** - For shell `ask`/`explain` functions and tmux popup (uses OAuth, no API key needed)
+- **Claude CLI** - For shell `ask`/`explain` functions (uses OAuth, no API key needed)
 
 ### Auto-installed by init.zsh (macOS with Homebrew)
 - **Hack Nerd Font** - Icons in Neovim
@@ -90,6 +90,13 @@ Modern Lua-based config using lazy.nvim for plugin management.
 - **todo-comments.nvim** - Highlight and search TODO/FIXME comments
 - **indent-blankline.nvim** - Vertical indent guides
 - **dressing.nvim** - Improved vim.ui interfaces
+- **nvim-dap** - Debug Adapter Protocol with Python support
+- **nvim-lint** - Async linting (mypy, flake8)
+- **LuaSnip** - Snippet engine with custom Python snippets
+- **neogen** - Google-style docstring generation
+- **nvim-coverage** - Test coverage display in gutter
+- **lsp_signature.nvim** - Function signature help
+- **other.nvim** - Source/test file switching
 
 ### Key Bindings
 
@@ -149,6 +156,7 @@ Leader key is `,`
 | `[d` | Previous diagnostic |
 | `]d` | Next diagnostic |
 | `,pp` | Format file |
+| `,ih` | Toggle inlay hints |
 
 #### Git (gitsigns)
 
@@ -221,6 +229,71 @@ Leader key is `,`
 | `,co` | Open quickfix horizontally |
 | `,cc` | Close quickfix |
 
+#### Debug (nvim-dap)
+
+| Binding | Action |
+|---------|--------|
+| `,db` | Toggle breakpoint |
+| `,dB` | Conditional breakpoint |
+| `,dc` | Continue |
+| `,di` | Step into |
+| `,do` | Step over |
+| `,dO` | Step out |
+| `,dr` | Open REPL |
+| `,dl` | Run last |
+| `,du` | Toggle DAP UI |
+| `,dt` | Terminate |
+| `,dq` | Quit and reset (terminate + close UI + clear breakpoints) |
+| `,de` | Evaluate expression |
+
+#### Docstrings (neogen)
+
+| Binding | Action |
+|---------|--------|
+| `,nf` | Generate function docstring |
+| `,nc` | Generate class docstring |
+
+#### Coverage
+
+| Binding | Action |
+|---------|--------|
+| `,Tc` | Toggle coverage |
+| `,Ts` | Coverage summary |
+| `,Tl` | Load coverage |
+
+#### Diagnostics (telescope)
+
+| Binding | Action |
+|---------|--------|
+| `,xd` | All diagnostics |
+| `,xD` | Buffer diagnostics |
+
+#### Symbols (telescope)
+
+| Binding | Action |
+|---------|--------|
+| `,fs` | Workspace symbols |
+| `,fd` | Document symbols |
+| `,ci` | Incoming calls |
+| `,cr` | Outgoing calls |
+
+#### Source/Test Switching
+
+| Binding | Action |
+|---------|--------|
+| `,oo` | Switch to other file |
+| `,os` | Other in split |
+| `,ov` | Other in vsplit |
+
+#### Snippets (LuaSnip)
+
+| Binding | Action |
+|---------|--------|
+| `Ctrl+k` | Jump to next placeholder |
+| `Ctrl+j` | Jump to previous placeholder |
+
+Custom Python snippets: `docg` (Google docstring), `testfn` (pytest test), `faroute` (FastAPI route), `fixture` (pytest fixture).
+
 ### First Launch
 Run `nvim` after setup - lazy.nvim will automatically install all plugins.
 
@@ -236,8 +309,6 @@ Run `nvim` after setup - lazy.nvim will automatically install all plugins.
 | `Ctrl+a %` | Split pane horizontally (same directory) |
 | `Ctrl+a c` | New window (same directory) |
 | `Ctrl+a r` | Reload tmux config |
-| `Ctrl+a j` | Open Claude popup |
-| `Escape` | Close Claude popup |
 
 ## File Structure
 
@@ -275,7 +346,14 @@ dotfiles/
             ├── copilot.lua
             ├── todo-comments.lua
             ├── indent-blankline.lua
-            └── dressing.lua
+            ├── dressing.lua
+            ├── dap.lua
+            ├── neogen.lua
+            ├── lint.lua
+            ├── luasnip.lua
+            ├── coverage.lua
+            ├── signature.lua
+            └── other.lua
 ```
 
 ## Notes
