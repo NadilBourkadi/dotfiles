@@ -1,5 +1,8 @@
 # Local gitignore - applies to this repo only
 
+# Override global gitignore to track these files
+!CLAUDE.md
+
 # Neovim
 nvim/lazy-lock.json
 # Catches circular symlinks from incorrect ln -sf on existing symlink
