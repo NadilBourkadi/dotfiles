@@ -83,6 +83,15 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     else
       echo "Starship already installed, ${GREEN}skipping${NC}"
     fi
+
+    # Lazygit
+    if ! command -v lazygit &> /dev/null; then
+      echo -n "Installing Lazygit... "
+      brew install lazygit
+      echo "${GREEN}Done${NC}"
+    else
+      echo "Lazygit already installed, ${GREEN}skipping${NC}"
+    fi
   else
     echo "Homebrew not found, skipping dependency installation"
   fi

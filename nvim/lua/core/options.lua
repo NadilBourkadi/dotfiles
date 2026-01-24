@@ -58,3 +58,9 @@ opt.clipboard = "unnamedplus"
 -- Disable netrw (using nvim-tree)
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
+
+-- Auto-reload files changed externally
+opt.autoread = true
+vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold" }, {
+  command = "silent! checktime",
+})
