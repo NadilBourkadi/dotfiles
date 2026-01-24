@@ -57,6 +57,15 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
       echo "Nerd Font already installed, ${GREEN}skipping${NC}"
     fi
 
+    # Neovim
+    if ! command -v nvim &> /dev/null; then
+      echo -n "Installing Neovim... "
+      brew install neovim
+      echo "${GREEN}Done${NC}"
+    else
+      echo "Neovim already installed, ${GREEN}skipping${NC}"
+    fi
+
     # tree-sitter CLI (required by nvim-treesitter for compiling parsers)
     if ! command -v tree-sitter &> /dev/null; then
       echo -n "Installing tree-sitter CLI... "

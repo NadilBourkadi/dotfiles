@@ -33,7 +33,7 @@ fi
 # Text: #cdd6f4 | Overlay0: #6c7086 | Surface1: #45475a
 
 # Starship prompt
-eval "$(starship init zsh)"
+command -v starship &>/dev/null && eval "$(starship init zsh)"
 
 # Autosuggestions color (subtle overlay)
 ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#6c7086'
