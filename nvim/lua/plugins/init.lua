@@ -9,6 +9,7 @@ return {
   { import = "plugins.lsp" },
   { import = "plugins.treesitter" },
   { import = "plugins.gitsigns" },
+  { import = "plugins.diffview" },
   { import = "plugins.lualine" },
   { import = "plugins.vim-test" },
   { import = "plugins.ufo" },

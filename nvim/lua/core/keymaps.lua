@@ -39,7 +39,7 @@ map("n", "<S-Right>", ":+tabm<CR>", opts)
 
 -- Last active tab
 vim.g.lasttab = 1
-map("n", "<leader><Tab>", ':exe "tabn " .. vim.g.lasttab<CR>', opts)
+map("n", "<leader><Tab>", function() vim.cmd("tabn " .. vim.g.lasttab) end, opts)
 vim.api.nvim_create_autocmd("TabLeave", {
   callback = function()
     vim.g.lasttab = vim.fn.tabpagenr()

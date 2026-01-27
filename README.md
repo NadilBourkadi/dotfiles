@@ -84,6 +84,7 @@ Modern Lua-based config using lazy.nvim for plugin management.
 - **bufferline.nvim** - Prominent tab display
 - **mini.icons** - File icons
 - **vim-fugitive** - Git commands
+- **diffview.nvim** - Side-by-side branch diff and file history
 - **nvim-ufo** - Better folding with preview
 - **persistence.nvim** - Session management
 - **copilot.vim** - GitHub Copilot AI autocomplete
@@ -192,6 +193,15 @@ Leader key is `,`
 | `,gd` | Git diff |
 | `,gb` | Git blame |
 | `,gl` | Git log |
+
+#### Git (diffview)
+
+| Binding | Action |
+|---------|--------|
+| `,gv` | Diff branch (vs main) |
+| `,gh` | Current file history |
+| `,gH` | Full branch history |
+| `,gc` | Close diffview |
 
 #### Testing (vim-test)
 
@@ -339,6 +349,7 @@ dotfiles/
             ├── lsp.lua
             ├── treesitter.lua
             ├── gitsigns.lua
+            ├── diffview.lua
             ├── lualine.lua
             ├── vim-test.lua
             ├── ufo.lua
