@@ -74,6 +74,8 @@ size = 15.5
 family = "Hack Nerd Font"
 
 [window]
+decorations = "Buttonless"
+startup_mode = "Maximized"
 opacity = 0.95
 
 dynamic_padding = false
