@@ -113,6 +113,8 @@ Leader key is `,`
 | `,se` | Edit init.lua config |
 | `,dw` | Delete trailing whitespace |
 | `,y` | Yank to system clipboard (visual mode) |
+| `,cp` | Copy absolute file path to clipboard |
+| `,cP` | Copy relative file path to clipboard |
 | `,pi` | Open Lazy plugin manager |
 | `Ctrl+m` | Insert newline without entering insert mode |
 | `j/k` | Move by visual line (screen line) |

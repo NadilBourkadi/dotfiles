@@ -67,5 +67,18 @@ map("n", "j", "gj", { noremap = true })
 -- Yank to system clipboard
 map("v", "<leader>y", '"+y', opts)
 
+-- Copy file path to system clipboard
+map("n", "<leader>cp", function()
+  local path = vim.fn.expand("%:p")
+  vim.fn.setreg("+", path)
+  vim.notify(path, vim.log.levels.INFO, { title = "Copied absolute path" })
+end, vim.tbl_extend("force", opts, { desc = "Copy absolute path" }))
+
+map("n", "<leader>cP", function()
+  local path = vim.fn.expand("%:.")
+  vim.fn.setreg("+", path)
+  vim.notify(path, vim.log.levels.INFO, { title = "Copied relative path" })
+end, vim.tbl_extend("force", opts, { desc = "Copy relative path" }))
+
 -- Plugin install (lazy.nvim equivalent)
 map("n", "<leader>pi", ":Lazy<CR>", opts)
