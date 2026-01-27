@@ -170,10 +170,12 @@ vim.o.foldenable = true
 - The check `vim.lsp.get_clients({ bufnr = 0 })` returning empty means LSP didn't attach
 
 ### Pyright + Poetry
-- Pyright auto-detects Poetry venvs via `on_init` callback in lsp.lua
-- Checks for `[tool.poetry]` in pyproject.toml, then runs `poetry env info --path`
+- Pyright auto-detects Poetry venvs via async `on_init` callback in lsp.lua
+- Checks for `[tool.poetry]` in pyproject.toml, then runs `poetry env info --path` via `vim.system()` (async)
 - Sets `python.pythonPath` to the venv's Python executable
 - No need for `pyrightconfig.json` in each project
+- **Poetry venv paths are cached per project root** in both lsp.lua and lint.lua to avoid repeated shell calls
+- Use `vim.system()` (async) instead of `vim.fn.system()` (blocking) for Poetry lookups — `poetry env info` is slow (200-500ms)
 
 ## Debugging Neovim Config
 

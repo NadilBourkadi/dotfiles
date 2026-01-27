@@ -79,23 +79,49 @@ return {
         end,
       })
 
-      -- Helper: detect Poetry venv for a project
-      local function get_poetry_venv(root_dir)
+      -- Cache: project root -> poetry venv path (false = no poetry)
+      local poetry_venv_cache = {}
+
+      -- Async detect Poetry venv for a project, then call callback(venv_path_or_nil)
+      local function get_poetry_venv_async(root_dir, callback)
+        -- Cache hit
+        if poetry_venv_cache[root_dir] ~= nil then
+          local cached = poetry_venv_cache[root_dir]
+          callback(cached ~= false and cached or nil)
+          return
+        end
+
         local pyproject = root_dir .. "/pyproject.toml"
         if vim.fn.filereadable(pyproject) == 0 then
-          return nil
+          poetry_venv_cache[root_dir] = false
+          callback(nil)
+          return
         end
-        -- Check if it's a Poetry project
+
         local content = table.concat(vim.fn.readfile(pyproject), "\n")
         if not content:match("%[tool%.poetry%]") then
-          return nil
+          poetry_venv_cache[root_dir] = false
+          callback(nil)
+          return
         end
-        -- Get venv path from Poetry
-        local result = vim.fn.system("cd " .. vim.fn.shellescape(root_dir) .. " && poetry env info --path 2>/dev/null")
-        if vim.v.shell_error == 0 and result and result ~= "" then
-          return vim.trim(result)
-        end
-        return nil
+
+        -- Async lookup
+        vim.system(
+          { "poetry", "env", "info", "--path" },
+          { cwd = root_dir, text = true },
+          function(result)
+            vim.schedule(function()
+              if result.code == 0 and result.stdout and result.stdout ~= "" then
+                local venv_path = vim.trim(result.stdout)
+                poetry_venv_cache[root_dir] = venv_path
+                callback(venv_path)
+              else
+                poetry_venv_cache[root_dir] = false
+                callback(nil)
+              end
+            end)
+          end
+        )
       end
 
       -- Configure LSP servers (Neovim 0.11+ native)
@@ -122,16 +148,17 @@ return {
           on_dir(root)
         end,
         on_init = function(client)
-          -- Auto-detect Poetry venv and configure pyright
-          local venv_path = get_poetry_venv(client.root_dir)
-          if venv_path then
-            client.settings = vim.tbl_deep_extend("force", client.settings or {}, {
-              python = {
-                pythonPath = venv_path .. "/bin/python",
-              },
-            })
-            client.notify("workspace/didChangeConfiguration", { settings = client.settings })
-          end
+          -- Auto-detect Poetry venv and configure pyright (async)
+          get_poetry_venv_async(client.root_dir, function(venv_path)
+            if venv_path then
+              client.settings = vim.tbl_deep_extend("force", client.settings or {}, {
+                python = {
+                  pythonPath = venv_path .. "/bin/python",
+                },
+              })
+              client.notify("workspace/didChangeConfiguration", { settings = client.settings })
+            end
+          end)
         end,
       })
 
