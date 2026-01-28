@@ -221,6 +221,9 @@ return {
           javascript = { "prettier" },
           json = { "prettier" },
         },
+        format_after_save = {
+          lsp_fallback = true,
+        },
       })
 
       vim.keymap.set({ "n", "v" }, "<leader>pp", function()
