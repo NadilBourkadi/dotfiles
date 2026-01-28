@@ -97,7 +97,6 @@ Modern Lua-based config using lazy.nvim for plugin management.
 - **neogen** - Google-style docstring generation
 - **nvim-coverage** - Test coverage display in gutter
 - **lsp_signature.nvim** - Function signature help
-- **other.nvim** - Source/test file switching
 
 ### Key Bindings
 
@@ -133,6 +132,26 @@ Leader key is `,`
 | `,fr` | Find recent files |
 | `,gf` | Find git files |
 | `,sp` | Resume last search |
+
+#### File Tree (nvim-tree)
+
+These work when focused in the tree:
+
+| Binding | Action |
+|---------|--------|
+| `Enter` | Open file |
+| `Ctrl+v` | Open in vsplit |
+| `Ctrl+x` | Open in split |
+| `Ctrl+t` | Open in new tab |
+| `a` | Create file (add `/` for folder) |
+| `d` | Delete |
+| `r` | Rename |
+| `x` | Cut |
+| `c` | Copy |
+| `p` | Paste |
+| `y` | Copy name |
+| `Y` | Copy relative path |
+| `gy` | Copy absolute path |
 
 #### Tab Navigation
 
@@ -289,14 +308,6 @@ Leader key is `,`
 | `,ci` | Incoming calls |
 | `,cr` | Outgoing calls |
 
-#### Source/Test Switching
-
-| Binding | Action |
-|---------|--------|
-| `,oo` | Switch to other file |
-| `,os` | Other in split |
-| `,ov` | Other in vsplit |
-
 #### Snippets (LuaSnip)
 
 | Binding | Action |
@@ -365,8 +376,7 @@ dotfiles/
             ├── lint.lua
             ├── luasnip.lua
             ├── coverage.lua
-            ├── signature.lua
-            └── other.lua
+            └── signature.lua
 ```
 
 ## Notes
