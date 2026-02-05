@@ -22,7 +22,6 @@ return {
   { import = "plugins.luasnip" },
   { import = "plugins.coverage" },
   { import = "plugins.signature" },
-  { import = "plugins.other" },
 
   -- Plugins that work with minimal or no config
 
@@ -73,7 +72,6 @@ return {
         { "<leader>h", group = "Git Hunks" },
         { "<leader>i", group = "Inlay Hints" },
         { "<leader>n", group = "Neogen" },
-        { "<leader>o", group = "Other File" },
         { "<leader>p", group = "Plugins/Format" },
         { "<leader>q", group = "Quit" },
         { "<leader>r", group = "Rename/Restart" },

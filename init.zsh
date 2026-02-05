@@ -57,6 +57,24 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
       echo "Nerd Font already installed, ${GREEN}skipping${NC}"
     fi
 
+    # Alacritty terminal
+    if ! command -v alacritty &> /dev/null; then
+      echo -n "Installing Alacritty... "
+      brew install --cask alacritty
+      echo "${GREEN}Done${NC}"
+    else
+      echo "Alacritty already installed, ${GREEN}skipping${NC}"
+    fi
+
+    # Tmux
+    if ! command -v tmux &> /dev/null; then
+      echo -n "Installing Tmux... "
+      brew install tmux
+      echo "${GREEN}Done${NC}"
+    else
+      echo "Tmux already installed, ${GREEN}skipping${NC}"
+    fi
+
     # Neovim
     if ! command -v nvim &> /dev/null; then
       echo -n "Installing Neovim... "
@@ -73,6 +91,24 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
       echo "${GREEN}Done${NC}"
     else
       echo "tree-sitter CLI already installed, ${GREEN}skipping${NC}"
+    fi
+
+    # ripgrep (required by Telescope live grep)
+    if ! command -v rg &> /dev/null; then
+      echo -n "Installing ripgrep... "
+      brew install ripgrep
+      echo "${GREEN}Done${NC}"
+    else
+      echo "ripgrep already installed, ${GREEN}skipping${NC}"
+    fi
+
+    # fd (fast file finder for Telescope)
+    if ! command -v fd &> /dev/null; then
+      echo -n "Installing fd... "
+      brew install fd
+      echo "${GREEN}Done${NC}"
+    else
+      echo "fd already installed, ${GREEN}skipping${NC}"
     fi
 
     # Starship prompt
@@ -95,6 +131,16 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   else
     echo "Homebrew not found, skipping dependency installation"
   fi
+fi
+
+# Install Antigen (Zsh plugin manager)
+if [[ ! -f ~/.zsh/antigen.zsh ]]; then
+  echo -n "Installing Antigen... "
+  mkdir -p ~/.zsh
+  curl -fsSL git.io/antigen > ~/.zsh/antigen.zsh 2>/dev/null
+  echo "${GREEN}Done${NC}"
+else
+  echo "Antigen already installed, ${GREEN}skipping${NC}"
 fi
 
 # Install TPM (Tmux Plugin Manager)

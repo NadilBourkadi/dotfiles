@@ -37,23 +37,25 @@ The script will:
 
 ### Required
 - **Zsh** - Primary shell
-- **Neovim** (0.11+) - Primary editor with Lua configuration
-- **Tmux** - Terminal multiplexer
 - **Git** - Version control
-- **Alacritty** - Terminal emulator
+- **Homebrew** - For automatic dependency installation (macOS)
 
-### Optional but Recommended
-- **Homebrew** - For automatic dependency installation
-- **Antigen** - Zsh plugin manager (install to `~/.zsh/antigen.zsh`)
-- **aws-vault** - For AWS credential management
-- **ripgrep** - For fast searching in Neovim
+### Optional
+- **aws-vault** - For AWS credential management (`av` shell function)
 - **Claude CLI** - For shell `ask`/`explain` functions (uses OAuth, no API key needed)
 
 ### Auto-installed by init.zsh (macOS with Homebrew)
-- **Hack Nerd Font** - Icons in Neovim
-- **tree-sitter-cli** - Required by nvim-treesitter for compiling parsers
+- **Alacritty** - Terminal emulator
+- **Tmux** - Terminal multiplexer
+- **Neovim** (0.11+) - Primary editor
+- **tree-sitter-cli** - Required by nvim-treesitter
+- **ripgrep** - Fast searching for Telescope
+- **fd** - Fast file finder for Telescope
 - **Starship** - Cross-shell prompt
-- **TPM** - Tmux Plugin Manager (press `prefix + I` in tmux to install plugins)
+- **Lazygit** - Terminal UI for git
+- **Hack Nerd Font** - Icons in Neovim
+- **Antigen** - Zsh plugin manager
+- **TPM** - Tmux Plugin Manager (press `prefix + I` to install plugins)
 
 ## Shell Aliases
 
