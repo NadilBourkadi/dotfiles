@@ -6,9 +6,7 @@ return {
   event = { "BufWritePost", "BufReadPost" },
   config = function()
     local lint = require("lint")
-
-    -- Cache: project root -> poetry bin path (false = no poetry)
-    local poetry_cache = {}
+    local utils = require("core.utils")
 
     -- Helper: find project root with pyproject.toml
     local function find_project_root()
@@ -16,46 +14,13 @@ return {
       return root or vim.fn.getcwd()
     end
 
-    -- Async resolve Poetry venv bin path, then call callback
-    local function resolve_poetry_bin(root, callback)
-      -- Cache hit
-      if poetry_cache[root] ~= nil then
-        callback(poetry_cache[root] ~= false and poetry_cache[root] or nil)
-        return
-      end
-      -- Async lookup
-      vim.system(
-        { "poetry", "env", "info", "--path" },
-        { cwd = root, text = true },
-        function(result)
-          vim.schedule(function()
-            if result.code == 0 and result.stdout and result.stdout ~= "" then
-              poetry_cache[root] = vim.trim(result.stdout) .. "/bin"
-            else
-              poetry_cache[root] = false
-            end
-            callback(poetry_cache[root] ~= false and poetry_cache[root] or nil)
-          end)
-        end
-      )
-    end
-
-    -- Sync read from cache (used by linter cmd functions after cache is warm)
-    local function get_poetry_bin_cached(root)
-      local cached = poetry_cache[root]
-      if cached and cached ~= false then
-        return cached
-      end
-      return nil
-    end
-
     -- Configure mypy to run from project root with Poetry's mypy
     lint.linters.mypy = {
       cmd = function()
         local root = find_project_root()
-        local poetry_bin = get_poetry_bin_cached(root)
-        if poetry_bin and vim.fn.executable(poetry_bin .. "/mypy") == 1 then
-          return poetry_bin .. "/mypy"
+        local venv = utils.get_poetry_venv_cached(root)
+        if venv and vim.fn.executable(venv .. "/bin/mypy") == 1 then
+          return venv .. "/bin/mypy"
         end
         return "mypy"
       end,
@@ -85,9 +50,9 @@ return {
     lint.linters.flake8 = {
       cmd = function()
         local root = find_project_root()
-        local poetry_bin = get_poetry_bin_cached(root)
-        if poetry_bin and vim.fn.executable(poetry_bin .. "/flake8") == 1 then
-          return poetry_bin .. "/flake8"
+        local venv = utils.get_poetry_venv_cached(root)
+        if venv and vim.fn.executable(venv .. "/bin/flake8") == 1 then
+          return venv .. "/bin/flake8"
         end
         return "flake8"
       end,
@@ -117,10 +82,10 @@ return {
       pattern = { "*.py" },
       callback = function()
         local root = find_project_root()
-        if poetry_cache[root] ~= nil then
+        if utils.is_poetry_venv_resolved(root) then
           lint.try_lint()
         else
-          resolve_poetry_bin(root, function()
+          utils.get_poetry_venv(root, function()
             lint.try_lint()
           end)
         end

@@ -79,50 +79,7 @@ return {
         end,
       })
 
-      -- Cache: project root -> poetry venv path (false = no poetry)
-      local poetry_venv_cache = {}
-
-      -- Async detect Poetry venv for a project, then call callback(venv_path_or_nil)
-      local function get_poetry_venv_async(root_dir, callback)
-        -- Cache hit
-        if poetry_venv_cache[root_dir] ~= nil then
-          local cached = poetry_venv_cache[root_dir]
-          callback(cached ~= false and cached or nil)
-          return
-        end
-
-        local pyproject = root_dir .. "/pyproject.toml"
-        if vim.fn.filereadable(pyproject) == 0 then
-          poetry_venv_cache[root_dir] = false
-          callback(nil)
-          return
-        end
-
-        local content = table.concat(vim.fn.readfile(pyproject), "\n")
-        if not content:match("%[tool%.poetry%]") then
-          poetry_venv_cache[root_dir] = false
-          callback(nil)
-          return
-        end
-
-        -- Async lookup
-        vim.system(
-          { "poetry", "env", "info", "--path" },
-          { cwd = root_dir, text = true },
-          function(result)
-            vim.schedule(function()
-              if result.code == 0 and result.stdout and result.stdout ~= "" then
-                local venv_path = vim.trim(result.stdout)
-                poetry_venv_cache[root_dir] = venv_path
-                callback(venv_path)
-              else
-                poetry_venv_cache[root_dir] = false
-                callback(nil)
-              end
-            end)
-          end
-        )
-      end
+      local utils = require("core.utils")
 
       -- Configure LSP servers (Neovim 0.11+ native)
       vim.lsp.config("lua_ls", {
@@ -140,7 +97,6 @@ return {
       vim.lsp.config("pyright", {
         cmd = { "pyright-langserver", "--stdio" },
         filetypes = { "python" },
-        root_markers = { "pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", ".git", ".python-version" },
         root_dir = function(bufnr, on_dir)
           local fname = vim.api.nvim_buf_get_name(bufnr)
           local markers = { "pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", ".git", ".python-version" }
@@ -149,7 +105,7 @@ return {
         end,
         on_init = function(client)
           -- Auto-detect Poetry venv and configure pyright (async)
-          get_poetry_venv_async(client.root_dir, function(venv_path)
+          utils.get_poetry_venv(client.root_dir, function(venv_path)
             if venv_path then
               client.settings = vim.tbl_deep_extend("force", client.settings or {}, {
                 python = {
@@ -164,71 +120,6 @@ return {
 
       -- Enable LSP servers
       vim.lsp.enable({ "lua_ls", "pyright" })
-    end,
-  },
-  -- Autocompletion
-  {
-    "hrsh7th/nvim-cmp",
-    event = "InsertEnter",
-    dependencies = {
-      "hrsh7th/cmp-nvim-lsp",
-      "hrsh7th/cmp-buffer",
-      "hrsh7th/cmp-path",
-    },
-    config = function()
-      local cmp = require("cmp")
-
-      cmp.setup({
-        mapping = cmp.mapping.preset.insert({
-          ["<C-b>"] = cmp.mapping.scroll_docs(-4),
-          ["<C-f>"] = cmp.mapping.scroll_docs(4),
-          ["<C-Space>"] = cmp.mapping.complete(),
-          ["<C-e>"] = cmp.mapping.abort(),
-          ["<CR>"] = cmp.mapping.confirm({ select = true }),
-          ["<Tab>"] = cmp.mapping(function(fallback)
-            if cmp.visible() then
-              cmp.select_next_item()
-            else
-              fallback()
-            end
-          end, { "i", "s" }),
-          ["<S-Tab>"] = cmp.mapping(function(fallback)
-            if cmp.visible() then
-              cmp.select_prev_item()
-            else
-              fallback()
-            end
-          end, { "i", "s" }),
-        }),
-        sources = cmp.config.sources({
-          { name = "nvim_lsp" },
-          { name = "luasnip" },
-          { name = "buffer" },
-          { name = "path" },
-        }),
-      })
-    end,
-  },
-  -- Formatting
-  {
-    "stevearc/conform.nvim",
-    event = { "BufWritePre" },
-    config = function()
-      require("conform").setup({
-        formatters_by_ft = {
-          lua = { "stylua" },
-          python = { "black" },
-          javascript = { "prettier" },
-          json = { "prettier" },
-        },
-        format_after_save = {
-          lsp_fallback = true,
-        },
-      })
-
-      vim.keymap.set({ "n", "v" }, "<leader>pp", function()
-        require("conform").format({ async = true, lsp_fallback = true })
-      end)
     end,
   },
 }
