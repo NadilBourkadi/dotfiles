@@ -45,5 +45,16 @@ return {
         ts.update_signs_from_terminal()
       end
     end, opts)
+
+    -- Auto-update signs when test terminal closes
+    vim.api.nvim_create_autocmd("TermClose", {
+      callback = function(args)
+        if args.buf == ts.state.term_buf then
+          vim.schedule(function()
+            ts.on_complete(args.buf)
+          end)
+        end
+      end,
+    })
   end,
 }
