@@ -231,7 +231,7 @@ These work when focused in the tree:
 
 | Binding | Action |
 |---------|--------|
-| `,go` | Open line/selection on GitHub (master branch) |
+| `,go` | Open line/selection on GitHub (default branch) |
 | `,gO` | Open line/selection on GitHub (current branch) |
 
 #### Testing (vim-test)

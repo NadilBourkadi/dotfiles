@@ -1,5 +1,15 @@
 -- GitHub line opener (no external dependencies)
 
+-- Get the default branch (main or master)
+local function get_default_branch()
+  local ref = vim.fn.systemlist("git symbolic-ref refs/remotes/origin/HEAD")[1]
+  if vim.v.shell_error == 0 and ref then
+    return ref:match("refs/remotes/origin/(.+)$")
+  end
+  -- Fallback to master if we can't detect
+  return "master"
+end
+
 -- Build GitHub URL and open in browser
 local function open_github_url(mode, ref)
   local git_root = vim.fn.systemlist("git rev-parse --show-toplevel")[1]
@@ -55,18 +65,18 @@ return {
     {
       "<leader>go",
       function()
-        open_github_url("n", "master")
+        open_github_url("n", get_default_branch())
       end,
       mode = "n",
-      desc = "Open line on GitHub (master)",
+      desc = "Open line on GitHub (default branch)",
     },
     {
       "<leader>go",
       function()
-        open_github_url("v", "master")
+        open_github_url("v", get_default_branch())
       end,
       mode = "v",
-      desc = "Open selection on GitHub (master)",
+      desc = "Open selection on GitHub (default branch)",
     },
     {
       "<leader>gO",
