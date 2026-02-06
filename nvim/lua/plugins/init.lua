@@ -7,6 +7,8 @@ return {
   { import = "plugins.telescope" },
   { import = "plugins.nvim-tree" },
   { import = "plugins.lsp" },
+  { import = "plugins.completion" },
+  { import = "plugins.formatting" },
   { import = "plugins.treesitter" },
   { import = "plugins.gitsigns" },
   { import = "plugins.diffview" },
