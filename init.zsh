@@ -1,75 +1,98 @@
 #!/usr/bin/env zsh
+set -e
 
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color
 
-echo "Setting up dotfiles..."
+# Derive dotfiles directory from script location
+DOTFILES_DIR="$(cd "$(dirname "$0")" && pwd)"
 
+echo "Setting up dotfiles from $DOTFILES_DIR..."
+
+# Prerequisite checks
+for cmd in git zsh; do
+  command -v "$cmd" &>/dev/null || { echo "Error: $cmd is required but not found"; exit 1; }
+done
+
+# ─────────────────────────────────────────────────────────────
 # Symlinks
-echo -n "Symlinking zshrc... "
-ln -sf ~/Dev/dotfiles/zshrc ~/.zshrc
-echo "${GREEN}Done${NC}"
+# ─────────────────────────────────────────────────────────────
 
-echo -n "Symlinking tmux.conf... "
-ln -sf ~/Dev/dotfiles/tmux.conf ~/.tmux.conf
-echo "${GREEN}Done${NC}"
+# File symlinks (ln -sf is safe for files)
+typeset -A file_symlinks=(
+  [zshrc]=~/.zshrc
+  [tmux.conf]=~/.tmux.conf
+  [gitignore_global]=~/.gitignore_global
+  [starship.toml]=~/.config/starship.toml
+  [alacritty.toml]=~/.config/alacritty/alacritty.toml
+)
 
-echo -n "Symlinking gitignore_global... "
-ln -sf ~/Dev/dotfiles/gitignore_global ~/.gitignore_global
-echo "${GREEN}Done${NC}"
+for src dest in "${(@kv)file_symlinks}"; do
+  echo -n "Symlinking $src... "
+  mkdir -p "$(dirname "$dest")"
+  ln -sf "$DOTFILES_DIR/$src" "$dest"
+  echo "${GREEN}Done${NC}"
+done
 
-echo -n "Configuring git to use global gitignore... "
+# Directory symlinks (must rm -f first to avoid circular symlink)
+typeset -A dir_symlinks=(
+  [nvim]=~/.config/nvim
+)
+
+for src dest in "${(@kv)dir_symlinks}"; do
+  echo -n "Symlinking $src/ ... "
+  mkdir -p "$(dirname "$dest")"
+  rm -f "$dest"
+  ln -s "$DOTFILES_DIR/$src" "$dest"
+  echo "${GREEN}Done${NC}"
+done
+
+# ─────────────────────────────────────────────────────────────
+# Git config
+# ─────────────────────────────────────────────────────────────
+
+echo -n "Configuring git global settings... "
 git config --global core.excludesfile ~/.gitignore_global
-echo "${GREEN}Done${NC}"
-
-echo -n "Configuring git autocrlf... "
 git config --global core.autocrlf false
 echo "${GREEN}Done${NC}"
 
-# Neovim config (directory symlink)
-echo -n "Symlinking nvim config... "
-mkdir -p ~/.config
-rm -f ~/.config/nvim
-ln -s ~/Dev/dotfiles/nvim ~/.config/nvim
-echo "${GREEN}Done${NC}"
+# ─────────────────────────────────────────────────────────────
+# Package installation
+# ─────────────────────────────────────────────────────────────
 
-# Alacritty config
-echo -n "Symlinking alacritty config... "
-mkdir -p ~/.config/alacritty
-ln -sf ~/Dev/dotfiles/alacritty.toml ~/.config/alacritty/alacritty.toml
-echo "${GREEN}Done${NC}"
-
-# Starship prompt config
-echo -n "Symlinking starship config... "
-ln -sf ~/Dev/dotfiles/starship.toml ~/.config/starship.toml
-echo "${GREEN}Done${NC}"
-
-# Install dependencies (macOS only)
 if [[ "$OSTYPE" == "darwin"* ]]; then
-  if command -v brew &> /dev/null; then
+  if command -v brew &>/dev/null; then
     echo -n "Installing Homebrew dependencies... "
-    brew bundle --file=~/Dev/dotfiles/Brewfile --no-lock --quiet
+    brew bundle --file="$DOTFILES_DIR/Brewfile" --quiet || { echo "brew bundle failed"; exit 1; }
     echo "${GREEN}Done${NC}"
     echo "Note: Set your terminal font to 'Hack Nerd Font' in preferences"
   else
     echo "Homebrew not found, skipping dependency installation"
   fi
+elif [[ "$OSTYPE" == "linux"* ]]; then
+  if command -v apt &>/dev/null; then
+    echo -n "Installing packages via apt... "
+    sudo apt install -y tmux neovim ripgrep fd-find fonts-hack 2>/dev/null
+    echo "${GREEN}Done${NC}"
+  elif command -v dnf &>/dev/null; then
+    echo -n "Installing packages via dnf... "
+    sudo dnf install -y tmux neovim ripgrep fd-find 2>/dev/null
+    echo "${GREEN}Done${NC}"
+  else
+    echo "No supported package manager found (apt/dnf), skipping dependency installation"
+  fi
 fi
 
-# Install Antigen (Zsh plugin manager)
-if [[ ! -f ~/.zsh/antigen.zsh ]]; then
-  echo -n "Installing Antigen... "
-  mkdir -p ~/.zsh
-  curl -fsSL https://raw.githubusercontent.com/zsh-users/antigen/master/bin/antigen.zsh > ~/.zsh/antigen.zsh 2>/dev/null
-  echo "${GREEN}Done${NC}"
-else
-  echo "Antigen already installed, ${GREEN}skipping${NC}"
-fi
+# ─────────────────────────────────────────────────────────────
+# Plugin managers
+# ─────────────────────────────────────────────────────────────
+
+echo "Zinit (Zsh plugin manager) will auto-install on first shell launch"
 
 # Install TPM (Tmux Plugin Manager)
 if [[ ! -d ~/.tmux/plugins/tpm ]]; then
   echo -n "Installing TPM (Tmux Plugin Manager)... "
-  git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm 2>/dev/null
+  git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm 2>/dev/null || { echo "TPM clone failed"; exit 1; }
   echo "${GREEN}Done${NC}"
   echo "Note: Press prefix + I in tmux to install plugins"
 else
@@ -77,7 +100,7 @@ else
 fi
 
 # Install Neovim plugins
-if command -v nvim &> /dev/null; then
+if command -v nvim &>/dev/null; then
   echo -n "Installing Neovim plugins (lazy.nvim)... "
   nvim --headless "+Lazy! sync" +qa 2>/dev/null
   echo "${GREEN}Done${NC}"
