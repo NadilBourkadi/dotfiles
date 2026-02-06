@@ -83,6 +83,10 @@ return {
       function()
         -- Use current commit SHA for permalink
         local rev = vim.fn.systemlist("git rev-parse HEAD")[1]
+        if vim.v.shell_error ~= 0 then
+          vim.notify("Failed to get current commit", vim.log.levels.ERROR)
+          return
+        end
         open_github_url("n", rev)
       end,
       mode = "n",
@@ -92,6 +96,10 @@ return {
       "<leader>gO",
       function()
         local rev = vim.fn.systemlist("git rev-parse HEAD")[1]
+        if vim.v.shell_error ~= 0 then
+          vim.notify("Failed to get current commit", vim.log.levels.ERROR)
+          return
+        end
         open_github_url("v", rev)
       end,
       mode = "v",

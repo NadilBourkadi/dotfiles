@@ -32,16 +32,21 @@ return {
         "mfussenegger/nvim-dap-python",
         config = function()
           local dap = require("dap")
+          local utils = require("core.utils")
 
-          -- Helper: get Poetry venv Python path
+          -- Helper: get Poetry venv Python path (uses shared cache)
           local function get_python_path()
             local root = vim.fs.root(0, { "pyproject.toml", ".git" }) or vim.fn.getcwd()
-            local result = vim.fn.system("cd " .. vim.fn.shellescape(root) .. " && poetry env info --executable 2>/dev/null")
-            if vim.v.shell_error == 0 and result and result ~= "" then
-              return vim.trim(result)
+            local venv = utils.get_poetry_venv_cached(root)
+            if venv then
+              return venv .. "/bin/python"
             end
             return "python"
           end
+
+          -- Warm the cache on plugin load
+          local root = vim.fs.root(0, { "pyproject.toml", ".git" }) or vim.fn.getcwd()
+          utils.get_poetry_venv(root, function() end)
 
           -- Configure debugpy adapter from Mason
           local mason_packages = vim.fn.stdpath("data") .. "/mason/packages"
@@ -146,12 +151,6 @@ return {
             dapui.close()
           end
           dap.listeners.before.disconnect["dapui_config"] = function()
-            dapui.close()
-          end
-          dap.listeners.after.event_terminated["dapui_config"] = function()
-            dapui.close()
-          end
-          dap.listeners.after.event_exited["dapui_config"] = function()
             dapui.close()
           end
         end,

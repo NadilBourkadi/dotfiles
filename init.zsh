@@ -47,87 +47,10 @@ echo "${GREEN}Done${NC}"
 # Install dependencies (macOS only)
 if [[ "$OSTYPE" == "darwin"* ]]; then
   if command -v brew &> /dev/null; then
-    # Nerd Font for Neovim icons
-    if ! brew list --cask font-hack-nerd-font &> /dev/null; then
-      echo -n "Installing Nerd Font for Neovim icons... "
-      brew install --cask font-hack-nerd-font
-      echo "${GREEN}Done${NC}"
-      echo "Note: Set your terminal font to 'Hack Nerd Font' in preferences"
-    else
-      echo "Nerd Font already installed, ${GREEN}skipping${NC}"
-    fi
-
-    # Alacritty terminal
-    if ! command -v alacritty &> /dev/null; then
-      echo -n "Installing Alacritty... "
-      brew install --cask alacritty
-      echo "${GREEN}Done${NC}"
-    else
-      echo "Alacritty already installed, ${GREEN}skipping${NC}"
-    fi
-
-    # Tmux
-    if ! command -v tmux &> /dev/null; then
-      echo -n "Installing Tmux... "
-      brew install tmux
-      echo "${GREEN}Done${NC}"
-    else
-      echo "Tmux already installed, ${GREEN}skipping${NC}"
-    fi
-
-    # Neovim
-    if ! command -v nvim &> /dev/null; then
-      echo -n "Installing Neovim... "
-      brew install neovim
-      echo "${GREEN}Done${NC}"
-    else
-      echo "Neovim already installed, ${GREEN}skipping${NC}"
-    fi
-
-    # tree-sitter CLI (required by nvim-treesitter for compiling parsers)
-    if ! command -v tree-sitter &> /dev/null; then
-      echo -n "Installing tree-sitter CLI... "
-      brew install tree-sitter-cli
-      echo "${GREEN}Done${NC}"
-    else
-      echo "tree-sitter CLI already installed, ${GREEN}skipping${NC}"
-    fi
-
-    # ripgrep (required by Telescope live grep)
-    if ! command -v rg &> /dev/null; then
-      echo -n "Installing ripgrep... "
-      brew install ripgrep
-      echo "${GREEN}Done${NC}"
-    else
-      echo "ripgrep already installed, ${GREEN}skipping${NC}"
-    fi
-
-    # fd (fast file finder for Telescope)
-    if ! command -v fd &> /dev/null; then
-      echo -n "Installing fd... "
-      brew install fd
-      echo "${GREEN}Done${NC}"
-    else
-      echo "fd already installed, ${GREEN}skipping${NC}"
-    fi
-
-    # Starship prompt
-    if ! command -v starship &> /dev/null; then
-      echo -n "Installing Starship prompt... "
-      brew install starship
-      echo "${GREEN}Done${NC}"
-    else
-      echo "Starship already installed, ${GREEN}skipping${NC}"
-    fi
-
-    # Lazygit
-    if ! command -v lazygit &> /dev/null; then
-      echo -n "Installing Lazygit... "
-      brew install lazygit
-      echo "${GREEN}Done${NC}"
-    else
-      echo "Lazygit already installed, ${GREEN}skipping${NC}"
-    fi
+    echo -n "Installing Homebrew dependencies... "
+    brew bundle --file=~/Dev/dotfiles/Brewfile --no-lock --quiet
+    echo "${GREEN}Done${NC}"
+    echo "Note: Set your terminal font to 'Hack Nerd Font' in preferences"
   else
     echo "Homebrew not found, skipping dependency installation"
   fi
@@ -137,7 +60,7 @@ fi
 if [[ ! -f ~/.zsh/antigen.zsh ]]; then
   echo -n "Installing Antigen... "
   mkdir -p ~/.zsh
-  curl -fsSL git.io/antigen > ~/.zsh/antigen.zsh 2>/dev/null
+  curl -fsSL https://raw.githubusercontent.com/zsh-users/antigen/master/bin/antigen.zsh > ~/.zsh/antigen.zsh 2>/dev/null
   echo "${GREEN}Done${NC}"
 else
   echo "Antigen already installed, ${GREEN}skipping${NC}"
