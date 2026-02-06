@@ -87,6 +87,7 @@ Modern Lua-based config using lazy.nvim for plugin management.
 - **mini.icons** - File icons
 - **vim-fugitive** - Git commands
 - **diffview.nvim** - Side-by-side branch diff and file history
+- **open-on-github** (custom) - Open file/line on GitHub
 - **nvim-ufo** - Better folding with preview
 - **persistence.nvim** - Session management
 - **copilot.vim** - GitHub Copilot AI autocomplete
@@ -225,6 +226,13 @@ These work when focused in the tree:
 | `,gh` | Current file history |
 | `,gH` | Full branch history |
 | `,gc` | Close diffview |
+
+#### Git (open-on-github)
+
+| Binding | Action |
+|---------|--------|
+| `,go` | Open line/selection on GitHub (master branch) |
+| `,gO` | Open line/selection on GitHub (current branch) |
 
 #### Testing (vim-test)
 
@@ -365,6 +373,7 @@ dotfiles/
             ├── treesitter.lua
             ├── gitsigns.lua
             ├── diffview.lua
+            ├── open-on-github.lua
             ├── lualine.lua
             ├── vim-test.lua
             ├── ufo.lua
