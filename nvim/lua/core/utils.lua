@@ -43,31 +43,42 @@ function M.restore_nvim_tree_state(state_file)
   end
 end
 
--- Cache: project root -> poetry venv path (false = no poetry)
+--- Find project root using common markers
+---@param bufnr? number Buffer number (defaults to current)
+---@return string root Project root directory
+function M.find_project_root(bufnr)
+  return vim.fs.root(bufnr or 0, {
+    "pyproject.toml", "setup.py", "setup.cfg",
+    "requirements.txt", ".python-version", ".git",
+  }) or vim.fn.getcwd()
+end
+
+-- Cache: project root -> { path = string|false, time = number }
 local poetry_venv_cache = {}
+local CACHE_TTL = 300 -- 5 minutes
 
 --- Async detect Poetry venv for a project, then call callback(venv_path_or_nil)
---- Results are cached per project root to avoid repeated shell calls.
+--- Results are cached per project root with a 5-minute TTL.
 ---@param root_dir string Project root directory
 ---@param callback fun(venv_path: string|nil)
 function M.get_poetry_venv(root_dir, callback)
-  -- Cache hit
-  if poetry_venv_cache[root_dir] ~= nil then
-    local cached = poetry_venv_cache[root_dir]
-    callback(cached ~= false and cached or nil)
+  -- Cache hit (within TTL)
+  local entry = poetry_venv_cache[root_dir]
+  if entry ~= nil and (os.time() - entry.time) < CACHE_TTL then
+    callback(entry.path ~= false and entry.path or nil)
     return
   end
 
   local pyproject = root_dir .. "/pyproject.toml"
   if vim.fn.filereadable(pyproject) == 0 then
-    poetry_venv_cache[root_dir] = false
+    poetry_venv_cache[root_dir] = { path = false, time = os.time() }
     callback(nil)
     return
   end
 
   local content = table.concat(vim.fn.readfile(pyproject), "\n")
   if not content:match("%[tool%.poetry%]") then
-    poetry_venv_cache[root_dir] = false
+    poetry_venv_cache[root_dir] = { path = false, time = os.time() }
     callback(nil)
     return
   end
@@ -80,10 +91,10 @@ function M.get_poetry_venv(root_dir, callback)
       vim.schedule(function()
         if result.code == 0 and result.stdout and result.stdout ~= "" then
           local venv_path = vim.trim(result.stdout)
-          poetry_venv_cache[root_dir] = venv_path
+          poetry_venv_cache[root_dir] = { path = venv_path, time = os.time() }
           callback(venv_path)
         else
-          poetry_venv_cache[root_dir] = false
+          poetry_venv_cache[root_dir] = { path = false, time = os.time() }
           callback(nil)
         end
       end)
@@ -95,16 +106,17 @@ end
 ---@param root_dir string Project root directory
 ---@return boolean
 function M.is_poetry_venv_resolved(root_dir)
-  return poetry_venv_cache[root_dir] ~= nil
+  local entry = poetry_venv_cache[root_dir]
+  return entry ~= nil and (os.time() - entry.time) < CACHE_TTL
 end
 
 --- Get cached Poetry venv path (sync, returns nil if not yet cached or no poetry)
 ---@param root_dir string Project root directory
 ---@return string|nil venv_path
 function M.get_poetry_venv_cached(root_dir)
-  local cached = poetry_venv_cache[root_dir]
-  if cached and cached ~= false then
-    return cached
+  local entry = poetry_venv_cache[root_dir]
+  if entry and entry.path ~= false and (os.time() - entry.time) < CACHE_TTL then
+    return entry.path
   end
   return nil
 end

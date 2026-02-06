@@ -36,7 +36,7 @@ return {
 
           -- Helper: get Poetry venv Python path (uses shared cache)
           local function get_python_path()
-            local root = vim.fs.root(0, { "pyproject.toml", ".git" }) or vim.fn.getcwd()
+            local root = utils.find_project_root()
             local venv = utils.get_poetry_venv_cached(root)
             if venv then
               return venv .. "/bin/python"
@@ -45,7 +45,7 @@ return {
           end
 
           -- Warm the cache on plugin load
-          local root = vim.fs.root(0, { "pyproject.toml", ".git" }) or vim.fn.getcwd()
+          local root = utils.find_project_root()
           utils.get_poetry_venv(root, function() end)
 
           -- Configure debugpy adapter from Mason

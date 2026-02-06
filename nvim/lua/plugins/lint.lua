@@ -8,16 +8,10 @@ return {
     local lint = require("lint")
     local utils = require("core.utils")
 
-    -- Helper: find project root with pyproject.toml
-    local function find_project_root()
-      local root = vim.fs.root(0, { "pyproject.toml", ".git" })
-      return root or vim.fn.getcwd()
-    end
-
     -- Configure mypy to run from project root with Poetry's mypy
     lint.linters.mypy = {
       cmd = function()
-        local root = find_project_root()
+        local root = utils.find_project_root()
         local venv = utils.get_poetry_venv_cached(root)
         if venv and vim.fn.executable(venv .. "/bin/mypy") == 1 then
           return venv .. "/bin/mypy"
@@ -49,7 +43,7 @@ return {
     -- Configure flake8 to use Poetry's version (has flake8-pyproject plugin)
     lint.linters.flake8 = {
       cmd = function()
-        local root = find_project_root()
+        local root = utils.find_project_root()
         local venv = utils.get_poetry_venv_cached(root)
         if venv and vim.fn.executable(venv .. "/bin/flake8") == 1 then
           return venv .. "/bin/flake8"
@@ -81,7 +75,7 @@ return {
     vim.api.nvim_create_autocmd({ "BufReadPost", "BufWritePost" }, {
       pattern = { "*.py" },
       callback = function()
-        local root = find_project_root()
+        local root = utils.find_project_root()
         if utils.is_poetry_venv_resolved(root) then
           lint.try_lint()
         else
