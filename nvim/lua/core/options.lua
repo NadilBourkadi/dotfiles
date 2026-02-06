@@ -34,7 +34,6 @@ opt.splitright = true
 opt.backspace = "indent,eol,start"
 
 -- Status line
-opt.laststatus = 2
 opt.showmode = false
 
 -- Wild menu (command completion)
@@ -42,7 +41,9 @@ opt.wildmenu = true
 opt.wildmode = "longest,list"
 
 -- Persistent undo
-opt.undodir = vim.fn.expand("~/.vim/undodir")
+local undodir = vim.fn.stdpath("state") .. "/undo"
+vim.fn.mkdir(undodir, "p")
+opt.undodir = undodir
 opt.undofile = true
 
 -- Update time (for gitgutter/gitsigns)

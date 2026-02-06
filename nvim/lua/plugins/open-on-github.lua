@@ -57,53 +57,31 @@ local function open_github_url(mode, ref)
   vim.ui.open(url)
 end
 
+-- Helper to generate {n, v} keymap pairs for GitHub open commands
+local function github_keys(key, ref_fn, desc)
+  return {
+    { key, function() open_github_url("n", ref_fn()) end, mode = "n", desc = desc },
+    { key, function() open_github_url("v", ref_fn()) end, mode = "v", desc = desc:gsub("line", "selection") },
+  }
+end
+
+local function get_head_rev()
+  local rev = vim.fn.systemlist("git rev-parse HEAD")[1]
+  if vim.v.shell_error ~= 0 then
+    vim.notify("Failed to get current commit", vim.log.levels.ERROR)
+    return nil
+  end
+  return rev
+end
+
+-- Build flattened keys table
+local keys = {}
+vim.list_extend(keys, github_keys("<leader>go", get_default_branch, "Open line on GitHub (default branch)"))
+vim.list_extend(keys, github_keys("<leader>gO", get_head_rev, "Open line on GitHub (current commit)"))
+
 return {
   -- Virtual plugin entry for lazy.nvim keymaps (no actual plugin needed)
   dir = vim.fn.stdpath("config") .. "/lua/plugins",
   name = "open-on-github",
-  keys = {
-    {
-      "<leader>go",
-      function()
-        open_github_url("n", get_default_branch())
-      end,
-      mode = "n",
-      desc = "Open line on GitHub (default branch)",
-    },
-    {
-      "<leader>go",
-      function()
-        open_github_url("v", get_default_branch())
-      end,
-      mode = "v",
-      desc = "Open selection on GitHub (default branch)",
-    },
-    {
-      "<leader>gO",
-      function()
-        -- Use current commit SHA for permalink
-        local rev = vim.fn.systemlist("git rev-parse HEAD")[1]
-        if vim.v.shell_error ~= 0 then
-          vim.notify("Failed to get current commit", vim.log.levels.ERROR)
-          return
-        end
-        open_github_url("n", rev)
-      end,
-      mode = "n",
-      desc = "Open line on GitHub (current commit)",
-    },
-    {
-      "<leader>gO",
-      function()
-        local rev = vim.fn.systemlist("git rev-parse HEAD")[1]
-        if vim.v.shell_error ~= 0 then
-          vim.notify("Failed to get current commit", vim.log.levels.ERROR)
-          return
-        end
-        open_github_url("v", rev)
-      end,
-      mode = "v",
-      desc = "Open selection on GitHub (current commit)",
-    },
-  },
+  keys = keys,
 }
