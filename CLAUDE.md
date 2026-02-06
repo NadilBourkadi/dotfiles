@@ -32,7 +32,8 @@ Using **Neovim 0.11+** which has breaking API changes:
 Core config lives in `nvim/lua/core/`, plugins in `nvim/lua/plugins/`:
 - `core/options.lua` - Editor options (tabs, line numbers, etc.)
 - `core/keymaps.lua` - Global keybindings
-- `core/utils.lua` - Shared utility functions (state file helpers, nvim-tree state)
+- `core/utils.lua` - Shared utility functions (state file helpers, nvim-tree state, Poetry venv)
+- `core/test-signs.lua` - Pytest output parser and gutter sign management
 - `plugins/*.lua` - One file per plugin
 
 ### Symlink Gotchas
@@ -44,6 +45,7 @@ ln -s ~/Dev/dotfiles/nvim ~/.config/nvim
 Using `ln -sf` on an existing symlink creates a circular symlink inside the target directory (e.g., `nvim/nvim`).
 
 ### File Naming Conventions
+- `Brewfile` → Homebrew dependencies (used by `brew bundle` in `init.zsh`)
 - `gitignore_global` → Global gitignore (symlinked to `~/.gitignore_global`)
 - `.gitignore` → Repo-specific ignores only (not duplicating global patterns)
 - `CLAUDE.md` → This file, gitignored globally, local-only
@@ -56,10 +58,11 @@ Using `ln -sf` on an existing symlink creates a circular symlink inside the targ
 3. Update README.md with the new file in the structure and any relevant documentation
 
 ### Adding New Dependencies
-**NEVER install manually.** All installations must go through `init.zsh` for repeatability:
-1. Add installation logic to `init.zsh` (with idempotent check, e.g., `if ! command -v foo`)
-2. Run `dotfiles` alias to install
-3. Update README.md prerequisites section
+**NEVER install manually.** All installations must go through `Brewfile` + `init.zsh` for repeatability:
+1. Add Homebrew formulae/casks to `Brewfile`
+2. For non-Homebrew tools, add installation logic to `init.zsh`
+3. Run `dotfiles` alias to install
+4. Update README.md prerequisites section
 
 ### init.zsh Style
 - Echo what's happening at each step
@@ -170,11 +173,11 @@ vim.o.foldenable = true
 - The check `vim.lsp.get_clients({ bufnr = 0 })` returning empty means LSP didn't attach
 
 ### Pyright + Poetry
-- Pyright auto-detects Poetry venvs via async `on_init` callback in lsp.lua
+- Poetry venv detection is centralized in `core/utils.lua` (`get_poetry_venv()`)
+- Used by lsp.lua (pyright config), lint.lua (mypy/flake8 cmd), and dap.lua (python path)
 - Checks for `[tool.poetry]` in pyproject.toml, then runs `poetry env info --path` via `vim.system()` (async)
-- Sets `python.pythonPath` to the venv's Python executable
+- **Poetry venv paths are cached per project root** in a shared cache to avoid repeated shell calls
 - No need for `pyrightconfig.json` in each project
-- **Poetry venv paths are cached per project root** in both lsp.lua and lint.lua to avoid repeated shell calls
 - Use `vim.system()` (async) instead of `vim.fn.system()` (blocking) for Poetry lookups — `poetry env info` is slow (200-500ms)
 
 ## Debugging Neovim Config

@@ -99,7 +99,7 @@ $*"
 # Usage: explain file.py
 function explain() {
   if [ -n "$1" ]; then
-    cat "$1" | claude --print "Explain this code concisely:"
+    claude --print "Explain this code concisely:" < "$1"
   elif [ ! -t 0 ]; then
     cat | claude --print "Explain this code concisely:"
   else

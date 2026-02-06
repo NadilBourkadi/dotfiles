@@ -20,7 +20,7 @@ zsh init.zsh
 The script will:
 - Create symbolic links for all config files
 - Configure git to use the global gitignore
-- Install Nerd Font for Neovim icons (macOS with Homebrew)
+- Install all Homebrew dependencies from `Brewfile` (macOS)
 
 ## What Gets Symlinked
 
@@ -118,7 +118,6 @@ Leader key is `,`
 | `,cp` | Copy absolute file path to clipboard |
 | `,cP` | Copy relative file path to clipboard |
 | `,pi` | Open Lazy plugin manager |
-| `Ctrl+m` | Insert newline without entering insert mode |
 | `j/k` | Move by visual line (screen line) |
 
 #### File Navigation
@@ -349,6 +348,7 @@ Run `nvim` after setup - lazy.nvim will automatically install all plugins.
 dotfiles/
 ├── README.md           # This file
 ├── CLAUDE.md           # Instructions for AI assistants
+├── Brewfile            # Homebrew dependencies
 ├── init.zsh            # Bootstrap script
 ├── zshrc               # Zsh configuration
 ├── tmux.conf           # Tmux configuration
@@ -362,14 +362,17 @@ dotfiles/
         ├── core/           # Core configuration
         │   ├── options.lua     # Editor options
         │   ├── keymaps.lua     # Global keybindings
-        │   └── utils.lua       # Shared utilities
+        │   ├── utils.lua       # Shared utilities (Poetry venv, nvim-tree state)
+        │   └── test-signs.lua  # Pytest output parser and gutter signs
         └── plugins/        # Plugin configurations
             ├── init.lua
             ├── bufferline.lua
             ├── catppuccin.lua
+            ├── completion.lua
             ├── telescope.lua
             ├── nvim-tree.lua
             ├── lsp.lua
+            ├── formatting.lua
             ├── treesitter.lua
             ├── gitsigns.lua
             ├── diffview.lua

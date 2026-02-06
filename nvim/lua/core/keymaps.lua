@@ -49,9 +49,6 @@ vim.api.nvim_create_autocmd("TabLeave", {
 -- Config file shortcut
 map("n", "<leader>se", ":tabe $MYVIMRC<CR>", opts)
 
--- Insert newline without entering insert mode
-map("n", "<C-m>", "i<CR><Esc>", opts)
-
 -- Quickfix window
 map("n", "<leader>cv", ":vert copen 70<CR>", opts)
 map("n", "<leader>co", ":copen 15<CR>", opts)

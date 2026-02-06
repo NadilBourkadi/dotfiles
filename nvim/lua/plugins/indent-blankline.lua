@@ -6,8 +6,8 @@ return {
   main = "ibl",
   event = { "BufReadPost", "BufNewFile" },
   config = function()
-    -- Subtle scope highlight (between inactive and bright)
-    vim.api.nvim_set_hl(0, "IblScopeSubtle", { fg = "#7f849c" }) -- Catppuccin overlay1
+    -- Subtle scope highlight (theme-resilient via Comment link)
+    vim.api.nvim_set_hl(0, "IblScopeSubtle", { link = "Comment" })
 
     require("ibl").setup({
       indent = {
