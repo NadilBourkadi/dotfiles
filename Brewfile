@@ -1,0 +1,10 @@
+brew "tmux"
+brew "neovim"
+brew "ripgrep"
+brew "fd"
+brew "starship"
+brew "lazygit"
+brew "tree-sitter-cli"
+
+cask "alacritty"
+cask "font-hack-nerd-font"
