@@ -28,12 +28,20 @@ Using **Neovim 0.11+** which has breaking API changes:
 - Use native `vim.treesitter.start()` for highlighting
 - `vim.treesitter.language.ft_to_lang` removed → use `get_lang` (shim in init.lua for plugin compat)
 
+### Zsh Configuration
+- `zshrc` is a thin loader that sources `zsh/{plugins,theme,functions}.zsh`
+- `zsh/plugins.zsh` - Zinit setup + plugin loading (auto-installs zinit if missing)
+- `zsh/theme.zsh` - Catppuccin Mocha colors, completion styling, man page colors
+- `zsh/functions.zsh` - Shell functions (`av`, `ask`, `explain`)
+- Zinit uses `OMZL::` for OMZ libraries, `OMZP::` for OMZ plugins, `light` for community plugins
+- Must call `autoload -Uz compinit && compinit` + `zinit cdreplay -q` after plugins load (Antigen did this automatically via oh-my-zsh)
+
 ### Neovim Directory Structure
 Core config lives in `nvim/lua/core/`, plugins in `nvim/lua/plugins/`:
 - `core/options.lua` - Editor options (tabs, line numbers, etc.)
 - `core/keymaps.lua` - Global keybindings
-- `core/utils.lua` - Shared utility functions (state file helpers, nvim-tree state, Poetry venv)
-- `core/test-signs.lua` - Pytest output parser and gutter sign management
+- `core/utils.lua` - Shared utility functions (root-finding, Poetry venv cache with TTL, nvim-tree state)
+- `core/test-signs.lua` - Pytest output parser and gutter sign management (TermClose-driven, no polling)
 - `plugins/*.lua` - One file per plugin
 
 ### Symlink Gotchas
@@ -54,7 +62,7 @@ Using `ln -sf` on an existing symlink creates a circular symlink inside the targ
 
 ### Adding New Config Files
 1. Add the config file to the repo root (e.g., `alacritty.toml`)
-2. Update `init.zsh` to symlink it with an echo statement and green "Done" output
+2. Add the file to the appropriate symlink map in `init.zsh` (`file_symlinks` for files, `dir_symlinks` for directories)
 3. Update README.md with the new file in the structure and any relevant documentation
 
 ### Adding New Dependencies
@@ -65,9 +73,10 @@ Using `ln -sf` on an existing symlink creates a circular symlink inside the targ
 4. Update README.md prerequisites section
 
 ### init.zsh Style
-- Echo what's happening at each step
-- Use green "Done" output: `echo "${GREEN}Done${NC}"`
-- Use `echo -n` for the action, then echo Done after
+- Uses `set -e` for error handling and `$DOTFILES_DIR` derived from script location
+- Symlinks are data-driven via `file_symlinks` and `dir_symlinks` associative arrays
+- Supports both macOS (Homebrew) and Linux (apt/dnf) package installation
+- Echo what's happening at each step with green "Done" output
 
 ### Commit Message Style
 - Use a concise summary line in imperative mood (e.g., "Remove legacy vimrc")
@@ -176,7 +185,8 @@ vim.o.foldenable = true
 - Poetry venv detection is centralized in `core/utils.lua` (`get_poetry_venv()`)
 - Used by lsp.lua (pyright config), lint.lua (mypy/flake8 cmd), and dap.lua (python path)
 - Checks for `[tool.poetry]` in pyproject.toml, then runs `poetry env info --path` via `vim.system()` (async)
-- **Poetry venv paths are cached per project root** in a shared cache to avoid repeated shell calls
+- **Poetry venv paths are cached per project root** with a 5-minute TTL to avoid stale caches and repeated shell calls
+- Project root detection is centralized via `utils.find_project_root()` — all consumers (lsp, lint, dap) use it
 - No need for `pyrightconfig.json` in each project
 - Use `vim.system()` (async) instead of `vim.fn.system()` (blocking) for Poetry lookups — `poetry env info` is slow (200-500ms)
 
@@ -209,6 +219,8 @@ nvim --headless "+Lazy! sync" +qa 2>/dev/null
 ### vim-test
 - `test#neovim#term_position` controls terminal size: `"botright " .. math.floor(vim.o.lines / 3)` for 1/3 height
 - `test#neovim#start_normal = 1` keeps terminal in normal mode after test (allows scrolling)
+- Test sign updates use `TermClose` autocmd (not polling) — `vim-test.lua` listens for the event and calls `test-signs.on_complete()`
+- `run_test()` stores the terminal buffer via `vim.schedule`, and TermClose fires when the process exits
 
 ### neotest (avoided)
 **Do not use neotest** - it has fundamental architecture issues:

@@ -20,7 +20,7 @@ zsh init.zsh
 The script will:
 - Create symbolic links for all config files
 - Configure git to use the global gitignore
-- Install all Homebrew dependencies from `Brewfile` (macOS)
+- Install dependencies via Homebrew (macOS) or apt/dnf (Linux)
 
 ## What Gets Symlinked
 
@@ -38,7 +38,7 @@ The script will:
 ### Required
 - **Zsh** - Primary shell
 - **Git** - Version control
-- **Homebrew** - For automatic dependency installation (macOS)
+- **Homebrew** (macOS) or **apt/dnf** (Linux) - For automatic dependency installation
 
 ### Optional
 - **aws-vault** - For AWS credential management (`av` shell function)
@@ -54,7 +54,7 @@ The script will:
 - **Starship** - Cross-shell prompt
 - **Lazygit** - Terminal UI for git
 - **Hack Nerd Font** - Icons in Neovim
-- **Antigen** - Zsh plugin manager
+- **Zinit** - Zsh plugin manager (auto-installs on first shell launch)
 - **TPM** - Tmux Plugin Manager (press `prefix + I` to install plugins)
 
 ## Shell Aliases
@@ -349,8 +349,12 @@ dotfiles/
 ├── README.md           # This file
 ├── CLAUDE.md           # Instructions for AI assistants
 ├── Brewfile            # Homebrew dependencies
-├── init.zsh            # Bootstrap script
-├── zshrc               # Zsh configuration
+├── init.zsh            # Bootstrap script (macOS + Linux)
+├── zshrc               # Zsh configuration (sources zsh/*.zsh)
+├── zsh/                # Modular Zsh config
+│   ├── plugins.zsh        # Zinit setup + plugin loading
+│   ├── theme.zsh          # Catppuccin Mocha colors + completion styling
+│   └── functions.zsh      # Shell functions (av, ask, explain)
 ├── tmux.conf           # Tmux configuration
 ├── alacritty.toml      # Alacritty terminal config
 ├── starship.toml       # Starship prompt config
@@ -362,7 +366,7 @@ dotfiles/
         ├── core/           # Core configuration
         │   ├── options.lua     # Editor options
         │   ├── keymaps.lua     # Global keybindings
-        │   ├── utils.lua       # Shared utilities (Poetry venv, nvim-tree state)
+        │   ├── utils.lua       # Shared utilities (root-finding, Poetry venv, nvim-tree state)
         │   └── test-signs.lua  # Pytest output parser and gutter signs
         └── plugins/        # Plugin configurations
             ├── init.lua
