@@ -6,5 +6,4 @@ brew "starship"
 brew "lazygit"
 brew "tree-sitter-cli"
 
-cask "alacritty"
 cask "font-hack-nerd-font"

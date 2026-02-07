@@ -84,6 +84,26 @@ elif [[ "$OSTYPE" == "linux"* ]]; then
 fi
 
 # ─────────────────────────────────────────────────────────────
+# Alacritty (GitHub release, macOS only)
+# ─────────────────────────────────────────────────────────────
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  if [[ -d /Applications/Alacritty.app ]]; then
+    echo "Alacritty already installed, ${GREEN}skipping${NC}"
+  else
+    echo -n "Installing Alacritty from GitHub... "
+    ALACRITTY_TAG=$(curl -sL https://api.github.com/repos/alacritty/alacritty/releases/latest | grep -o '"tag_name": *"[^"]*"' | head -1 | cut -d'"' -f4)
+    ALACRITTY_DMG="Alacritty-${ALACRITTY_TAG}.dmg"
+    curl -sL "https://github.com/alacritty/alacritty/releases/download/${ALACRITTY_TAG}/${ALACRITTY_DMG}" -o "/tmp/${ALACRITTY_DMG}"
+    hdiutil attach "/tmp/${ALACRITTY_DMG}" -quiet -nobrowse -mountpoint /tmp/alacritty-mnt
+    cp -R /tmp/alacritty-mnt/Alacritty.app /Applications/
+    hdiutil detach /tmp/alacritty-mnt -quiet
+    rm -f "/tmp/${ALACRITTY_DMG}"
+    echo "${GREEN}Done${NC}"
+  fi
+fi
+
+# ─────────────────────────────────────────────────────────────
 # Plugin managers
 # ─────────────────────────────────────────────────────────────
 

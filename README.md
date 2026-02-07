@@ -21,6 +21,7 @@ The script will:
 - Create symbolic links for all config files
 - Configure git to use the global gitignore
 - Install dependencies via Homebrew (macOS) or apt/dnf (Linux)
+- Install Alacritty from GitHub releases (macOS)
 
 ## What Gets Symlinked
 
