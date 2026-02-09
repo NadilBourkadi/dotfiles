@@ -1,6 +1,6 @@
 -- LSP configuration using Neovim 0.11+ native API
 
-local ensure_installed = { "lua-language-server", "pyright", "stylua", "black", "prettier", "debugpy", "mypy", "flake8" }
+local ensure_installed = { "lua-language-server", "pyright", "stylua", "black", "isort", "prettier", "debugpy", "mypy", "flake8" }
 
 local function add_mason_to_path()
   local mason_bin = vim.fn.stdpath("data") .. "/mason/bin"
