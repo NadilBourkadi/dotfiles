@@ -16,6 +16,24 @@
 
 **When in doubt, ask:** "Would a competent developer working on this repo need to know this?" If not, don't add it.
 
+## !! MANDATORY: Branch-Based Workflow !!
+
+> **NEVER commit directly to master. ALWAYS use feature branches.**
+
+This is the **#1 most important rule** in this repo. Every change — no matter how small — MUST follow this workflow:
+
+1. **Create a new branch** from master (`git checkout -b <descriptive-branch-name>`)
+2. **Make atomic commits** — each commit captures one logical change with a clear message
+3. **Stop and wait for user review** — do NOT merge into master. Present the branch and commits for approval
+4. **Only merge after explicit approval** — the user will merge or ask you to merge after reviewing
+
+**What "atomic commits" means:**
+- One logical change per commit (e.g., "add isort" is separate from "disable Pyright diagnostics")
+- If a single file has changes for two different purposes, split them into separate commits
+- Each commit should build/work on its own — no "fix previous commit" follow-ups
+
+**Branch naming:** Use descriptive names like `fix/pyright-diagnostics`, `feat/add-isort`, `refactor/lsp-config`
+
 ## Critical Context
 
 ### Repository Location
@@ -106,6 +124,7 @@ Using `ln -sf` on an existing symlink creates a circular symlink inside the targ
 5. **Co-author lines in commits**: Do NOT add `Co-Authored-By` lines to commit messages
 6. **Forgetting README updates**: When adding keybindings, aliases, plugins, or features - update README.md immediately as part of the same task, not as a follow-up
 7. **Manual installations**: NEVER run installation commands directly (e.g., `git clone`, `brew install`). Always add to `init.zsh` and run `dotfiles` alias. This keeps setup repeatable across machines.
+8. **Committing to master**: NEVER commit directly to master. Always create a feature branch, make atomic commits, and wait for user approval before merging. See "MANDATORY: Branch-Based Workflow" above.
 
 ## Documentation Maintenance
 
@@ -187,6 +206,7 @@ vim.o.foldenable = true
 - Checks for `[tool.poetry]` in pyproject.toml, then runs `poetry env info --path` via `vim.system()` (async)
 - **Poetry venv paths are cached per project root** with a 5-minute TTL to avoid stale caches and repeated shell calls
 - Project root detection is centralized via `utils.find_project_root()` — all consumers (lsp, lint, dap) use it
+- Pyright `typeCheckingMode` is set to `"off"` — mypy is the canonical type checker, Pyright is used only for LSP features (completions, navigation, hover, rename)
 - No need for `pyrightconfig.json` in each project
 - Use `vim.system()` (async) instead of `vim.fn.system()` (blocking) for Poetry lookups — `poetry env info` is slow (200-500ms)
 
