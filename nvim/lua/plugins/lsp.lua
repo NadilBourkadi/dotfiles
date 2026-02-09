@@ -97,6 +97,13 @@ local function configure_servers(utils)
       local root = utils.find_project_root(bufnr) or vim.fn.fnamemodify(fname, ":h")
       on_dir(root)
     end,
+    settings = {
+      python = {
+        analysis = {
+          typeCheckingMode = "off",
+        },
+      },
+    },
     on_init = function(client)
       -- Auto-detect Poetry venv and configure pyright (async)
       utils.get_poetry_venv(client.root_dir, function(venv_path)
