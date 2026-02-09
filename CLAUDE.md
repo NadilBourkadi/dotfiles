@@ -1,6 +1,6 @@
 # Claude AI Instructions
 
-> **This file is local-only (gitignored) and exists to help AI assistants work effectively on this repo.**
+> **This file is tracked in git and exists to help AI assistants work effectively on this repo.**
 >
 > **YOU MUST keep this file updated.** When you learn something new, encounter a gotcha, or establish a pattern - add it here immediately. Future Claude agents depend on this being accurate and comprehensive.
 
@@ -74,7 +74,7 @@ Using `ln -sf` on an existing symlink creates a circular symlink inside the targ
 - `Brewfile` → Homebrew dependencies (used by `brew bundle` in `init.zsh`)
 - `gitignore_global` → Global gitignore (symlinked to `~/.gitignore_global`)
 - `.gitignore` → Repo-specific ignores only (not duplicating global patterns)
-- `CLAUDE.md` → This file, gitignored globally, local-only
+- `CLAUDE.md` → This file, tracked in git (globally ignored but overridden via `!CLAUDE.md` in `.gitignore`)
 
 ## Patterns to Follow
 
@@ -147,7 +147,7 @@ Before marking any task complete, verify:
 
 **This is not a separate follow-up task.** Include README updates as part of implementing any feature.
 
-### CLAUDE.md (this file, local-only)
+### CLAUDE.md (this file, tracked in git)
 **⚠️ MANDATORY: Update this file DURING the task, not after.**
 
 After completing ANY of these, IMMEDIATELY add to CLAUDE.md before moving on:
