@@ -54,7 +54,7 @@ return {
             gs.next_hunk()
           end)
           return "<Ignore>"
-        end, { expr = true, buffer = bufnr })
+        end, { expr = true, buffer = bufnr, desc = "Next hunk" })
 
         map("n", "[c", function()
           if vim.wo.diff then
@@ -64,33 +64,33 @@ return {
             gs.prev_hunk()
           end)
           return "<Ignore>"
-        end, { expr = true, buffer = bufnr })
+        end, { expr = true, buffer = bufnr, desc = "Previous hunk" })
 
         -- Actions
-        map("n", "<leader>hs", gs.stage_hunk, opts)
-        map("n", "<leader>hr", gs.reset_hunk, opts)
+        map("n", "<leader>hs", gs.stage_hunk, vim.tbl_extend("force", opts, { desc = "Stage hunk" }))
+        map("n", "<leader>hr", gs.reset_hunk, vim.tbl_extend("force", opts, { desc = "Reset hunk" }))
         map("v", "<leader>hs", function()
           gs.stage_hunk({ vim.fn.line("."), vim.fn.line("v") })
-        end, opts)
+        end, vim.tbl_extend("force", opts, { desc = "Stage hunk" }))
         map("v", "<leader>hr", function()
           gs.reset_hunk({ vim.fn.line("."), vim.fn.line("v") })
-        end, opts)
-        map("n", "<leader>hS", gs.stage_buffer, opts)
-        map("n", "<leader>hu", gs.undo_stage_hunk, opts)
-        map("n", "<leader>hR", gs.reset_buffer, opts)
-        map("n", "<leader>hp", gs.preview_hunk, opts)
+        end, vim.tbl_extend("force", opts, { desc = "Reset hunk" }))
+        map("n", "<leader>hS", gs.stage_buffer, vim.tbl_extend("force", opts, { desc = "Stage buffer" }))
+        map("n", "<leader>hu", gs.undo_stage_hunk, vim.tbl_extend("force", opts, { desc = "Undo stage hunk" }))
+        map("n", "<leader>hR", gs.reset_buffer, vim.tbl_extend("force", opts, { desc = "Reset buffer" }))
+        map("n", "<leader>hp", gs.preview_hunk, vim.tbl_extend("force", opts, { desc = "Preview hunk" }))
         map("n", "<leader>hb", function()
           gs.blame_line({ full = true })
-        end, opts)
-        map("n", "<leader>tb", gs.toggle_current_line_blame, opts)
-        map("n", "<leader>hd", gs.diffthis, opts)
+        end, vim.tbl_extend("force", opts, { desc = "Blame line (full)" }))
+        map("n", "<leader>tb", gs.toggle_current_line_blame, vim.tbl_extend("force", opts, { desc = "Toggle line blame" }))
+        map("n", "<leader>hd", gs.diffthis, vim.tbl_extend("force", opts, { desc = "Diff this" }))
         map("n", "<leader>hD", function()
           gs.diffthis("~")
-        end, opts)
-        map("n", "<leader>td", gs.toggle_deleted, opts)
+        end, vim.tbl_extend("force", opts, { desc = "Diff this ~" }))
+        map("n", "<leader>td", gs.toggle_deleted, vim.tbl_extend("force", opts, { desc = "Toggle deleted" }))
 
         -- Text object
-        map({ "o", "x" }, "ih", ":<C-U>Gitsigns select_hunk<CR>", opts)
+        map({ "o", "x" }, "ih", ":<C-U>Gitsigns select_hunk<CR>", vim.tbl_extend("force", opts, { desc = "Select hunk" }))
       end,
     })
   end,

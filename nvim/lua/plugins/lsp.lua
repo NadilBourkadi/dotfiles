@@ -57,21 +57,21 @@ local function setup_keymaps()
       local map = vim.keymap.set
       local opts = { noremap = true, silent = true, buffer = args.buf }
 
-      map("n", "gd", vim.lsp.buf.definition, opts)
-      map("n", "gD", vim.lsp.buf.declaration, opts)
-      map("n", "gi", vim.lsp.buf.implementation, opts)
-      map("n", "gr", vim.lsp.buf.references, opts)
-      map("n", "K", vim.lsp.buf.hover, opts)
-      map("n", "<leader>rn", vim.lsp.buf.rename, opts)
-      map("n", "<leader>ca", vim.lsp.buf.code_action, opts)
-      map("n", "<leader>ll", vim.diagnostic.open_float, opts)
-      map("n", "[d", vim.diagnostic.goto_prev, opts)
-      map("n", "]d", vim.diagnostic.goto_next, opts)
+      map("n", "gd", vim.lsp.buf.definition, vim.tbl_extend("force", opts, { desc = "Go to definition" }))
+      map("n", "gD", vim.lsp.buf.declaration, vim.tbl_extend("force", opts, { desc = "Go to declaration" }))
+      map("n", "gi", vim.lsp.buf.implementation, vim.tbl_extend("force", opts, { desc = "Go to implementation" }))
+      map("n", "gr", vim.lsp.buf.references, vim.tbl_extend("force", opts, { desc = "Find references" }))
+      map("n", "K", vim.lsp.buf.hover, vim.tbl_extend("force", opts, { desc = "Hover documentation" }))
+      map("n", "<leader>rn", vim.lsp.buf.rename, vim.tbl_extend("force", opts, { desc = "Rename symbol" }))
+      map("n", "<leader>ca", vim.lsp.buf.code_action, vim.tbl_extend("force", opts, { desc = "Code action" }))
+      map("n", "<leader>ll", vim.diagnostic.open_float, vim.tbl_extend("force", opts, { desc = "Line diagnostics" }))
+      map("n", "[d", vim.diagnostic.goto_prev, vim.tbl_extend("force", opts, { desc = "Previous diagnostic" }))
+      map("n", "]d", vim.diagnostic.goto_next, vim.tbl_extend("force", opts, { desc = "Next diagnostic" }))
 
       -- Toggle inlay hints
       map("n", "<leader>ih", function()
         vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
-      end, opts)
+      end, vim.tbl_extend("force", opts, { desc = "Toggle inlay hints" }))
     end,
   })
 end

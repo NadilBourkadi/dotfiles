@@ -18,6 +18,6 @@ return {
 
     vim.keymap.set({ "n", "v" }, "<leader>pp", function()
       require("conform").format({ async = true, lsp_fallback = true })
-    end)
+    end, { desc = "Format file" })
   end,
 }

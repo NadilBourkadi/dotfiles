@@ -12,9 +12,9 @@ return {
     local opts = { noremap = true, silent = true }
 
     -- Keymaps
-    map("n", "<C-n>", "<cmd>NvimTreeToggle<CR>", opts)
-    map("n", "<leader>n", "<cmd>NvimTreeFindFile<CR>", opts)
-    map("n", "<leader>nr", "<cmd>NvimTreeRefresh<CR>", opts)
+    map("n", "<C-n>", "<cmd>NvimTreeToggle<CR>", vim.tbl_extend("force", opts, { desc = "Toggle file tree" }))
+    map("n", "<leader>n", "<cmd>NvimTreeFindFile<CR>", vim.tbl_extend("force", opts, { desc = "Find file in tree" }))
+    map("n", "<leader>nr", "<cmd>NvimTreeRefresh<CR>", vim.tbl_extend("force", opts, { desc = "Refresh file tree" }))
     require("nvim-tree").setup({
       sort_by = "case_sensitive",
       view = {

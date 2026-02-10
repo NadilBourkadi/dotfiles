@@ -25,17 +25,17 @@ return {
     local map = vim.keymap.set
     local opts = { noremap = true, silent = true }
 
-    map("n", "<leader>tn", function() ts.run_test("TestNearest") end, opts)
-    map("n", "<leader>tt", function() ts.run_test("TestFile") end, opts)
-    map("n", "<leader>ts", function() ts.run_test("TestSuite") end, opts)
-    map("n", "<leader>tl", function() ts.run_test("TestLast") end, opts)
-    map("n", "<leader>tv", "<cmd>TestVisit<CR>", opts)
+    map("n", "<leader>tn", function() ts.run_test("TestNearest") end, vim.tbl_extend("force", opts, { desc = "Run nearest test" }))
+    map("n", "<leader>tt", function() ts.run_test("TestFile") end, vim.tbl_extend("force", opts, { desc = "Run test file" }))
+    map("n", "<leader>ts", function() ts.run_test("TestSuite") end, vim.tbl_extend("force", opts, { desc = "Run test suite" }))
+    map("n", "<leader>tl", function() ts.run_test("TestLast") end, vim.tbl_extend("force", opts, { desc = "Run last test" }))
+    map("n", "<leader>tv", "<cmd>TestVisit<CR>", vim.tbl_extend("force", opts, { desc = "Visit test file" }))
     map("n", "<leader>tc", function()
       ts.close_test_terminal()
       if ts.state.test_buf then
         ts.clear_signs(ts.state.test_buf)
       end
-    end, opts)
+    end, vim.tbl_extend("force", opts, { desc = "Close test pane and clear signs" }))
 
     -- Manual refresh signs from terminal output
     map("n", "<leader>tr", function()
@@ -44,7 +44,7 @@ return {
       if ts.state.term_buf and ts.state.test_buf then
         ts.update_signs_from_terminal()
       end
-    end, opts)
+    end, vim.tbl_extend("force", opts, { desc = "Refresh test gutter signs" }))
 
     -- Auto-update signs when test terminal closes
     vim.api.nvim_create_autocmd("TermClose", {
