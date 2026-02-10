@@ -2,7 +2,7 @@
 # Symlinked to ~/.gitignore_global via init.zsh
 
 # Editor
-*.sw*
+*.sw[a-p]
 
 # OS
 .DS_Store
