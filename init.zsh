@@ -1,6 +1,15 @@
 #!/usr/bin/env zsh
 set -e
 
+if [[ "$1" == "--help" || "$1" == "-h" ]]; then
+  cat <<'USAGE'
+Usage: zsh init.zsh [--help]
+
+Bootstrap dotfiles: symlinks configs, installs packages, sets up plugin managers.
+USAGE
+  exit 0
+fi
+
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color
 
