@@ -72,11 +72,11 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 elif [[ "$OSTYPE" == "linux"* ]]; then
   if command -v apt &>/dev/null; then
     echo -n "Installing packages via apt... "
-    sudo apt install -y tmux neovim ripgrep fd-find fonts-hack 2>/dev/null
+    sudo apt install -y tmux neovim ripgrep fd-find fonts-hack
     echo "${GREEN}Done${NC}"
   elif command -v dnf &>/dev/null; then
     echo -n "Installing packages via dnf... "
-    sudo dnf install -y tmux neovim ripgrep fd-find 2>/dev/null
+    sudo dnf install -y tmux neovim ripgrep fd-find
     echo "${GREEN}Done${NC}"
   else
     echo "No supported package manager found (apt/dnf), skipping dependency installation"
