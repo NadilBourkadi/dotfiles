@@ -34,7 +34,7 @@ return {
       update_debounce = 100,
       max_file_length = 40000,
       preview_config = {
-        border = "single",
+        border = "rounded",
         style = "minimal",
         relative = "cursor",
         row = 0,
