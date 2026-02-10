@@ -101,10 +101,23 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   if [[ -d /Applications/Alacritty.app ]]; then
     echo "Alacritty already installed, ${GREEN}skipping${NC}"
   else
-    echo -n "Installing Alacritty from GitHub... "
-    ALACRITTY_TAG=$(curl -sL https://api.github.com/repos/alacritty/alacritty/releases/latest | grep -o '"tag_name": *"[^"]*"' | head -1 | cut -d'"' -f4)
+    ALACRITTY_JSON=$(curl -sL https://api.github.com/repos/alacritty/alacritty/releases/latest)
+    if command -v jq &>/dev/null; then
+      ALACRITTY_TAG=$(echo "$ALACRITTY_JSON" | jq -r '.tag_name')
+    else
+      ALACRITTY_TAG=$(echo "$ALACRITTY_JSON" | grep -o '"tag_name": *"[^"]*"' | head -1 | cut -d'"' -f4)
+    fi
+    echo "Installing Alacritty ${ALACRITTY_TAG} from GitHub... "
     ALACRITTY_DMG="Alacritty-${ALACRITTY_TAG}.dmg"
     curl -sL "https://github.com/alacritty/alacritty/releases/download/${ALACRITTY_TAG}/${ALACRITTY_DMG}" -o "/tmp/${ALACRITTY_DMG}"
+    # Best-effort SHA256 checksum verification
+    ALACRITTY_SHA="Alacritty-${ALACRITTY_TAG}.dmg.sha256"
+    if curl -sfL "https://github.com/alacritty/alacritty/releases/download/${ALACRITTY_TAG}/${ALACRITTY_SHA}" -o "/tmp/${ALACRITTY_SHA}" 2>/dev/null; then
+      (cd /tmp && shasum -a 256 -c "${ALACRITTY_SHA}") || { echo "Checksum verification failed!"; rm -f "/tmp/${ALACRITTY_DMG}" "/tmp/${ALACRITTY_SHA}"; exit 1; }
+      rm -f "/tmp/${ALACRITTY_SHA}"
+    else
+      echo "Note: Checksum file not available, skipping verification"
+    fi
     hdiutil attach "/tmp/${ALACRITTY_DMG}" -quiet -nobrowse -mountpoint /tmp/alacritty-mnt
     cp -R /tmp/alacritty-mnt/Alacritty.app /Applications/
     hdiutil detach /tmp/alacritty-mnt -quiet
