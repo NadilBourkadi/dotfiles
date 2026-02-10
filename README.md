@@ -158,6 +158,7 @@ These work when focused in the tree:
 | `y` | Copy name |
 | `Y` | Copy relative path |
 | `gy` | Copy absolute path |
+| `g?` | Toggle help (show all keybindings) |
 
 #### Tab Navigation
 
