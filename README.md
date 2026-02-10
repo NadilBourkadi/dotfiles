@@ -56,6 +56,13 @@ The script will:
 - **Zinit** - Zsh plugin manager (auto-installs on first shell launch)
 - **TPM** - Tmux Plugin Manager (press `prefix + I` to install plugins)
 
+### Manual installation needed on Linux
+These are auto-installed via Homebrew on macOS but need manual setup on Linux:
+- **[Starship](https://starship.rs/#quick-install)** - Cross-shell prompt
+- **[Lazygit](https://github.com/jesseduffield/lazygit#installation)** - Terminal UI for git
+- **[tree-sitter-cli](https://github.com/tree-sitter/tree-sitter/blob/master/cli/README.md)** - Required by nvim-treesitter
+- **[Hack Nerd Font](https://www.nerdfonts.com/font-downloads)** - Icons in Neovim
+
 ## Shell Aliases
 
 | Alias | Action |

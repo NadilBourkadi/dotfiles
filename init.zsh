@@ -81,6 +81,7 @@ elif [[ "$OSTYPE" == "linux"* ]]; then
   else
     echo "No supported package manager found (apt/dnf), skipping dependency installation"
   fi
+  echo "Note: starship, lazygit, and tree-sitter-cli need manual installation on Linux"
 fi
 
 # ─────────────────────────────────────────────────────────────
