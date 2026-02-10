@@ -77,7 +77,6 @@ family = "Hack Nerd Font"
 decorations = "Buttonless"
 startup_mode = "Maximized"
 opacity = 0.95
-
 dynamic_padding = false
 
 [window.padding]
