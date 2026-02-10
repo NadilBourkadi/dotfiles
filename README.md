@@ -294,8 +294,8 @@ These work when focused in the tree:
 
 | Binding | Action |
 |---------|--------|
-| `,nf` | Generate function docstring |
-| `,nc` | Generate class docstring |
+| `,af` | Generate function docstring |
+| `,ac` | Generate class docstring |
 
 #### Coverage
 

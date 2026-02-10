@@ -5,8 +5,8 @@ return {
   "danymat/neogen",
   dependencies = { "nvim-treesitter/nvim-treesitter" },
   keys = {
-    { "<leader>nf", "<cmd>Neogen func<CR>", desc = "Generate function docstring" },
-    { "<leader>nc", "<cmd>Neogen class<CR>", desc = "Generate class docstring" },
+    { "<leader>af", "<cmd>Neogen func<CR>", desc = "Generate function docstring" },
+    { "<leader>ac", "<cmd>Neogen class<CR>", desc = "Generate class docstring" },
   },
   config = function()
     require("neogen").setup({
