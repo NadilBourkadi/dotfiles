@@ -43,8 +43,6 @@ The script will:
 
 ### Optional
 - **aws-vault** - For AWS credential management (`av` shell function)
-- **Claude CLI** - For shell `ask`/`explain` functions (uses OAuth, no API key needed)
-
 ### Auto-installed by init.zsh (macOS with Homebrew)
 - **Alacritty** - Terminal emulator
 - **Tmux** - Terminal multiplexer
@@ -66,8 +64,6 @@ The script will:
 | `reload` | Reload zshrc |
 | `reload-alacritty` | Reload Alacritty config |
 | `av <profile> <cmd>` | Run AWS CLI with aws-vault |
-| `ask "question"` | Ask Claude a question (supports piped input) |
-| `explain <file>` | Get Claude to explain code (supports piped input) |
 
 ## Neovim
 
@@ -355,7 +351,7 @@ dotfiles/
 ├── zsh/                # Modular Zsh config
 │   ├── plugins.zsh        # Zinit setup + plugin loading
 │   ├── theme.zsh          # Catppuccin Mocha colors + completion styling
-│   └── functions.zsh      # Shell functions (av, ask, explain)
+│   └── functions.zsh      # Shell functions (av)
 ├── tmux.conf           # Tmux configuration
 ├── alacritty.toml      # Alacritty terminal config
 ├── starship.toml       # Starship prompt config
