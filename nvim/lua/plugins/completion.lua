@@ -22,6 +22,9 @@ return {
         ["<Tab>"] = cmp.mapping(function(fallback)
           if cmp.visible() then
             cmp.select_next_item()
+          elseif vim.fn.exists("*copilot#GetDisplayedSuggestion") == 1
+            and vim.fn["copilot#GetDisplayedSuggestion"]().text ~= "" then
+            vim.api.nvim_feedkeys(vim.fn["copilot#Accept"](""), "n", true)
           else
             fallback()
           end

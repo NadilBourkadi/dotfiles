@@ -3,7 +3,7 @@ return {
   "github/copilot.vim",
   event = "InsertEnter",
   config = function()
-    -- Accept suggestion with Tab (default is Tab but being explicit)
-    vim.g.copilot_assume_mapped = true
+    -- Disable Copilot's default Tab mapping so nvim-cmp can handle Tab
+    vim.g.copilot_no_tab_map = true
   end,
 }
