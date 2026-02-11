@@ -1,5 +1,6 @@
 export TERM=xterm-256color
 export EDITOR='nvim'
+bindkey -e  # Use emacs keybindings for line editing (zsh defaults to vi when EDITOR=nvim)
 export PATH="$HOME/.local/bin:$PATH"
 
 # Dotfiles bootstrap
