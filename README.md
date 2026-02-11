@@ -124,6 +124,7 @@ Leader key is `,`
 | `,cp` | Copy absolute file path to clipboard |
 | `,cP` | Copy relative file path to clipboard |
 | `,pi` | Open Lazy plugin manager |
+| `gx` | Open URL under cursor in browser |
 | `j/k` | Move by visual line (screen line) |
 
 #### File Navigation
