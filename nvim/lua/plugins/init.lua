@@ -25,6 +25,7 @@ return {
   { import = "plugins.luasnip" },
   { import = "plugins.coverage" },
   { import = "plugins.signature" },
+  { import = "plugins.render-markdown" },
 
   -- Plugins that work with minimal or no config
 
@@ -74,6 +75,7 @@ return {
         { "<leader>g", group = "Git" },
         { "<leader>h", group = "Git Hunks" },
         { "<leader>i", group = "Inlay Hints" },
+        { "<leader>m", group = "Markdown" },
         { "<leader>a", group = "Annotate" },
         { "<leader>n", group = "NvimTree" },
         { "<leader>p", group = "Plugins/Format" },

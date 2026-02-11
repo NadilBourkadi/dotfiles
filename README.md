@@ -104,6 +104,7 @@ Modern Lua-based config using lazy.nvim for plugin management.
 - **neogen** - Google-style docstring generation
 - **nvim-coverage** - Test coverage display in gutter
 - **lsp_signature.nvim** - Function signature help
+- **render-markdown.nvim** - In-buffer markdown rendering
 
 ### Key Bindings
 
@@ -322,6 +323,12 @@ These work when focused in the tree:
 | `,ci` | Incoming calls |
 | `,cr` | Outgoing calls |
 
+#### Markdown
+
+| Binding | Action |
+|---------|--------|
+| `,mp` | Toggle markdown preview |
+
 #### Snippets (LuaSnip)
 
 | Binding | Action |
@@ -399,7 +406,8 @@ dotfiles/
             ├── lint.lua
             ├── luasnip.lua
             ├── coverage.lua
-            └── signature.lua
+            ├── signature.lua
+            └── render-markdown.lua
 ```
 
 ## Notes
