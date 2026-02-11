@@ -9,6 +9,7 @@ fi
 source "$ZINIT_HOME/zinit.zsh"
 
 # Oh-My-Zsh snippets
+zinit snippet OMZL::history.zsh
 zinit snippet OMZL::git.zsh
 zinit snippet OMZP::git
 zinit snippet OMZP::command-not-found
