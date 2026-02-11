@@ -5,5 +5,6 @@ brew "fd"
 brew "starship"
 brew "lazygit"
 brew "tree-sitter-cli"
+brew "pandoc"
 
 cask "font-hack-nerd-font"
