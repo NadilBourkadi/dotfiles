@@ -357,6 +357,10 @@ Run `nvim` after setup - lazy.nvim will automatically install all plugins.
 | `Ctrl+a %` | Split pane horizontally (same directory) |
 | `Ctrl+a c` | New window (same directory) |
 | `Ctrl+a r` | Reload tmux config |
+| `Ctrl+a Ctrl+s` | Save session (tmux-resurrect) |
+| `Ctrl+a Ctrl+r` | Restore session (tmux-resurrect) |
+
+Sessions auto-save every 10 minutes via tmux-continuum and auto-restore when tmux starts. Nvim sessions are restored via persistence.nvim.
 
 ## File Structure
 
