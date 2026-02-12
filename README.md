@@ -231,7 +231,8 @@ These work when focused in the tree:
 
 | Binding | Action |
 |---------|--------|
-| `,gv` | Diff branch (vs main) |
+| `,gv` | Diff working tree |
+| `,gm` | Diff branch (vs master) |
 | `,gh` | Current file history |
 | `,gH` | Full branch history |
 | `,gc` | Close diffview |
