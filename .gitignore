@@ -3,6 +3,9 @@
 # Override global gitignore to track these files
 !CLAUDE.md
 
+# Private extensions (not committed)
+private/
+
 # Neovim
 nvim/lazy-lock.json
 # Catches circular symlinks from incorrect ln -sf on existing symlink

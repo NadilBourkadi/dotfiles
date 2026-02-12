@@ -20,6 +20,9 @@ done
 # Starship prompt
 command -v starship &>/dev/null && eval "$(starship init zsh)"
 
+# Private extensions (gitignored)
+[[ -f ~/Dev/dotfiles/private/zshrc ]] && source ~/Dev/dotfiles/private/zshrc
+
 # Tmux auto-attach (skip in IDE terminals and non-interactive shells)
 if command -v tmux &>/dev/null && [ -n "$PS1" ] && [ -z "$TMUX" ] && [ -z "$VSCODE_RESOLVING_ENVIRONMENT" ] && [ -z "$CURSOR_TRACE_ID" ] && [[ ! "$TERM_PROGRAM" =~ ^(vscode|cursor)$ ]]; then
   tmux attach 2>/dev/null || tmux new-session
