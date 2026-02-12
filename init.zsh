@@ -141,9 +141,13 @@ else
   echo "TPM already installed, ${GREEN}skipping${NC}"
 fi
 
-echo -n "Installing tmux plugins (TPM)... "
-~/.tmux/plugins/tpm/bin/install_plugins >/dev/null 2>&1
-echo "${GREEN}Done${NC}"
+if command -v tmux &>/dev/null; then
+  echo -n "Installing tmux plugins (TPM)... "
+  ~/.tmux/plugins/tpm/bin/install_plugins >/dev/null
+  echo "${GREEN}Done${NC}"
+else
+  echo "tmux not found, skipping plugin installation"
+fi
 
 # Install Neovim plugins
 if command -v nvim &>/dev/null; then
