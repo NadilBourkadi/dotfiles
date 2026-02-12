@@ -420,6 +420,17 @@ dotfiles/
             └── render-markdown.lua
 ```
 
+## Private Extensions
+
+Work-specific config (credentials, aliases) lives in the gitignored `private/` directory.
+
+**Setup:**
+1. Create `private/zshrc` with your functions and env vars:
+   ```bash
+   mkdir -p ~/Dev/dotfiles/private
+   ```
+2. The public `zshrc` sources `private/zshrc` if it exists. Silently skipped when absent.
+
 ## Notes
 
 - Neovim opens nvim-tree automatically when opening a directory

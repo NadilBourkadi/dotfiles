@@ -53,6 +53,7 @@ Using **Neovim 0.11+** which has breaking API changes:
 - `zsh/functions.zsh` - Shell functions (`av`, `ask`, `explain`)
 - Zinit uses `OMZL::` for OMZ libraries, `OMZP::` for OMZ plugins, `light` for community plugins
 - Must call `autoload -Uz compinit && compinit` + `zinit cdreplay -q` after plugins load (Antigen did this automatically via oh-my-zsh)
+- `zshrc` sources `private/zshrc` if present — used for private/work-specific config (directory is gitignored)
 
 ### Neovim Directory Structure
 Core config lives in `nvim/lua/core/`, plugins in `nvim/lua/plugins/`:
