@@ -137,10 +137,13 @@ if [[ ! -d ~/.tmux/plugins/tpm ]]; then
   echo -n "Installing TPM (Tmux Plugin Manager)... "
   git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm 2>/dev/null || { echo "TPM clone failed"; exit 1; }
   echo "${GREEN}Done${NC}"
-  echo "Note: Press prefix + I in tmux to install plugins"
 else
   echo "TPM already installed, ${GREEN}skipping${NC}"
 fi
+
+echo -n "Installing tmux plugins (TPM)... "
+~/.tmux/plugins/tpm/bin/install_plugins >/dev/null 2>&1
+echo "${GREEN}Done${NC}"
 
 # Install Neovim plugins
 if command -v nvim &>/dev/null; then
