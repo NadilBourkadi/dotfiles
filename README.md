@@ -72,6 +72,7 @@ These are auto-installed via Homebrew on macOS but need manual setup on Linux:
 | `reload` | Reload zshrc |
 | `reload-alacritty` | Reload Alacritty config |
 | `av <profile> <cmd>` | Run AWS CLI with aws-vault |
+| `kill-orphan-nvims` | Kill nvim processes not attached to any tmux pane (`--dry-run` to preview) |
 
 ## Neovim
 
@@ -369,7 +370,7 @@ dotfiles/
 ├── zsh/                # Modular Zsh config
 │   ├── plugins.zsh        # Zinit setup + plugin loading
 │   ├── theme.zsh          # Catppuccin Mocha colors + completion styling
-│   └── functions.zsh      # Shell functions (av)
+│   └── functions.zsh      # Shell functions (av, kill-orphan-nvims)
 ├── tmux.conf           # Tmux configuration
 ├── alacritty.toml      # Alacritty terminal config
 ├── starship.toml       # Starship prompt config
