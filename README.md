@@ -53,6 +53,7 @@ The script will:
 - **Pandoc** - Document conversion (markdown to HTML export)
 - **Starship** - Cross-shell prompt
 - **Lazygit** - Terminal UI for git
+- **Harlequin** - Terminal SQL IDE (PostgreSQL, MySQL, SQLite, DuckDB)
 - **Hack Nerd Font** - Icons in Neovim
 - **Zinit** - Zsh plugin manager (auto-installs on first shell launch)
 - **TPM** - Tmux Plugin Manager (press `prefix + I` to install plugins)

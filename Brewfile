@@ -6,5 +6,6 @@ brew "starship"
 brew "lazygit"
 brew "tree-sitter-cli"
 brew "pandoc"
+brew "harlequin"
 
 cask "font-hack-nerd-font"
