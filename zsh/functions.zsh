@@ -57,14 +57,27 @@ function kill-orphan-nvims() {
     return 0
   fi
 
+  # Separate embedded (--embed) from regular nvim processes
+  # Embedded nvim ignores SIGTERM since it has no UI — needs SIGKILL
+  local orphaned_embed=() orphaned_regular=()
+  for pid in "${orphaned[@]}"; do
+    if ps -p "$pid" -o args= 2>/dev/null | grep -q -- '--embed'; then
+      orphaned_embed+=("$pid")
+    else
+      orphaned_regular+=("$pid")
+    fi
+  done
+
   echo "Found ${#orphaned[@]} orphaned nvim process(es) (${#all_nvim_pids[@]} total):"
-  printf "  PID %s\n" "${orphaned[@]}"
+  (( ${#orphaned_regular[@]} )) && printf "  PID %s (regular)\n" "${orphaned_regular[@]}"
+  (( ${#orphaned_embed[@]} )) && printf "  PID %s (--embed)\n" "${orphaned_embed[@]}"
 
   if $dry_run; then
     echo "(dry run — no processes killed)"
     return 0
   fi
 
-  kill "${orphaned[@]}" 2>/dev/null
-  echo "Sent SIGTERM to ${#orphaned[@]} process(es)."
+  (( ${#orphaned_regular[@]} )) && kill "${orphaned_regular[@]}" 2>/dev/null
+  (( ${#orphaned_embed[@]} )) && kill -9 "${orphaned_embed[@]}" 2>/dev/null
+  echo "Killed ${#orphaned[@]} process(es) (${#orphaned_regular[@]} SIGTERM, ${#orphaned_embed[@]} SIGKILL)."
 }
