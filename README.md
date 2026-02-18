@@ -136,7 +136,8 @@ Leader key is `,`
 | `Ctrl+p` | Find files |
 | `Ctrl+n` | Toggle file tree |
 | `,n` | Find current file in tree |
-| `,sa` | Live grep (search all, smart-case: case-insensitive unless query has uppercase; append `-- -s` to force case-sensitive) |
+| `,sa` | Live grep (search all, smart-case) |
+| `,sg` | Live grep with glob filter (e.g. `!*.test.js` to exclude, `*.py` to include only) |
 | `,sw` | Grep word under cursor |
 | `,fb` | Find buffers |
 | `,fh` | Find help tags |

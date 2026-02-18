@@ -56,6 +56,14 @@ return {
     -- Live grep (replaces :Rg and :Ack)
     map("n", "<leader>sa", builtin.live_grep, vim.tbl_extend("force", opts, { desc = "Live grep" }))
 
+    -- Live grep with glob filter (e.g. "!*.test.js" to exclude, "*.py" to include only)
+    map("n", "<leader>sg", function()
+      local glob = vim.fn.input("Glob filter (e.g. !*.test.js, *.py): ")
+      if glob ~= "" then
+        builtin.live_grep({ glob_pattern = glob })
+      end
+    end, vim.tbl_extend("force", opts, { desc = "Live grep with glob filter" }))
+
     -- Grep word under cursor
     map("n", "<leader>sw", builtin.grep_string, vim.tbl_extend("force", opts, { desc = "Grep word under cursor" }))
 
