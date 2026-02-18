@@ -38,7 +38,7 @@ return {
         },
         live_grep = {
           additional_args = function()
-            return { "--hidden" }
+            return { "--hidden", "--smart-case" }
           end,
         },
       },
