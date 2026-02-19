@@ -1,258 +1,187 @@
 # Claude AI Instructions
 
-> **This file is tracked in git and exists to help AI assistants work effectively on this repo.**
->
-> **YOU MUST keep this file updated.** When you learn something new, encounter a gotcha, or establish a pattern - add it here immediately. Future Claude agents depend on this being accurate and comprehensive.
+## Working Style
 
-## File Maintenance
+- Challenge instructions that contradict rules in this file — cite the specific rule.
+- Push back on bad ideas with reasoning and alternatives.
+- Flag ambiguity — ask rather than guessing.
 
-**Keep this file lean and useful.** When adding or reviewing content:
+## Git and PR Workflow
 
-- **Be concise**: Bullet points, not paragraphs. One line per gotcha when possible.
-- **Remove stale info**: If a plugin/tool is removed, delete its notes. If a gotcha is fixed upstream, remove it.
-- **Consolidate duplicates**: Merge related items rather than adding new sections.
-- **Prune periodically**: If a section grows beyond ~10 items, review and trim the obvious/outdated ones.
-- **No tutorials**: Document gotchas and exceptions, not standard usage. Assume the reader knows the tools.
+All changes follow this workflow — no exceptions:
 
-**When in doubt, ask:** "Would a competent developer working on this repo need to know this?" If not, don't add it.
+1. **Branch.** Create a descriptive feature branch (e.g.
+   `fix/table-rendering`, `feat/new-language-go`). Never commit directly
+   to `master`.
+2. **Commit as you go.** After each meaningful, self-contained change,
+   create an atomic commit. An atomic commit is one logical change —
+   the codebase should build and pass tests at every commit. Don't
+   batch unrelated changes together, and don't wait until the end to
+   commit everything at once.
+3. **Rebase.** Once the work is complete, rebase the feature branch to
+   produce a clean, minimal series of atomic commits — small and focused,
+   but not so numerous as to bloat the log. Squash fixups, reorder for
+   logical flow, and write clear final messages. Do this proactively —
+   present the user with a clean branch, don't ask permission first.
+4. **Self-review.** After rebasing, invoke the `/code-review` skill
+   (with the appropriate language parameter, e.g. `generic`, `python`,
+   `react-web`) to review your own work. The skill runs as a sub-agent
+   and returns a review — it does not make changes itself. Once you
+   receive the review, use your own judgment to action any comments at
+   `medium` severity or above, committing the fixes without asking for
+   user input. For `low` and `question` items, fix them if the right
+   answer is obvious; otherwise leave them for the user. Then run
+   `/code-review` a second time and action findings the same way. Do
+   not ask for permission between passes — the entire cycle (review →
+   fix → review → fix) should run to completion autonomously.
+5. **Push and open a PR.** Push the branch and create a pull request on
+   GitHub using `gh pr create`. Include a short summary and a test plan.
+   Do this automatically — do not ask for permission to push or create
+   the PR.
+6. **Hand off for review.** Share the PR URL with the user and ask them
+   to review. Do not merge yet.
+7. **Action feedback or merge.**
+   - If the user leaves comments on the PR, read them with
+     `gh pr view <number> --comments` for top-level comments and
+     `gh api repos/OWNER/REPO/pulls/<number>/comments` for inline review
+     comments. Address them with new commits on the branch, push, and let
+     the user know.
+   - If the user approves, merge the PR on GitHub with
+     `gh pr merge <number> --rebase --delete-branch`, then pull `master`
+     locally.
 
-## !! MANDATORY: Branch-Based Workflow !!
+Additional rules:
 
-> **NEVER commit directly to master. ALWAYS use feature branches.**
+- No `Co-Authored-By` lines in commit messages.
+- **Keep commits small** — aim for under 500 lines changed. If a task
+  is larger, break it into a sequence of smaller commits (e.g. refactor
+  first, then add the feature).
+- **Clean history before pushing.** Squash trial-and-error into logical
+  commits. The final history should read as if each change was done
+  correctly the first time.
+- **`--force-with-lease` only** — never use bare `--force` after rebase.
+- **Resolve conflicts carefully** — if rebase conflicts arise, resolve
+  them; never drop commits.
 
-This is the **#1 most important rule** in this repo. Every change — no matter how small — MUST follow this workflow:
+### Commit Message Style
 
-1. **Create a new branch** from master (`git checkout -b <descriptive-branch-name>`)
-2. **Make atomic commits** — each commit captures one logical change with a clear message
-3. **Stop and wait for user review** — do NOT merge into master. Present the branch and commits for approval
-4. **Only merge after explicit approval** — the user will merge or ask you to merge after reviewing
+Imperative summary + bulleted body:
+```
+Remove legacy vimrc and unused i3config plugin
 
-**What "atomic commits" means:**
-- One logical change per commit (e.g., "add isort" is separate from "disable Pyright diagnostics")
-- If a single file has changes for two different purposes, split them into separate commits
-- Each commit should build/work on its own — no "fix previous commit" follow-ups
+- Delete vimrc file
+- Remove vimrc symlink from init.zsh
+- Remove i3config.vim plugin from nvim/lua/plugins/init.lua
+- Update README.md to remove vimrc references
+```
 
-**Branch naming:** Use descriptive names like `fix/pyright-diagnostics`, `feat/add-isort`, `refactor/lsp-config`
+## Shell Commands
+
+- Repo lives at `~/Dev/dotfiles`, **NOT** `~/dotfiles`. Always use full path.
+- Run commands from the repo root. Never use `git -C`.
+- Prefer explicit file lists over `git add -A`.
+
+## Documentation
+
+**README and CLAUDE.md updates are part of the task, not a follow-up.**
+Include doc edits in the same commit batch as code changes. Do not mark
+a task complete until docs are updated.
+
+### README.md
+Update when:
+- Adding/removing config files → "What Gets Symlinked" and "File Structure"
+- Adding keybindings → relevant keybindings table (Neovim/Tmux)
+- Adding shell aliases or functions → "Shell Aliases" table
+- Adding plugins → "Plugins" list
+- Changing prerequisites or install steps → those sections
+
+### CLAUDE.md
+Update when:
+- A bug or unexpected behaviour is discovered → "Common Mistakes"
+- A CLI flag or API behaves differently than expected → relevant Gotchas section
+- A new plugin or tool is added → document setup requirements
 
 ## Critical Context
 
-### Repository Location
-The repo lives at `~/Dev/dotfiles`, **NOT** `~/dotfiles`. Always use the full path in scripts and symlinks.
-
 ### Neovim Version
-Using **Neovim 0.11+** which has breaking API changes:
+Using **Neovim 0.11+** with breaking API changes:
 - Use `vim.lsp.config()` and `vim.lsp.enable()` for LSP, NOT `require('lspconfig')`
-- The old `nvim-treesitter.configs` module is deprecated
-- Use native `vim.treesitter.start()` for highlighting
-- `vim.treesitter.language.ft_to_lang` removed → use `get_lang` (shim in init.lua for plugin compat)
+- The old `nvim-treesitter.configs` module is removed — use native `vim.treesitter.start()`
+- `vim.treesitter.language.ft_to_lang` removed — use `get_lang` (shim in init.lua for plugin compat)
 
 ### Zsh Configuration
-- `zshrc` is a thin loader that sources `zsh/{plugins,theme,functions}.zsh`
-- `zsh/plugins.zsh` - Zinit setup + plugin loading (auto-installs zinit if missing)
-- `zsh/theme.zsh` - Catppuccin Mocha colors, completion styling, man page colors
-- `zsh/functions.zsh` - Shell functions (`av`, `ask`, `explain`)
-- Zinit uses `OMZL::` for OMZ libraries, `OMZP::` for OMZ plugins, `light` for community plugins
-- Must call `autoload -Uz compinit && compinit` + `zinit cdreplay -q` after plugins load (Antigen did this automatically via oh-my-zsh)
-- `zshrc` sources `private/zshrc` if present — used for private/work-specific config (directory is gitignored)
+- `zshrc` is a thin loader sourcing `zsh/{plugins,theme,functions}.zsh`
+- Uses Zinit (auto-installs on first shell launch). `OMZL::` for OMZ libraries, `OMZP::` for plugins, `light` for community.
+- Must call `autoload -Uz compinit && compinit` + `zinit cdreplay -q` after plugins load
+- `zshrc` sources `private/zshrc` if present (gitignored, for work-specific config)
 
 ### Neovim Directory Structure
-Core config lives in `nvim/lua/core/`, plugins in `nvim/lua/plugins/`:
-- `core/options.lua` - Editor options (tabs, line numbers, etc.)
-- `core/keymaps.lua` - Global keybindings
-- `core/utils.lua` - Shared utility functions (root-finding, Poetry venv cache with TTL, nvim-tree state)
-- `core/test-signs.lua` - Pytest output parser and gutter sign management (TermClose-driven, no polling)
-- `plugins/*.lua` - One file per plugin
-
-### Symlink Gotchas
-When symlinking directories, always `rm -f` before `ln -s`:
-```bash
-rm -f ~/.config/nvim
-ln -s ~/Dev/dotfiles/nvim ~/.config/nvim
-```
-Using `ln -sf` on an existing symlink creates a circular symlink inside the target directory (e.g., `nvim/nvim`).
-
-### File Naming Conventions
-- `Brewfile` → Homebrew dependencies (used by `brew bundle` in `init.zsh`)
-- `gitignore_global` → Global gitignore (symlinked to `~/.gitignore_global`)
-- `.gitignore` → Repo-specific ignores only (not duplicating global patterns)
-- `CLAUDE.md` → This file, tracked in git (globally ignored but overridden via `!CLAUDE.md` in `.gitignore`)
+- `core/options.lua` — Editor options
+- `core/keymaps.lua` — Global keybindings
+- `core/utils.lua` — Shared utilities (root-finding, Poetry venv cache with TTL, nvim-tree state)
+- `core/test-signs.lua` — Pytest output parser and gutter signs (TermClose-driven)
+- `plugins/*.lua` — One file per plugin, keymaps inside plugin config, `<cmd>...<CR>` syntax
 
 ## Patterns to Follow
 
 ### Adding New Config Files
-1. Add the config file to the repo root (e.g., `alacritty.toml`)
-2. Add the file to the appropriate symlink map in `init.zsh` (`file_symlinks` for files, `dir_symlinks` for directories)
-3. Update README.md with the new file in the structure and any relevant documentation
+1. Add config file to repo root
+2. Add to `file_symlinks` or `dir_symlinks` map in `init.zsh`
+3. Update README.md (What Gets Symlinked + File Structure)
 
 ### Adding New Dependencies
-**NEVER install manually.** All installations must go through `Brewfile` + `init.zsh` for repeatability:
-1. Add Homebrew formulae/casks to `Brewfile`
-2. For non-Homebrew tools, add installation logic to `init.zsh`
-3. Run `dotfiles` alias to install
-4. Update README.md prerequisites section
+**NEVER install manually.** All through `Brewfile` + `init.zsh`:
+1. Add formulae/casks to `Brewfile`
+2. For non-Homebrew tools, add install logic to `init.zsh`
+3. Update README.md prerequisites
 
 ### init.zsh Style
-- Uses `set -e` for error handling and `$DOTFILES_DIR` derived from script location
-- Symlinks are data-driven via `file_symlinks` and `dir_symlinks` associative arrays
-- Supports both macOS (Homebrew) and Linux (apt/dnf) package installation
-- Echo what's happening at each step with green "Done" output
+- Uses `set -e` and derives `$DOTFILES_DIR` from `$0` (not hardcoded)
+- Symlink maps are `file_symlinks`/`dir_symlinks` associative arrays; iterate with `${(@kv)map}`
 
-### Commit Message Style
-- Use a concise summary line in imperative mood (e.g., "Remove legacy vimrc")
-- Include a bulleted list of changes in the body
-- Example:
-  ```
-  Remove legacy vimrc and unused i3config plugin
+## Common Mistakes
 
-  - Delete vimrc file
-  - Remove vimrc symlink from init.zsh
-  - Remove i3config.vim plugin from nvim/lua/plugins/init.lua
-  - Update README.md to remove vimrc references
-  ```
-
-### Neovim Plugin Config Style
-- Each plugin gets its own file in `nvim/lua/plugins/`
-- Use `lazy = false` for plugins that need to load immediately
-- Define keymaps inside the plugin's config function
-- Use `<cmd>...<CR>` syntax for command mappings
-
-## Common Mistakes to Avoid
-
-1. **Wrong repo path**: Always `~/Dev/dotfiles`, never `~/dotfiles`
-2. **Old Neovim APIs**: Don't use `require('lspconfig')` or `require('nvim-treesitter.configs')`
-3. **Symlink -f flag on directories**: Causes circular symlinks
-4. **Duplicating global gitignore**: Keep `.gitignore` repo-specific only
-5. **Co-author lines in commits**: Do NOT add `Co-Authored-By` lines to commit messages
-6. **Forgetting README updates**: When adding keybindings, aliases, plugins, or features - update README.md immediately as part of the same task, not as a follow-up
-7. **Manual installations**: NEVER run installation commands directly (e.g., `git clone`, `brew install`). Always add to `init.zsh` and run `dotfiles` alias. This keeps setup repeatable across machines.
-8. **Committing to master**: NEVER commit directly to master. Always create a feature branch, make atomic commits, and wait for user approval before merging. See "MANDATORY: Branch-Based Workflow" above.
-
-## Documentation Maintenance
-
-### Enforcement Rule
-**When making code changes, include README/CLAUDE.md edits in the SAME tool call batch** - not in a follow-up message. This ensures documentation is never forgotten.
-
-### Pre-completion Checklist
-Before marking any task complete, verify:
-- [ ] README updated (if adding keybindings, plugins, aliases, or config files)
-- [ ] CLAUDE.md updated (if learned a gotcha, quirk, or new pattern)
-
-### README.md (tracked in git)
-**CRITICAL: README updates are MANDATORY, not optional.** When you make any of the following changes, you MUST update README.md in the same task - do not wait to be asked:
-- Adding/removing config files → Update "What Gets Symlinked" and "File Structure"
-- Adding keybindings → Update the relevant keybindings table (Neovim/Tmux)
-- Adding shell aliases or functions → Update "Shell Aliases" table
-- Adding plugins → Update "Plugins" list
-- Changing prerequisites → Update "Prerequisites" section
-- Changing installation steps → Update "Installation" section
-
-**This is not a separate follow-up task.** Include README updates as part of implementing any feature.
-
-### CLAUDE.md (this file, tracked in git)
-**⚠️ MANDATORY: Update this file DURING the task, not after.**
-
-After completing ANY of these, IMMEDIATELY add to CLAUDE.md before moving on:
-- Fixed a bug or unexpected behavior → Add to "Common Mistakes to Avoid"
-- Discovered a CLI flag or API quirk → Add to "Gotchas" section
-- Added a new plugin or tool → Document any setup requirements
-- Found that something works differently than expected → Document it
-
-**Concrete examples of when to update:**
-- "I had to use `-d` instead of `-c` for tmux popups" → Add to Gotchas
-- "nvim-ufo requires specific fold options" → Document in Patterns
-- "This API changed in version X" → Add to version-specific notes
-
-**This is NOT optional.** Treat CLAUDE.md updates like README updates - they are part of the task, not a follow-up.
+1. **Old Neovim APIs**: Don't use `require('lspconfig')` or `require('nvim-treesitter.configs')`
+2. **Symlink -f on directories**: Creates circular symlink. Always `rm -f` then `ln -s`.
+3. **Duplicating global gitignore**: `.gitignore` is repo-specific only.
+4. **Manual installations**: Never `brew install` or `git clone` directly. Add to `Brewfile`/`init.zsh`.
+5. **Wrong repo path**: Always `~/Dev/dotfiles`, not `~/dotfiles`.
 
 ## Tmux Gotchas
 
-### Directory flags differ by command
-- `split-window` / `new-window`: Use `-c "#{pane_current_path}"`
-- `display-popup`: Use `-d "#{pane_current_path}"` (NOT `-c`)
-
-### respawn-pane behavior
-- `respawn-pane -k` sends SIGTERM (not SIGKILL), so VimLeavePre autocmds still fire
-- To keep pane alive after nvim exits: `respawn-pane -k -c <dir> 'zsh -c "nvim; exec zsh"'`
+- `split-window`/`new-window`: `-c "#{pane_current_path}"`. `display-popup`: `-d` (NOT `-c`).
+- `respawn-pane -k` sends SIGTERM (not SIGKILL) — VimLeavePre autocmds still fire.
+- Keep pane alive after nvim: `respawn-pane -k -c <dir> 'zsh -c "nvim; exec zsh"'`
 
 ## Neovim Plugin Notes
 
 ### nvim-ufo (folding)
-Requires these options to be set in the plugin config:
-```lua
-vim.o.foldcolumn = "0"
-vim.o.foldlevel = 99
-vim.o.foldlevelstart = 99
-vim.o.foldenable = true
-```
+Requires: `foldcolumn = "0"`, `foldlevel = 99`, `foldlevelstart = 99`, `foldenable = true`
 
 ### persistence.nvim (sessions)
-- **nvim-tree doesn't restore well from sessions** - must be closed before saving and reopened after loading via separate state file
-- State file stored at `~/.local/state/nvim/sessions/<path>.state`
-- `<leader>rs` restart sets `vim.g.nvim_restarting = true` flag so VimLeavePre doesn't overwrite the state file
-- nvim-tree state logic is centralized in `core/utils.lua` - both persistence.lua and keymaps.lua use it
+- nvim-tree must be closed before save, reopened after load (state file at `~/.local/state/nvim/sessions/<path>.state`)
+- `<leader>rs` sets `vim.g.nvim_restarting = true` to prevent state overwrite
+- nvim-tree state logic centralized in `core/utils.lua`
 
 ### lazy.nvim
-- **Config re-sourcing not supported** - `:source $MYVIMRC` doesn't work; use `<leader>rs` to restart instead
-- Don't add `<leader>ss` style source mappings - they'll error
+- Config re-sourcing not supported. Use `<leader>rs` to restart, not `:source $MYVIMRC`.
 
 ### Mason + Native LSP
-- Mason installs servers to `~/.local/share/nvim/mason/bin/` which is NOT in PATH by default
-- Must add Mason bin to PATH before calling `vim.lsp.enable()` or servers won't be found
-- `vim.lsp.config()` needs explicit `cmd`, `filetypes`, and `root_markers` for servers to attach
-- The check `vim.lsp.get_clients({ bufnr = 0 })` returning empty means LSP didn't attach
+- Mason bin (`~/.local/share/nvim/mason/bin/`) not in PATH by default — must add before `vim.lsp.enable()`
+- `vim.lsp.config()` needs explicit `cmd`, `filetypes`, and `root_markers`
+- Debug: `nvim --headless -c "lua print(vim.env.PATH:match('mason/bin') and 'found' or 'missing')" -c "qa" 2>&1`
 
 ### Pyright + Poetry
-- Poetry venv detection is centralized in `core/utils.lua` (`get_poetry_venv()`)
-- Used by lsp.lua (pyright config), lint.lua (mypy/flake8 cmd), and dap.lua (python path)
-- Checks for `[tool.poetry]` in pyproject.toml, then runs `poetry env info --path` via `vim.system()` (async)
-- **Poetry venv paths are cached per project root** with a 5-minute TTL to avoid stale caches and repeated shell calls
-- Project root detection is centralized via `utils.find_project_root()` — all consumers (lsp, lint, dap) use it
-- Pyright `typeCheckingMode` is set to `"off"` — mypy is the canonical type checker, Pyright is used only for LSP features (completions, navigation, hover, rename)
-- No need for `pyrightconfig.json` in each project
-- Use `vim.system()` (async) instead of `vim.fn.system()` (blocking) for Poetry lookups — `poetry env info` is slow (200-500ms)
-
-## Debugging Neovim Config
-
-### Prefer headless mode for faster iteration
-Use `nvim --headless` to test config without opening a full editor:
-
-```bash
-# Check if a value is set correctly
-nvim --headless -c "lua print(vim.env.PATH:match('mason/bin') and 'found' or 'missing')" -c "qa" 2>&1
-
-# Check if an executable is found
-nvim --headless -c "lua print(vim.fn.exepath('pyright-langserver'))" -c "qa" 2>&1
-
-# Test that config loads without errors
-nvim --headless -c "echo 'Config loaded'" -c "qa" 2>&1
-
-# Run Lazy sync
-nvim --headless "+Lazy! sync" +qa 2>/dev/null
-```
-
-### Interactive debugging (when headless isn't enough)
-```vim
-:lua print(#vim.lsp.get_clients({ bufnr = 0 }))   " Check LSP attached
-:lua vim.print(vim.lsp.get_clients())             " Full LSP client info
-:checkhealth lsp                                   " LSP health check
-```
-
-### vim-test
-- `test#neovim#term_position` controls terminal size: `"botright " .. math.floor(vim.o.lines / 3)` for 1/3 height
-- `test#neovim#start_normal = 1` keeps terminal in normal mode after test (allows scrolling)
-- Test sign updates use `TermClose` autocmd (not polling) — `vim-test.lua` listens for the event and calls `test-signs.on_complete()`
-- `run_test()` stores the terminal buffer via `vim.schedule`, and TermClose fires when the process exits
-
-### neotest (avoided)
-**Do not use neotest** - it has fundamental architecture issues:
-- Spawns a subprocess with `-u NONE` (no user config) for treesitter parsing
-- That subprocess can't find parsers installed by nvim-treesitter (wrong runtimepath)
-- Causes "No parser for language X" errors that can't be fixed without hacking the plugin
-- The `nvim-treesitter.configs` module is removed in newer nvim-treesitter versions
-- vim-test is simpler and more reliable for running tests
+- Poetry venv detection in `core/utils.lua`, cached per project root (5-min TTL)
+- Pyright `typeCheckingMode = "off"` — mypy is the type checker, Pyright for LSP features only
+- Use `vim.system()` (async) for Poetry lookups — `poetry env info` is slow (200-500ms)
+- Debug LSP attach: `:lua print(#vim.lsp.get_clients({ bufnr = 0 }))` (0 = not attached)
 
 ### nvim-treesitter
-- **Don't use `require('nvim-treesitter.configs')`** - module removed in newer versions
-- Neovim 0.11+ ships with built-in parsers (lua, vim, vimdoc, markdown, c, query) in `/opt/homebrew/Cellar/neovim/*/lib/nvim/parser/`
-- Additional parsers from nvim-treesitter go elsewhere and may not be found by other tools
-- For highlighting, use native `vim.treesitter.start()` not nvim-treesitter's highlight module
+- Don't use `require('nvim-treesitter.configs')` — module removed
+- Neovim 0.11+ ships built-in parsers; use native `vim.treesitter.start()` for highlighting
+
+### vim-test
+- Test signs use `TermClose` autocmd, not polling
+- `test#neovim#start_normal = 1` keeps terminal in normal mode after test run
+- Do not use neotest — it spawns a subprocess with `-u NONE` which can't find nvim-treesitter parsers
