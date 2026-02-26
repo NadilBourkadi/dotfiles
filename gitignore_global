@@ -7,8 +7,9 @@
 # OS
 .DS_Store
 
-# Claude
-CLAUDE.md
+# Claude — CLAUDE.md is tracked (project instructions); CLAUDE.local.md is for
+# machine-specific overrides and stays gitignored.
+CLAUDE.local.md
 AGENTS.md
 .claude/
 
