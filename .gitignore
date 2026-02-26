@@ -1,8 +1,5 @@
 # Local gitignore - applies to this repo only
 
-# Override global gitignore to track these files
-!CLAUDE.md
-
 # Private extensions (not committed)
 private/
 
