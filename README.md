@@ -334,7 +334,7 @@ These work when focused in the tree:
 | Binding | Action |
 |---------|--------|
 | `,mp` | Toggle markdown preview |
-| `,mh` | Open markdown as HTML in browser |
+| `,mh` | Preview markdown as HTML in browser |
 
 #### Snippets (LuaSnip)
 
