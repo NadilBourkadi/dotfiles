@@ -146,6 +146,10 @@ Using **Neovim 0.11+** with breaking API changes:
 3. **Duplicating global gitignore**: `.gitignore` is repo-specific only.
 4. **Manual installations**: Never `brew install` or `git clone` directly. Add to `Brewfile`/`init.zsh`.
 5. **Wrong repo path**: Always `~/Dev/dotfiles`, not `~/dotfiles`.
+6. **Claude Code auto-update stale temp dirs**: Failed auto-updates leave
+   `.claude-code-*` dirs in `/opt/homebrew/lib/node_modules/@anthropic-ai/`
+   that block all future updates with `ENOTEMPTY`. The `zshrc` cleans these
+   up on shell startup.
 
 ## Tmux Gotchas
 
