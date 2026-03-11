@@ -3,6 +3,9 @@ export EDITOR='nvim'
 bindkey -e  # Use emacs keybindings for line editing (zsh defaults to vi when EDITOR=nvim)
 export PATH="$HOME/.local/bin:$PATH"
 
+# Clean up stale temp dirs left by failed Claude Code auto-updates (causes ENOTEMPTY on next attempt)
+[[ -d /opt/homebrew/lib/node_modules/@anthropic-ai ]] && rm -rf /opt/homebrew/lib/node_modules/@anthropic-ai/.claude-code-* 2>/dev/null
+
 # Dotfiles bootstrap
 alias dotfiles='zsh ~/Dev/dotfiles/init.zsh'
 alias reload='source ~/.zshrc && echo "zshrc reloaded"'
