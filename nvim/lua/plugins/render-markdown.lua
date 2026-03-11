@@ -21,25 +21,32 @@ table { border-collapse: collapse; width: 100%; }
 th, td { border: 1px solid #ddd; padding: 8px 12px; text-align: left; }
 th { background: #f4f4f4; }]]
 
-    local function html_path_for(src)
-      local hash = vim.fn.sha256(vim.fn.fnamemodify(src, ":p"))
+    local function html_path_for(abs)
+      local hash = vim.fn.sha256(abs)
       return preview_dir .. "/" .. hash:sub(1, 12) .. ".html"
     end
 
-    local function generate_html(src)
-      local body = vim.fn.system("pandoc -f gfm -t html " .. vim.fn.shellescape(src))
+    --- Convert a markdown file to HTML preview. Returns the output path, or nil on error.
+    local function generate_html(abs)
+      local body = vim.fn.system("pandoc -f gfm -t html " .. vim.fn.shellescape(abs))
+      if vim.v.shell_error ~= 0 then
+        vim.notify("pandoc failed: " .. body, vim.log.levels.ERROR)
+        return nil
+      end
       local html = "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><style>\n"
         .. css
         .. "\n</style></head><body>"
         .. body
         .. "</body></html>"
       vim.fn.mkdir(preview_dir, "p")
-      local out = html_path_for(src)
+      local out = html_path_for(abs)
       local f = io.open(out, "w")
-      if f then
-        f:write(html)
-        f:close()
+      if not f then
+        vim.notify("Failed to write " .. out, vim.log.levels.ERROR)
+        return nil
       end
+      f:write(html)
+      f:close()
       return out
     end
 
@@ -51,8 +58,9 @@ th { background: #f4f4f4; }]]
         return
       end
 
-      local out = generate_html(src)
       local abs = vim.fn.fnamemodify(src, ":p")
+      local out = generate_html(abs)
+      if not out then return end
 
       if previewed_path ~= abs then
         previewed_path = abs
