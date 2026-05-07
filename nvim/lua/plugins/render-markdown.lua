@@ -63,7 +63,11 @@ th { background: #f4f4f4; }]]
       if not out then return end
 
       if previewed_path ~= abs then
-        vim.ui.open(out)
+        local ok, err = pcall(vim.ui.open, out)
+        if not ok then
+          vim.notify("Failed to open browser: " .. tostring(err), vim.log.levels.ERROR)
+          return
+        end
         previewed_path = abs
 
         -- Set up autocmd to regenerate HTML on save
