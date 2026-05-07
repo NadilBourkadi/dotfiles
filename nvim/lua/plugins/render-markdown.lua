@@ -63,8 +63,8 @@ th { background: #f4f4f4; }]]
       if not out then return end
 
       if previewed_path ~= abs then
-        previewed_path = abs
         vim.ui.open(out)
+        previewed_path = abs
 
         -- Set up autocmd to regenerate HTML on save
         vim.api.nvim_clear_autocmds({ group = augroup })
