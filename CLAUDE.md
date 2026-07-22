@@ -109,6 +109,19 @@ Using **Neovim 0.11+** with breaking API changes:
 - The old `nvim-treesitter.configs` module is removed — use native `vim.treesitter.start()`
 - `vim.treesitter.language.ft_to_lang` removed — use `get_lang` (shim in init.lua for plugin compat)
 
+### Linux / WSL
+- Linux uses **Homebrew on Linux** with the same `Brewfile` as macOS —
+  casks are macOS-only, so guard them with `if OS.mac?`
+- Node.js comes from **nvm** on both OSes (installed by `init.zsh` into
+  `~/.nvm`, loaded by `zshrc`). The nvm installer must run with
+  `PROFILE=/dev/null` or it appends loader lines to `~/.zshrc`, which is a
+  symlink into this repo — dirtying the working tree.
+- On WSL the Nerd Font must be installed on the **Windows** side (the
+  terminal renders there); `fonts-hack` via apt does nothing useful.
+- WSL clipboard: WSLg Wayland + `wl-clipboard` (apt) — no win32yank needed.
+- Mason needs `unzip` on PATH for zip-packaged tools (e.g. stylua) — minimal
+  Ubuntu doesn't ship it; it's in the Brewfile guarded with `if OS.linux?`.
+
 ### Zsh Configuration
 - `zshrc` is a thin loader sourcing `zsh/{plugins,theme,functions}.zsh`
 - Uses Zinit (auto-installs on first shell launch). `OMZL::` for OMZ libraries, `OMZP::` for plugins, `light` for community.
@@ -131,7 +144,7 @@ Using **Neovim 0.11+** with breaking API changes:
 
 ### Adding New Dependencies
 **NEVER install manually.** All through `Brewfile` + `init.zsh`:
-1. Add formulae/casks to `Brewfile`
+1. Add formulae/casks to `Brewfile` (casks: append `if OS.mac?` — Linux has no casks)
 2. For non-Homebrew tools, add install logic to `init.zsh`
 3. Update README.md prerequisites
 

@@ -79,18 +79,57 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     echo "Homebrew not found, skipping dependency installation"
   fi
 elif [[ "$OSTYPE" == "linux"* ]]; then
-  if command -v apt &>/dev/null; then
-    echo -n "Installing packages via apt... "
-    sudo apt install -y tmux neovim ripgrep fd-find fonts-hack
-    echo "${GREEN}Done${NC}"
-  elif command -v dnf &>/dev/null; then
-    echo -n "Installing packages via dnf... "
-    sudo dnf install -y tmux neovim ripgrep fd-find
+  # System packages Homebrew on Linux needs (bubblewrap is recommended by
+  # the Homebrew installer for sandboxed source builds), plus wl-clipboard
+  # for WSLg/Wayland clipboard integration
+  if command -v apt-get &>/dev/null; then
+    apt_missing=()
+    for pkg in build-essential bubblewrap curl file procps wl-clipboard; do
+      # dpkg-query status check: `dpkg -s` wrongly passes for removed-but-
+      # not-purged (rc state) packages
+      dpkg-query -W -f='${db:Status-Status}' "$pkg" 2>/dev/null | grep -qx installed || apt_missing+=("$pkg")
+    done
+    if (( ${#apt_missing[@]} )); then
+      echo "Installing apt prerequisites: ${apt_missing[*]}"
+      sudo apt-get update -qq
+      sudo apt-get install -y "${apt_missing[@]}"
+    fi
+  else
+    echo "apt-get not found — install Homebrew prerequisites manually: build-essential bubblewrap curl file procps (and wl-clipboard on WSL)"
+  fi
+
+  # Homebrew on Linux — same Brewfile as macOS (casks are guarded with OS.mac?)
+  if ! command -v brew &>/dev/null && [[ ! -x /home/linuxbrew/.linuxbrew/bin/brew ]]; then
+    echo "Installing Homebrew..."
+    # The NONINTERACTIVE installer uses `sudo -n`, so cache credentials
+    # first (|| true: sudo may be absent, e.g. when the prefix is pre-owned)
+    sudo -v || true
+    # || true: failures are caught below with a clear message — without it
+    # set -e would abort before reaching the check
+    NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || true
+  fi
+  [[ -x /home/linuxbrew/.linuxbrew/bin/brew ]] && eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+  if command -v brew &>/dev/null; then
+    echo -n "Installing Homebrew dependencies... "
+    brew bundle --file="$DOTFILES_DIR/Brewfile" --quiet || { echo "brew bundle failed"; exit 1; }
     echo "${GREEN}Done${NC}"
   else
-    echo "No supported package manager found (apt/dnf), skipping dependency installation"
+    echo "Homebrew installation failed"
+    exit 1
   fi
-  echo "Note: starship, lazygit, and tree-sitter-cli need manual installation on Linux"
+
+  if [[ -f /proc/version ]] && grep -qi microsoft /proc/version; then
+    echo "Note: WSL — install 'Hack Nerd Font' on Windows and select it in your terminal profile (see README)"
+  fi
+
+  # Make zsh the login shell (macOS already defaults to zsh).
+  # Check getent, not $SHELL — $SHELL is stale until re-login.
+  login_shell="$(getent passwd "$USER" | cut -d: -f7)"
+  if [[ "$login_shell" != */zsh ]]; then
+    zsh_path="$(command -v zsh)"
+    echo "Changing default shell to ${zsh_path}..."
+    chsh -s "$zsh_path" || echo "chsh failed — run manually: chsh -s $zsh_path"
+  fi
 fi
 
 # ─────────────────────────────────────────────────────────────
@@ -124,6 +163,31 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     rm -f "/tmp/${ALACRITTY_DMG}"
     echo "${GREEN}Done${NC}"
   fi
+fi
+
+# ─────────────────────────────────────────────────────────────
+# Node.js via nvm (copilot.vim + Mason's npm-based servers)
+# ─────────────────────────────────────────────────────────────
+
+NVM_VERSION="v0.40.3"
+export NVM_DIR="$HOME/.nvm"
+if [[ ! -s "$NVM_DIR/nvm.sh" ]]; then
+  echo -n "Installing nvm ${NVM_VERSION}... "
+  # PROFILE=/dev/null stops the installer appending loader lines to the
+  # symlinked ~/.zshrc — zshrc already sources nvm itself
+  PROFILE=/dev/null bash -c "$(curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/${NVM_VERSION}/install.sh)" >/dev/null || true
+  # bash -c "$(curl ...)" exits 0 on a failed download (empty script), so
+  # verify the result instead of trusting the exit code
+  [[ -s "$NVM_DIR/nvm.sh" ]] || { echo "nvm install failed"; exit 1; }
+  echo "${GREEN}Done${NC}"
+fi
+# nvm is incompatible with errexit (its README lists `set -e` as a known
+# issue) — run it relaxed and verify the outcome instead
+source "$NVM_DIR/nvm.sh" || true
+if ! command -v node &>/dev/null; then
+  echo "Installing Node.js LTS via nvm..."
+  nvm install --lts || true
+  command -v node &>/dev/null || { echo "Node.js install via nvm failed"; exit 1; }
 fi
 
 # ─────────────────────────────────────────────────────────────
