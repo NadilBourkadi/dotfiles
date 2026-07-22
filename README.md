@@ -6,12 +6,18 @@ Personal dotfiles for a development environment.
 
 One-time setup for a new machine:
 
-1. Clone this repository:
+1. On Linux/WSL only — install git, zsh, and the Homebrew build prerequisites
+   (macOS already ships git/zsh and is expected to have Homebrew installed):
+```bash
+sudo apt-get install -y zsh git build-essential curl file procps
+```
+
+2. Clone this repository:
 ```bash
 git clone <repository-url> ~/Dev/dotfiles
 ```
 
-2. Run the bootstrap script:
+3. Run the bootstrap script:
 ```bash
 cd ~/Dev/dotfiles
 zsh init.zsh
@@ -20,8 +26,10 @@ zsh init.zsh
 The script will:
 - Create symbolic links for all config files
 - Configure git to use the global gitignore
-- Install dependencies via Homebrew (macOS) or apt/dnf (Linux)
+- Install Homebrew itself on Linux, then dependencies via `brew bundle` on both OSes
+- Install nvm + Node.js LTS (needed by copilot.vim and Mason's npm-based servers)
 - Install Alacritty from GitHub releases (macOS)
+- Change the login shell to zsh (Linux)
 
 ## What Gets Symlinked
 
@@ -37,14 +45,14 @@ The script will:
 ## Prerequisites
 
 ### Required
-- **Zsh** - Primary shell
+- **Zsh** - Primary shell (`sudo apt-get install zsh` on Linux; macOS ships it)
 - **Git** - Version control
-- **Homebrew** (macOS) or **apt/dnf** (Linux) - For automatic dependency installation
+- **Homebrew** - macOS: install manually first; Linux: init.zsh installs it automatically
 
 ### Optional
 - **aws-vault** - For AWS credential management (`av` shell function)
-### Auto-installed by init.zsh (macOS with Homebrew)
-- **Alacritty** - Terminal emulator
+### Auto-installed by init.zsh (both macOS and Linux)
+- **Alacritty** - Terminal emulator (macOS only)
 - **Tmux** - Terminal multiplexer
 - **Neovim** (0.11+) - Primary editor
 - **tree-sitter-cli** - Required by nvim-treesitter
@@ -54,16 +62,25 @@ The script will:
 - **Starship** - Cross-shell prompt
 - **Lazygit** - Terminal UI for git
 - **Harlequin** - Terminal SQL IDE (PostgreSQL, MySQL, SQLite, DuckDB)
-- **Hack Nerd Font** - Icons in Neovim
+- **Hack Nerd Font** - Icons in Neovim (macOS only — on WSL install it on Windows, see below)
+- **nvm + Node.js LTS** - Via the nvm installer script, not Homebrew (needed by copilot.vim and Mason's npm-based servers)
 - **Zinit** - Zsh plugin manager (auto-installs on first shell launch)
 - **TPM** - Tmux Plugin Manager (press `prefix + I` to install plugins)
 
-### Manual installation needed on Linux
-These are auto-installed via Homebrew on macOS but need manual setup on Linux:
-- **[Starship](https://starship.rs/#quick-install)** - Cross-shell prompt
-- **[Lazygit](https://github.com/jesseduffield/lazygit#installation)** - Terminal UI for git
-- **[tree-sitter-cli](https://github.com/tree-sitter/tree-sitter/blob/master/cli/README.md)** - Required by nvim-treesitter
-- **[Hack Nerd Font](https://www.nerdfonts.com/font-downloads)** - Icons in Neovim
+## WSL (Windows Subsystem for Linux)
+
+The bootstrap works unchanged inside a WSL Ubuntu distro. Windows-side specifics:
+
+- **Nerd Font**: the terminal renders on Windows, so install
+  [Hack Nerd Font](https://www.nerdfonts.com/font-downloads) *on Windows*
+  (unzip, select the `.ttf` files, right-click → Install), then set
+  `Hack Nerd Font` as the font face in your Windows Terminal profile.
+- **Clipboard**: WSLg's Wayland clipboard bridges to Windows automatically;
+  `wl-clipboard` (installed via apt by init.zsh) makes nvim's `"+y` and
+  tmux-yank use it.
+- **Alacritty**: not installed on Linux — use Windows Terminal, or install
+  Alacritty for Windows separately (it reads `%APPDATA%\alacritty`, not the
+  symlinked config).
 
 ## Shell Aliases
 

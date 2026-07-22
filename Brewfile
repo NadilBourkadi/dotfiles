@@ -9,5 +9,6 @@ brew "tree-sitter-cli"
 brew "pandoc"
 brew "gh"
 brew "harlequin"
+brew "unzip" if OS.linux?  # minimal Ubuntu lacks it; Mason needs it for zip-packaged tools
 
-cask "font-hack-nerd-font"
+cask "font-hack-nerd-font" if OS.mac?
