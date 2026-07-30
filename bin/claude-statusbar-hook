@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+# claude-statusbar-hook <event>
+# Invoked by Claude Code hooks. Reads JSON payload on stdin, writes per-session
+# state to ~/.claude/statusbar/<session_id>.json, and pushes a per-window tmux
+# flag (@claude_status) for immediate window-list highlighting.
+#
+# IMPORTANT: always exits 0 — must never break Claude.
+
+set +e
+
+EVENT="${1:-}"
+JQ="$(command -v jq 2>/dev/null)"
+DIR="$HOME/.claude/statusbar"
+
+# Bail out silently if jq is unavailable
+[ -n "$JQ" ] || exit 0
+
+# Read stdin fully (hook payload)
+INPUT="$(cat 2>/dev/null)"
+
+# Extract session_id — nothing to do without it
+SID="$("$JQ" -r '.session_id // empty' <<<"$INPUT" 2>/dev/null)"
+[ -z "$SID" ] && exit 0
+
+CWD="$("$JQ" -r '.cwd // empty' <<<"$INPUT" 2>/dev/null)"
+PANE="${TMUX_PANE:-}"
+# $PPID is the Claude process — Claude Code invokes hooks directly (no intermediate
+# shell), so $PPID is the Claude PID and matches sessions/<PID>.json for liveness
+CPID="${PPID:-0}"
+# macOS date lacks %3N (milliseconds) — use seconds * 1000 instead
+NOW="$(( $(date +%s) * 1000 ))"
+
+mkdir -p "$DIR" 2>/dev/null
+
+# Map event → state
+case "$EVENT" in
+    SessionEnd)
+        rm -f "$DIR/$SID.json" 2>/dev/null
+        STATE=""
+        ;;
+    Notification|Stop)
+        STATE="waiting"
+        ;;
+    SessionStart|UserPromptSubmit|PreToolUse|*)
+        STATE="working"
+        ;;
+esac
+
+# Write state file atomically (temp + mv, no flock on macOS)
+if [ -n "$STATE" ]; then
+    TMP="$DIR/.$SID.$$.tmp"
+    "$JQ" -n \
+        --arg  sid   "$SID"   \
+        --arg  st    "$STATE" \
+        --arg  cwd   "$CWD"   \
+        --arg  pane  "$PANE"  \
+        --argjson pid  "$CPID" \
+        --argjson ts   "$NOW"  \
+        '{session_id:$sid, state:$st, cwd:$cwd, tmux_pane:$pane, pid:$pid, updated_at:$ts}' \
+        >"$TMP" 2>/dev/null \
+    && mv -f "$TMP" "$DIR/$SID.json" 2>/dev/null
+fi
+
+# Push per-window tmux flag (instant highlight, no status-interval delay)
+if [ -n "$PANE" ] && command -v tmux >/dev/null 2>&1; then
+    if [ "$STATE" = "waiting" ]; then
+        tmux set-option -w -t "$PANE" @claude_status waiting 2>/dev/null
+    elif [ "$STATE" = "working" ]; then
+        tmux set-option -w -t "$PANE" @claude_status working 2>/dev/null
+    else
+        tmux set-option -uw -t "$PANE" @claude_status 2>/dev/null
+    fi
+fi
+
+exit 0

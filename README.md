@@ -33,6 +33,14 @@ The script will:
 | `nvim/` | `~/.config/nvim` |
 | `alacritty.toml` | `~/.config/alacritty/alacritty.toml` |
 | `starship.toml` | `~/.config/starship.toml` |
+| `bin/claude-statusbar-hook` | `~/.local/bin/claude-statusbar-hook` |
+| `bin/claude-statusbar-status` | `~/.local/bin/claude-statusbar-status` |
+
+Files under `private/` (gitignored) are symlinked separately if the directory exists:
+
+| Source | Target |
+|--------|--------|
+| `private/believ/claude-settings.json` | `~/.claude/settings.json` |
 
 ## Prerequisites
 
@@ -50,6 +58,7 @@ The script will:
 - **tree-sitter-cli** - Required by nvim-treesitter
 - **ripgrep** - Fast searching for Telescope
 - **fd** - Fast file finder for Telescope
+- **jq** - JSON processor (used by Claude Code status bar scripts)
 - **Pandoc** - Document conversion (markdown to HTML export)
 - **Starship** - Cross-shell prompt
 - **Lazygit** - Terminal UI for git
@@ -365,6 +374,15 @@ Run `nvim` after setup - lazy.nvim will automatically install all plugins.
 
 Sessions auto-save every 10 minutes via tmux-continuum and auto-restore when tmux starts. Nvim sessions are restored via persistence.nvim.
 
+### Claude Code status indicators
+
+Two indicators surface the state of running Claude Code CLI instances:
+
+- **Global count** (status-right): `󰚩 N waiting · M working` — turns red when any instance is waiting for input (permission prompt or idle). Refreshes every 5 seconds.
+- **Per-window highlight**: the window name turns red+bold the instant a Claude instance in that window is waiting for input (pushed directly by the hook, no polling delay).
+
+Both are driven by Claude Code hooks configured in `~/.claude/settings.json` (managed via `private/believ/claude-settings.json`). The hooks invoke `claude-statusbar-hook` on each event; tmux reads state from `~/.claude/statusbar/` via `claude-statusbar-status`.
+
 ## File Structure
 
 ```
@@ -379,6 +397,9 @@ dotfiles/
 │   ├── theme.zsh          # Catppuccin Mocha colors + completion styling
 │   └── functions.zsh      # Shell functions (av, kill-orphan-nvims)
 ├── tmux.conf           # Tmux configuration
+├── bin/                # Helper scripts (symlinked to ~/.local/bin)
+│   ├── claude-statusbar-hook    # Claude Code hook writer
+│   └── claude-statusbar-status  # Tmux status-right reader
 ├── alacritty.toml      # Alacritty terminal config
 ├── starship.toml       # Starship prompt config
 ├── gitignore_global    # Global git ignore patterns

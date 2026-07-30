@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+# claude-statusbar-status
+# Invoked by tmux status-right via #(claude-statusbar-status).
+# Reads ~/.claude/statusbar/*.json, cross-checks PID liveness against
+# ~/.claude/sessions/*.json, and prints a Catppuccin-coloured tmux segment.
+# Purges stale state files as a side effect.
+# Prints nothing (exits 0) when no Claude instances are running.
+
+set +e
+
+JQ="$(command -v jq 2>/dev/null)"
+DIR="$HOME/.claude/statusbar"
+SESS="$HOME/.claude/sessions"
+
+# Guard: nothing to do if dir absent or jq unavailable
+[ -d "$DIR" ] || exit 0
+[ -n "$JQ" ] || exit 0
+
+# Build list of live PIDs from sessions/*.json into a temp file
+# (avoids bash 3.2 incompatibility with declare -A on macOS system bash)
+LIVE_PIDS="$(mktemp 2>/dev/null)" || { exit 0; }
+trap 'rm -f "$LIVE_PIDS"' EXIT
+for f in "$SESS"/*.json; do
+    [ -e "$f" ] || continue
+    pid="$("$JQ" -r '.pid // empty' "$f" 2>/dev/null)"
+    [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null && printf '%s\n' "$pid" >>"$LIVE_PIDS"
+done
+
+working=0
+waiting=0
+
+for f in "$DIR"/*.json; do
+    [ -e "$f" ] || continue
+    pid="$("$JQ" -r '.pid // empty' "$f" 2>/dev/null)"
+    state="$("$JQ" -r '.state // empty' "$f" 2>/dev/null)"
+    if [ -z "$pid" ] || ! grep -qF "$pid" "$LIVE_PIDS" 2>/dev/null; then
+        pane="$("$JQ" -r '.tmux_pane // empty' "$f" 2>/dev/null)"
+        rm -f "$f" 2>/dev/null
+        [ -n "$pane" ] && tmux set-option -uw -t "$pane" @claude_status 2>/dev/null
+        continue
+    fi
+    case "$state" in
+        waiting) waiting=$(( waiting + 1 )) ;;
+        working) working=$(( working + 1 )) ;;
+    esac
+done
+
+total=$(( working + waiting ))
+[ "$total" -eq 0 ] && exit 0
+
+# Catppuccin Mocha colours
+RED='#f38ba8'
+GREEN='#a6e3a1'
+OVERLAY='#6c7086'
+
+if [ "$waiting" -gt 0 ]; then
+    extra=""
+    [ "$working" -gt 0 ] && extra=" · ${working} working"
+    printf '#[fg=%s bold]󰚩 %d waiting%s #[fg=%s]| ' \
+        "$RED" "$waiting" "$extra" "$OVERLAY"
+else
+    printf '#[fg=%s]󰚩 %d working #[fg=%s]| ' \
+        "$GREEN" "$working" "$OVERLAY"
+fi
+
+exit 0
