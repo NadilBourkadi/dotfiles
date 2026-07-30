@@ -15,6 +15,9 @@ DIR="$HOME/.claude/statusbar"
 # Bail out silently if jq is unavailable
 [ -n "$JQ" ] || exit 0
 
+TMP=""
+trap '[ -n "$TMP" ] && rm -f "$TMP"' EXIT
+
 # Read stdin fully (hook payload)
 INPUT="$(cat 2>/dev/null)"
 

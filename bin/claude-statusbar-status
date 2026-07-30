@@ -12,8 +12,9 @@ JQ="$(command -v jq 2>/dev/null)"
 DIR="$HOME/.claude/statusbar"
 SESS="$HOME/.claude/sessions"
 
-# Guard: nothing to do if dir absent or jq unavailable
+# Guard: nothing to do if required dirs absent or jq unavailable
 [ -d "$DIR" ] || exit 0
+[ -d "$SESS" ] || exit 0
 [ -n "$JQ" ] || exit 0
 
 # Build list of live PIDs from sessions/*.json into a temp file
