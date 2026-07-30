@@ -33,7 +33,7 @@ for f in "$DIR"/*.json; do
     [ -e "$f" ] || continue
     pid="$("$JQ" -r '.pid // empty' "$f" 2>/dev/null)"
     state="$("$JQ" -r '.state // empty' "$f" 2>/dev/null)"
-    if [ -z "$pid" ] || ! grep -qF "$pid" "$LIVE_PIDS" 2>/dev/null; then
+    if [ -z "$pid" ] || ! grep -qxF "$pid" "$LIVE_PIDS" 2>/dev/null; then
         pane="$("$JQ" -r '.tmux_pane // empty' "$f" 2>/dev/null)"
         rm -f "$f" 2>/dev/null
         [ -n "$pane" ] && tmux set-option -uw -t "$pane" @claude_status 2>/dev/null
