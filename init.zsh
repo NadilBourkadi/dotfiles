@@ -34,6 +34,8 @@ typeset -A file_symlinks=(
   [gitignore_global]=~/.gitignore_global
   [starship.toml]=~/.config/starship.toml
   [alacritty.toml]=~/.config/alacritty/alacritty.toml
+  [bin/claude-statusbar-hook]=~/.local/bin/claude-statusbar-hook
+  [bin/claude-statusbar-status]=~/.local/bin/claude-statusbar-status
 )
 
 for src dest in "${(@kv)file_symlinks}"; do
@@ -42,6 +44,7 @@ for src dest in "${(@kv)file_symlinks}"; do
   ln -sf "$DOTFILES_DIR/$src" "$dest"
   echo "${GREEN}Done${NC}"
 done
+chmod +x "$DOTFILES_DIR"/bin/claude-statusbar-* 2>/dev/null
 
 # Directory symlinks (must rm -f first to avoid circular symlink)
 typeset -A dir_symlinks=(
@@ -55,6 +58,23 @@ for src dest in "${(@kv)dir_symlinks}"; do
   ln -s "$DOTFILES_DIR/$src" "$dest"
   echo "${GREEN}Done${NC}"
 done
+
+# Private symlinks (gitignored; only applied when private/ is present)
+# Keys are relative to private/, values are the symlink destinations.
+# Add entries here for any private-repo files that need symlinking.
+if [[ -d "$DOTFILES_DIR/private" ]]; then
+  typeset -A private_symlinks=(
+    [believ/claude-settings.json]=~/.claude/settings.json
+  )
+  for src dest in "${(@kv)private_symlinks}"; do
+    if [[ -f "$DOTFILES_DIR/private/$src" ]]; then
+      echo -n "Symlinking private/$src... "
+      mkdir -p "$(dirname "$dest")"
+      ln -sf "$DOTFILES_DIR/private/$src" "$dest"
+      echo "${GREEN}Done${NC}"
+    fi
+  done
+fi
 
 # ─────────────────────────────────────────────────────────────
 # Git config

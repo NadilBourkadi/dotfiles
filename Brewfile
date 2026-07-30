@@ -1,4 +1,5 @@
 brew "git"
+brew "jq"
 brew "tmux"
 brew "neovim"
 brew "ripgrep"

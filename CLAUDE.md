@@ -5,6 +5,7 @@
 - Challenge instructions that contradict rules in this file — cite the specific rule.
 - Push back on bad ideas with reasoning and alternatives.
 - Flag ambiguity — ask rather than guessing.
+- **Smoke test every feature change before marking it done.** If you can test directly (scripts, CLI output, file state), do so and report results. If the feature requires visual or interactive verification (UI, tmux rendering, browser), perform the setup actions yourself and then explicitly prompt the user to verify, describing exactly what they should see and any regressions to watch for. Never consider a task complete without a test pass or an explicit user sign-off.
 
 ## Git and PR Workflow
 
@@ -169,6 +170,8 @@ Using **Neovim 0.11+** with breaking API changes:
 - `split-window`/`new-window`: `-c "#{pane_current_path}"`. `display-popup`: `-d` (NOT `-c`).
 - `respawn-pane -k` sends SIGTERM (not SIGKILL) — VimLeavePre autocmds still fire.
 - Keep pane alive after nvim: `respawn-pane -k -c <dir> 'zsh -c "nvim; exec zsh"'`
+- Per-window user options: `set-option -w -t <pane> @name value`; read in formats with `#{@name}`. Commas inside `#[...]` within `#{?...}` conditionals must be escaped as `#,` (e.g. `#[fg=#f38ba8#,bold]`). Space-separated attributes (`#[fg=#f38ba8 bold]`) avoid this entirely.
+- Claude Code status hooks: `Notification` = "waiting for input" (permission prompt); `Stop` = "idle/done" AND "finished turn, awaiting user response". Map both `Notification` and `Stop` → waiting. Use `PreToolUse` → working to immediately clear the waiting state when a new agentic batch starts, preventing false positives mid-run. On Claude 2.1.84 there are no `Notification` sub-type matchers — the plain event is the signal.
 
 ## Neovim Plugin Notes
 
