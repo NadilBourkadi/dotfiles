@@ -164,6 +164,11 @@ Using **Neovim 0.11+** with breaking API changes:
    `.claude-code-*` dirs in `/opt/homebrew/lib/node_modules/@anthropic-ai/`
    that block all future updates with `ENOTEMPTY`. The `zshrc` cleans these
    up on shell startup.
+7. **Interactive rebase on hook-symlinked files**: If a file being rebased is
+   symlinked from `~/.local/bin/` and wired as a Claude Code hook, conflict
+   markers in that file will cause every subsequent tool call to fail with a
+   syntax error. Don't use `git rebase -i` to squash commits that touch those
+   files. Use `git reset --soft <base>` + a single new commit instead.
 
 ## Tmux Gotchas
 
@@ -172,6 +177,8 @@ Using **Neovim 0.11+** with breaking API changes:
 - Keep pane alive after nvim: `respawn-pane -k -c <dir> 'zsh -c "nvim; exec zsh"'`
 - Per-window user options: `set-option -w -t <pane> @name value`; read in formats with `#{@name}`. Commas inside `#[...]` within `#{?...}` conditionals must be escaped as `#,` (e.g. `#[fg=#f38ba8#,bold]`). Space-separated attributes (`#[fg=#f38ba8 bold]`) avoid this entirely.
 - Claude Code status hooks: `Notification` = "waiting for input" (permission prompt); `Stop` = "idle/done" AND "finished turn, awaiting user response". Map both `Notification` and `Stop` → waiting. Use `PreToolUse` → working to immediately clear the waiting state when a new agentic batch starts, preventing false positives mid-run. On Claude 2.1.84 there are no `Notification` sub-type matchers — the plain event is the signal.
+- `#(command)` in `status-right` runs under tmux's inherited PATH (the shell that launched the tmux server). Use absolute paths (e.g. `$HOME/.local/bin/script`) — `$HOME` is expanded by the shell tmux spawns and is always set. Don't rely on `~/.local/bin` being on PATH.
+- `~/.claude/sessions/<PID>.json` is the liveness source for Claude Code instances. Each file contains a `pid` field matching the filename stem. Cross-check with `kill -0 <pid>` to detect dead processes. If the sessions directory is absent, no Claude instance can be running — bail out rather than treating all state as stale.
 
 ## Neovim Plugin Notes
 
