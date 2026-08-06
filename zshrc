@@ -40,6 +40,6 @@ command -v starship &>/dev/null && eval "$(starship init zsh)"
 
 # Tmux auto-attach. Skipped in IDE terminals, non-interactive shells, and WSL's
 # console login session (see zsh/wsl.zsh for why that one matters).
-if command -v tmux &>/dev/null && [ -n "$PS1" ] && [ -z "$TMUX" ] && [ -z "$VSCODE_RESOLVING_ENVIRONMENT" ] && [ -z "$CURSOR_TRACE_ID" ] && [[ ! "$TERM_PROGRAM" =~ ^(vscode|cursor)$ ]] && ! _wsl_console_login; then
+if command -v tmux &>/dev/null && [[ -o interactive ]] && [ -t 0 ] && [ -z "$TMUX" ] && [ -z "$VSCODE_RESOLVING_ENVIRONMENT" ] && [ -z "$CURSOR_TRACE_ID" ] && [[ ! "$TERM_PROGRAM" =~ ^(vscode|cursor)$ ]] && ! _wsl_console_login; then
   tmux attach 2>/dev/null || tmux new-session
 fi
