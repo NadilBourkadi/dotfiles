@@ -149,6 +149,11 @@ Using **Neovim 0.11+** with breaking API changes:
 - Uses Zinit (auto-installs on first shell launch). `OMZL::` for OMZ libraries, `OMZP::` for plugins, `light` for community.
 - Must call `autoload -Uz compinit && compinit` + `zinit cdreplay -q` after plugins load
 - `zshrc` sources `private/zshrc` if present (gitignored, for work-specific config)
+- **Don't test interactivity with `[ -n "$PS1" ]`** — that's a bash idiom. zsh
+  gives `PS1` a default and starship sets it unconditionally, so it is always
+  true. Use `[[ -o interactive ]]`, and add `[ -t 0 ]` when the code needs a
+  real terminal: `zsh -ic '<cmd>'` is interactive but may have no tty, and
+  anything that talks to a terminal (e.g. tmux) will fail there.
 
 ### Neovim Directory Structure
 - `core/options.lua` — Editor options
