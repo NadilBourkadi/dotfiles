@@ -1,4 +1,7 @@
-export TERM=xterm-256color
+# Assert 256 colours everywhere except on terminals that genuinely can't render
+# them — WSL's console login session, emacs shell-mode, serial consoles are all
+# TERM=dumb. Clobbering that loses the only portable "not a real terminal" signal.
+[[ "$TERM" == dumb ]] || export TERM=xterm-256color
 export EDITOR='nvim'
 bindkey -e  # Use emacs keybindings for line editing (zsh defaults to vi when EDITOR=nvim)
 export PATH="$HOME/.local/bin:$PATH"
