@@ -23,9 +23,14 @@ export ZSH_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/oh-my-zsh"
 [[ -d "$ZSH_CACHE_DIR" ]] || mkdir -p "$ZSH_CACHE_DIR"
 
 # Source modular config
-for f in ~/Dev/dotfiles/zsh/{plugins,theme,functions}.zsh; do
+for f in ~/Dev/dotfiles/zsh/{wsl,plugins,theme,functions}.zsh; do
   [[ -f "$f" ]] && source "$f"
 done
+
+# The tmux guard below calls _wsl_console_login. Sourcing is best-effort, so
+# define a fallback if zsh/wsl.zsh is missing (a partial checkout, or mid-rebase
+# while ~/.zshrc is symlinked into the repo) — otherwise every prompt errors.
+(( $+functions[_wsl_console_login] )) || _wsl_console_login() { return 1 }
 
 # Starship prompt
 command -v starship &>/dev/null && eval "$(starship init zsh)"
@@ -33,7 +38,8 @@ command -v starship &>/dev/null && eval "$(starship init zsh)"
 # Private extensions (gitignored)
 [[ -f ~/Dev/dotfiles/private/zshrc ]] && source ~/Dev/dotfiles/private/zshrc
 
-# Tmux auto-attach (skip in IDE terminals and non-interactive shells)
-if command -v tmux &>/dev/null && [ -n "$PS1" ] && [ -z "$TMUX" ] && [ -z "$VSCODE_RESOLVING_ENVIRONMENT" ] && [ -z "$CURSOR_TRACE_ID" ] && [[ ! "$TERM_PROGRAM" =~ ^(vscode|cursor)$ ]]; then
+# Tmux auto-attach. Skipped in IDE terminals, non-interactive shells, and WSL's
+# console login session (see zsh/wsl.zsh for why that one matters).
+if command -v tmux &>/dev/null && [ -n "$PS1" ] && [ -z "$TMUX" ] && [ -z "$VSCODE_RESOLVING_ENVIRONMENT" ] && [ -z "$CURSOR_TRACE_ID" ] && [[ ! "$TERM_PROGRAM" =~ ^(vscode|cursor)$ ]] && ! _wsl_console_login; then
   tmux attach 2>/dev/null || tmux new-session
 fi

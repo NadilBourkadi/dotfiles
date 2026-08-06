@@ -90,6 +90,13 @@ The bootstrap works unchanged inside a WSL Ubuntu distro. Windows-side specifics
 - **Alacritty**: not installed on Linux — use Windows Terminal, or install
   Alacritty for Windows separately (it reads `%APPDATA%\alacritty`, not the
   symlinked config).
+- **Console login session**: WSL runs systemd (`systemd=true` in
+  `/etc/wsl.conf`), which logs you into a console tty on every boot in
+  addition to your terminal. That extra shell sources `zshrc`, so tmux
+  auto-attach skips it — otherwise it would race your terminal to start tmux,
+  and tmux-continuum (which counts raw `tmux` *client* processes to decide
+  whether another server is running) would silently disable session
+  save/restore.
 
 ## Shell Aliases
 
@@ -412,7 +419,8 @@ dotfiles/
 ├── zsh/                # Modular Zsh config
 │   ├── plugins.zsh        # Zinit setup + plugin loading
 │   ├── theme.zsh          # Catppuccin Mocha colors + completion styling
-│   └── functions.zsh      # Shell functions (av, kill-orphan-nvims)
+│   ├── functions.zsh      # Shell functions (av, kill-orphan-nvims)
+│   └── wsl.zsh            # WSL predicates (_is_wsl, _wsl_console_login)
 ├── tmux.conf           # Tmux configuration
 ├── bin/                # Helper scripts (symlinked to ~/.local/bin)
 │   ├── claude-statusbar-hook    # Claude Code hook writer
@@ -473,6 +481,6 @@ Work-specific config (credentials, aliases) lives in the gitignored `private/` d
 ## Notes
 
 - Neovim opens nvim-tree automatically when opening a directory
-- Tmux auto-attach skips VS Code and Cursor terminals
+- Tmux auto-attach skips VS Code and Cursor terminals, and WSL's console login session
 - Run `:Lazy` in Neovim to manage plugins
 - Run `:Mason` in Neovim to install LSP servers
