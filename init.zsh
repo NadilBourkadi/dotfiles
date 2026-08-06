@@ -16,6 +16,15 @@ NC='\033[0m' # No Color
 # Derive dotfiles directory from script location
 DOTFILES_DIR="$(cd "$(dirname "$0")" && pwd)"
 
+# Shared WSL predicates (_is_wsl, _wsl_console_login) — also sourced by zshrc.
+# Guarded: set -e would otherwise abort the whole bootstrap before any symlink
+# is created if the module were missing.
+if [[ -f "$DOTFILES_DIR/zsh/wsl.zsh" ]]; then
+  source "$DOTFILES_DIR/zsh/wsl.zsh"
+else
+  _is_wsl() { return 1 }   # degrade to "not WSL" rather than killing the run
+fi
+
 echo "Setting up dotfiles from $DOTFILES_DIR..."
 
 # Prerequisite checks
@@ -138,7 +147,7 @@ elif [[ "$OSTYPE" == "linux"* ]]; then
     exit 1
   fi
 
-  if [[ -f /proc/version ]] && grep -qi microsoft /proc/version; then
+  if _is_wsl; then
     echo "Note: WSL — install 'Hack Nerd Font' on Windows and select it in your terminal profile (see README)"
   fi
 

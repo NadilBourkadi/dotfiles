@@ -122,6 +122,27 @@ Using **Neovim 0.11+** with breaking API changes:
 - WSL clipboard: WSLg Wayland + `wl-clipboard` (apt) — no win32yank needed.
 - Mason needs `unzip` on PATH for zip-packaged tools (e.g. stylua) — minimal
   Ubuntu doesn't ship it; it's in the Brewfile guarded with `if OS.linux?`.
+- **WSL console login session**: with `systemd=true` in `/etc/wsl.conf`, WSL
+  starts `login -- <user>` on a tty at *every* boot (`loginctl` shows it as
+  session `c1`, `Service=login`, `Type=tty`). That shell sources `zshrc` with a
+  near-empty environment — `TERM=dumb`, no `WSL_INTEROP`, no `WSL_DISTRO_NAME`,
+  no `WT_SESSION` — so any "is this interactive?" guard passes and it runs
+  alongside your real terminal. There is no macOS equivalent, so anything that
+  assumes one shell per login breaks on WSL only. Detect it with
+  `_wsl_console_login` in `zsh/wsl.zsh` (sourced by both `zshrc` and
+  `init.zsh`). It keys off the **parent process** being `login` (read from
+  `/proc/$PPID/comm`, not `ps` — a distro without procps would fail open), not
+  the absent `WSL_INTEROP`/`WSL_DISTRO_NAME`: ssh, `su -`, `sudo -i` and
+  systemd units have no interop vars either and must still get tmux. It checks
+  only the immediate parent, so a shell nested below the console shell isn't
+  recognised — the safer way to be wrong, since a false positive silently
+  denies tmux to a terminal you are actually using.
+- Use `_is_wsl` (same file) for "am I on WSL?" — never open-code it. It matches
+  the kernel string case-insensitively (WSL1 reports `Microsoft`, some builds
+  `MICROSOFT`) and falls back to `/run/WSL`, so a custom kernel set via
+  `kernel=` in `.wslconfig` (which need not contain "microsoft") still matches.
+  Both predicates are also true inside a container on a WSL2 host — containers
+  share the host kernel.
 
 ### Zsh Configuration
 - `zshrc` is a thin loader sourcing `zsh/{plugins,theme,functions}.zsh`
@@ -178,6 +199,16 @@ Using **Neovim 0.11+** with breaking API changes:
 - Per-window user options: `set-option -w -t <pane> @name value`; read in formats with `#{@name}`. Commas inside `#[...]` within `#{?...}` conditionals must be escaped as `#,` (e.g. `#[fg=#f38ba8#,bold]`). Space-separated attributes (`#[fg=#f38ba8 bold]`) avoid this entirely.
 - Claude Code status hooks: `Notification` = "waiting for input" (permission prompt); `Stop` = "idle/done" AND "finished turn, awaiting user response". Map both `Notification` and `Stop` → waiting. Use `PreToolUse` → working to immediately clear the waiting state when a new agentic batch starts, preventing false positives mid-run. On Claude 2.1.84 there are no `Notification` sub-type matchers — the plain event is the signal.
 - `#(command)` in `status-right` runs under tmux's inherited PATH (the shell that launched the tmux server). Use absolute paths (e.g. `$HOME/.local/bin/script`) — `$HOME` is expanded by the shell tmux spawns and is always set. Don't rely on `~/.local/bin` being on PATH.
+- **tmux-continuum fails open, silently.** Its `another_tmux_server_running`
+  guard counts raw `tmux` *client* processes, not servers
+  (`scripts/helpers.sh`): more than one besides the server at startup and it
+  skips `main()` entirely — no auto-restore *and* no periodic save hook. It
+  prints nothing. Diagnose with `tmux show-options -g
+  @continuum-save-last-timestamp` (`invalid option` = the save branch never
+  ran) and by checking `status-right` for a `continuum_save.sh` interpolation.
+  Note the startup branch (`> 1`) is stricter than the config-reload branch
+  (`> client count`), so a manual `prefix + r` can mask the bug for that
+  server's lifetime — always test from a cold server start.
 - `~/.claude/sessions/<PID>.json` is the liveness source for Claude Code instances. Each file contains a `pid` field matching the filename stem. Cross-check with `kill -0 <pid>` to detect dead processes. If the sessions directory is absent, no Claude instance can be running — bail out rather than treating all state as stale.
 
 ## Neovim Plugin Notes
