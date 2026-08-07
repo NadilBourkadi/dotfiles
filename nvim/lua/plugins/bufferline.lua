@@ -5,6 +5,8 @@ return {
   dependencies = { "catppuccin/nvim" },
   config = function()
     require("bufferline").setup({
+      -- Catppuccin moved bufferline out of `integrations` into this module
+      highlights = require("catppuccin.special.bufferline").get_theme(),
       options = {
         mode = "tabs", -- Show actual tabs, not buffers
         separator_style = "slant",
