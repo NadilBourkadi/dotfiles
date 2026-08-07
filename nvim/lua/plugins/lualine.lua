@@ -3,7 +3,11 @@
 
 return {
   "nvim-lualine/lualine.nvim",
-  dependencies = { "echasnovski/mini.icons" },
+  -- catppuccin is a dependency, not just a colour source: the theme module
+  -- reads require("catppuccin").options at load time, so setup() must have
+  -- already run. Today priority = 1000 happens to guarantee that; declaring
+  -- it keeps that true if lualine ever gains a lazy-load trigger.
+  dependencies = { "echasnovski/mini.icons", "catppuccin/nvim" },
   config = function()
     require("lualine").setup({
       options = {

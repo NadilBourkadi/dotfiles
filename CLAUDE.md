@@ -105,7 +105,7 @@ Update when:
 ## Critical Context
 
 ### Neovim Version
-Using **Neovim 0.11+** with breaking API changes:
+Currently on **Neovim 0.12.4**; config targets **0.11+** with breaking API changes:
 - Use `vim.lsp.config()` and `vim.lsp.enable()` for LSP, NOT `require('lspconfig')`
 - The old `nvim-treesitter.configs` module is removed — use native `vim.treesitter.start()`
 - `vim.treesitter.language.ft_to_lang` removed — use `get_lang` (shim in init.lua for plugin compat)
@@ -250,6 +250,14 @@ slightly off", so check these first after a catppuccin bump:
   defaults are merged, so it does nothing unless you pass it explicitly. Do not
   assume detection is on and delete the `integrations` block — pass
   `auto_integrations = true` yourself.
+- We pass `auto_integrations = true` rather than hand-maintaining the list,
+  which is why cmp, dap, dap_ui, diffview, mason, mini, render_markdown, ufo,
+  which_key and copilot_vim are now themed too — the old hand-written list
+  had drifted and covered none of them. The trade-off is that catppuccin
+  writes those plugins' highlight groups, so if a plugin config ever sets its
+  own colours, expect a last-writer-wins clash and pin that one key to
+  `false`. Dump `require("catppuccin").options.integrations` to see the live
+  set.
 
 ### nvim-ufo (folding)
 Requires: `foldcolumn = "0"`, `foldlevel = 99`, `foldlevelstart = 99`, `foldenable = true`

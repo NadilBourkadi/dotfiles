@@ -4,9 +4,14 @@ return {
   version = "*",
   dependencies = { "catppuccin/nvim" },
   config = function()
+    -- Catppuccin moved bufferline out of `integrations` into this module.
+    -- Guarded: upstream renames this sort of thing, and a bare require here
+    -- would abort setup() and leave no tabline at all rather than fall back
+    -- to bufferline's own colours.
+    local ok, ctp = pcall(require, "catppuccin.special.bufferline")
+
     require("bufferline").setup({
-      -- Catppuccin moved bufferline out of `integrations` into this module
-      highlights = require("catppuccin.special.bufferline").get_theme(),
+      highlights = ok and ctp.get_theme() or nil,
       options = {
         mode = "tabs", -- Show actual tabs, not buffers
         separator_style = "slant",
