@@ -1,0 +1,233 @@
+#!/usr/bin/env bash
+# alacritty-windows-sync [--install] [--force] [--quiet]
+#
+# Generates the Windows Alacritty config from this repo and writes it to
+# %APPDATA%\alacritty\alacritty.toml, so the Windows terminal that fronts WSL
+# is configured from the same source as the macOS one.
+#
+# Why a generated copy rather than a symlink, as on macOS:
+#   - A symlink created from WSL onto /mnt/c is an LX reparse point. Native
+#     Windows apps cannot follow it (they get an IOException), so Alacritty
+#     would never read it.
+#   - A native Windows symlink into \\wsl.localhost works, but needs admin (or
+#     Developer Mode) to create, and makes Alacritty's config read depend on
+#     the WSL VM being up. At cold boot that is a race, and losing the config
+#     means losing [terminal.shell] — i.e. a cmd.exe prompt instead of WSL.
+#
+# Ordering matters: everything cheap (input reads, templating, comparing
+# against the last-written destination) happens before the first cmd.exe
+# launch, which costs ~200ms. zshrc calls this on every interactive shell.
+#
+# Safe to call unconditionally: exits 0 without touching anything when not on
+# WSL or when Windows interop is unavailable.
+
+set -uo pipefail
+
+# Resolve symlinks: this script is invoked through ~/.local/bin, so a bare
+# dirname would put DOTFILES_DIR at ~/.local and find none of the inputs.
+SELF="${BASH_SOURCE[0]}"
+while [ -L "$SELF" ]; do
+  target="$(readlink "$SELF")"
+  case "$target" in
+    /*) SELF="$target" ;;
+    *)  SELF="$(dirname "$SELF")/$target" ;;
+  esac
+done
+DOTFILES_DIR="$(cd "$(dirname "$SELF")/.." && pwd)"
+
+INSTALL=0
+QUIET=0
+FORCE=0
+for arg in "$@"; do
+  case "$arg" in
+    --install) INSTALL=1 ;;
+    --quiet)   QUIET=1 ;;
+    --force)   FORCE=1 ;;
+    -h|--help)
+      cat <<'USAGE'
+Usage: alacritty-windows-sync [--install] [--force] [--quiet]
+
+Generates the Windows Alacritty config from this repo into
+%APPDATA%\alacritty\alacritty.toml. No-op unless running under WSL.
+
+  --install  Install Alacritty on Windows via winget if absent
+  --force    Bypass the fast path and re-check the destination
+  --quiet    Suppress informational output
+USAGE
+      exit 0 ;;
+    *) echo "unknown argument: $arg" >&2; exit 2 ;;
+  esac
+done
+
+say() { [ "$QUIET" -eq 1 ] || echo "$@"; }
+# Failures here are never fatal: this is a convenience layer on top of a
+# working WSL setup, and init.zsh runs under `set -e`.
+bail() { say "alacritty-windows-sync: $1"; exit 0; }
+
+BANNER="# GENERATED FILE — DO NOT EDIT."
+
+# ── Preconditions (no interop) ───────────────────────────────────────────────
+
+# Mirrors _is_wsl in zsh/wsl.zsh, which cannot be sourced here: that file is
+# zsh and this script is bash. Keep the two in step.
+_is_wsl() {
+  local rel=""
+  [ -r /proc/sys/kernel/osrelease ] && rel="$(tr '[:upper:]' '[:lower:]' < /proc/sys/kernel/osrelease)"
+  case "$rel" in *microsoft*) return 0 ;; esac
+  [ -e /run/WSL ]
+}
+
+_is_wsl || bail "not running under WSL, nothing to do"
+command -v wslpath >/dev/null 2>&1 || bail "wslpath not found, skipping"
+# Resolved through PATH, because that is how the calls below invoke it: with
+# appendWindowsPath=false the absolute path still exists and is executable
+# while bare cmd.exe is unreachable, so testing the path would pass and every
+# interop call would then silently yield nothing.
+command -v cmd.exe >/dev/null 2>&1 || bail "Windows interop unavailable (cmd.exe not on PATH), skipping"
+
+THEME="$DOTFILES_DIR/alacritty/theme.toml"
+WINDOWS="$DOTFILES_DIR/alacritty/windows.toml"
+for f in "$THEME" "$WINDOWS"; do
+  [ -r "$f" ] || bail "missing $f"
+done
+
+# Checked before any interop: ssh, `su -` and systemd units on WSL have no
+# WSL_DISTRO_NAME but do reach this script, and bailing after the cmd.exe
+# launch would make every such shell pay ~200ms it can never benefit from.
+DISTRO="${WSL_DISTRO_NAME:-}"
+[ -n "$DISTRO" ] || bail "WSL_DISTRO_NAME unset, cannot template the shell command"
+# The name lands inside a TOML basic string, where \ and " are escapes. Refuse
+# loudly rather than emit a config that parses into a different distro name.
+case "$DISTRO" in
+  *[\\\"]*) bail "distro name '$DISTRO' contains a backslash or quote, cannot embed it safely" ;;
+esac
+
+# ── Generate (no interop) ────────────────────────────────────────────────────
+
+# Substitution is done with prefix/suffix removal rather than sed s/// or
+# ${var//x/y}. Distro names are free-form, and both of those treat characters
+# in the *replacement* specially: sed breaks on / and &, and bash 5.2's
+# patsub_replacement expands a bare & to the matched text. Neither errors —
+# they silently emit a wrong or truncated config.
+expand_distro() {
+  local line head
+  while IFS= read -r line || [ -n "$line" ]; do
+    head=""
+    while case "$line" in *@DISTRO@*) true ;; *) false ;; esac; do
+      head="$head${line%%@DISTRO@*}$DISTRO"
+      line="${line#*@DISTRO@}"
+    done
+    printf '%s%s\n' "$head" "$line"
+  done < "$1"
+}
+
+TMP="$(mktemp)"
+trap 'rm -f "$TMP"' EXIT
+
+{
+  echo "$BANNER"
+  echo "#"
+  echo "# Written by bin/alacritty-windows-sync from the dotfiles repo."
+  echo "# Edit alacritty/theme.toml or alacritty/windows.toml there instead;"
+  echo "# this file is regenerated on shell startup and by init.zsh."
+  echo
+  cat "$THEME"
+  echo
+  expand_distro "$WINDOWS"
+} > "$TMP" || bail "could not write the generated config to $TMP"
+
+# A truncated write would still be valid TOML. Check the genuinely last
+# meaningful line — the args, which carry the distro and working directory.
+# Checking the section header or even `program` would pass a config cut off
+# before the args, leaving Alacritty to launch wsl.exe bare: Windows' default
+# distro, in the Windows working directory.
+grep -q "^args = .*\"$DISTRO\"" "$TMP" || bail "generated config is incomplete, refusing to publish"
+
+# ── Fast path: compare against the last known destination ────────────────────
+#
+# The stamp caches the resolved destination path so this can compare content
+# without a cmd.exe launch. Content comparison rather than mtimes: the
+# destination lives on drvfs with different timestamp granularity to the Linux
+# filesystem holding the stamp, and it also catches deletion and hand-edits.
+STAMP="${XDG_CACHE_HOME:-$HOME/.cache}/dotfiles/alacritty-windows-sync.stamp"
+if [ "$FORCE" -eq 0 ] && [ -s "$STAMP" ]; then
+  cached_dest="$(head -n1 "$STAMP")"
+  if [ -n "$cached_dest" ] && [ -f "$cached_dest" ] && cmp -s "$TMP" "$cached_dest"; then
+    exit 0
+  fi
+fi
+
+# ── Resolve %APPDATA% (first interop call) ───────────────────────────────────
+
+# Run from /mnt/c so cmd.exe does not warn about an unsupported UNC cwd.
+# </dev/null so a shell-startup call cannot swallow terminal input.
+APPDATA_WIN="$(cd /mnt/c && cmd.exe /c 'echo %APPDATA%' 2>/dev/null </dev/null | tr -d '\r\n')"
+case "$APPDATA_WIN" in
+  ?:\\*) ;;
+  *) bail "could not resolve %APPDATA% (got '${APPDATA_WIN}')" ;;
+esac
+
+DEST_DIR="$(wslpath -u "$APPDATA_WIN")/alacritty"
+DEST="$DEST_DIR/alacritty.toml"
+
+# ── Install Alacritty (opt-in) ───────────────────────────────────────────────
+
+if [ "$INSTALL" -eq 1 ]; then
+  PROGRAM_FILES="$(cd /mnt/c && cmd.exe /c 'echo %ProgramFiles%' 2>/dev/null </dev/null | tr -d '\r\n')"
+  need_install=0
+  case "$PROGRAM_FILES" in
+    # Unresolvable, or installed somewhere else (a user-scope winget install
+    # lands outside %ProgramFiles%): assume present rather than reinstalling on
+    # every bootstrap. Only a resolvable path with nothing there triggers it.
+    ?:\\*) [ -x "$(wslpath -u "$PROGRAM_FILES")/Alacritty/alacritty.exe" ] || need_install=1
+           ALACRITTY_EXE="$(wslpath -u "$PROGRAM_FILES")/Alacritty/alacritty.exe" ;;
+  esac
+  # A pre-existing install is never upgraded, and [terminal.shell] only exists
+  # in 0.13+ (it was top-level `shell` before). Without this the bootstrap
+  # reports success and every launch opens cmd.exe instead of WSL.
+  if [ "$need_install" -eq 0 ] && [ -x "${ALACRITTY_EXE:-}" ]; then
+    ver="$("$ALACRITTY_EXE" --version 2>/dev/null | tr -d '\r' | awk '{print $2}')"
+    if [ -n "$ver" ] && ! printf '0.13.0\n%s\n' "$ver" | sort -V -C; then
+      say "  Warning: Windows Alacritty $ver predates 0.13 — [terminal.shell] is ignored,"
+      say "  so it will open cmd.exe instead of WSL. Upgrade: winget upgrade Alacritty.Alacritty"
+    fi
+  fi
+  if [ "$need_install" -eq 1 ]; then
+    say "Installing Alacritty on Windows via winget..."
+    # --source winget: the msstore source blocks on an unaccepted agreement.
+    powershell.exe -NoProfile -Command \
+      "winget install --id Alacritty.Alacritty --source winget --accept-package-agreements --accept-source-agreements --disable-interactivity" \
+      >/dev/null 2>&1 </dev/null \
+      || say "  winget install failed — install Alacritty manually from https://alacritty.org"
+  fi
+fi
+
+# ── Publish ──────────────────────────────────────────────────────────────────
+
+mkdir -p "$DEST_DIR" || bail "could not create $DEST_DIR"
+
+# Never destroy a config this script did not write. Someone may already run
+# Alacritty on Windows with a hand-tuned config; the banner check is what
+# distinguishes ours from theirs.
+if [ -f "$DEST" ] && ! head -n1 "$DEST" | grep -qF "$BANNER"; then
+  backup="$DEST.pre-dotfiles.bak"
+  if [ -e "$backup" ]; then
+    bail "$DEST is not ours and $backup already exists — refusing to overwrite; move or delete one of them"
+  fi
+  cp "$DEST" "$backup" || bail "could not back up the existing $DEST"
+  say "Backed up your existing Alacritty config to ${APPDATA_WIN}\\alacritty\\$(basename "$backup")"
+fi
+
+# Write a sibling then rename: Alacritty watches this file and live-reloads,
+# and cp truncates in place, so a watcher can catch it empty and fall back to
+# the default palette until the next write.
+# $$-suffixed: zshrc runs this from every interactive shell, so a tmux-resurrect
+# restore can have many racing on the same directory. A shared staging name lets
+# one process rename a file another is still writing.
+STAGE="$DEST_DIR/.alacritty.toml.$$.new"
+cp "$TMP" "$STAGE" || bail "could not write $STAGE"
+mv -f "$STAGE" "$DEST" || { rm -f "$STAGE"; bail "could not publish $DEST"; }
+
+# Records the destination so the fast path can find it without interop.
+mkdir -p "$(dirname "$STAMP")" 2>/dev/null && printf '%s\n' "$DEST" > "$STAMP"
+say "Wrote Alacritty (Windows) config to $APPDATA_WIN\\alacritty\\alacritty.toml"

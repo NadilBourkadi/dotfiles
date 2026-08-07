@@ -40,9 +40,19 @@ The script will:
 | `gitignore_global` | `~/.gitignore_global` |
 | `nvim/` | `~/.config/nvim` |
 | `alacritty.toml` | `~/.config/alacritty/alacritty.toml` |
+| `alacritty/theme.toml` | `~/.config/alacritty/theme.toml` |
 | `starship.toml` | `~/.config/starship.toml` |
 | `bin/claude-statusbar-hook` | `~/.local/bin/claude-statusbar-hook` |
 | `bin/claude-statusbar-status` | `~/.local/bin/claude-statusbar-status` |
+| `bin/alacritty-windows-sync` | `~/.local/bin/alacritty-windows-sync` |
+
+`alacritty.toml` imports `theme.toml` through its symlink, so the repo can be
+cloned anywhere — but that means **pulling a change to the Alacritty config
+needs one `dotfiles` (init.zsh) run** before the palette applies; until then
+Alacritty falls back to its defaults. Requires Alacritty 0.14+ (`[general]
+import`); `init.zsh` warns if it finds an older one, so re-run it after
+installing Alacritty on Linux. On WSL the Windows config is **generated**
+rather than symlinked — see [WSL](#wsl-windows-subsystem-for-linux).
 
 Files under `private/` (gitignored) are symlinked separately if the directory exists:
 
@@ -87,9 +97,28 @@ The bootstrap works unchanged inside a WSL Ubuntu distro. Windows-side specifics
 - **Clipboard**: WSLg's Wayland clipboard bridges to Windows automatically;
   `wl-clipboard` (installed via apt by init.zsh) makes nvim's `"+y` and
   tmux-yank use it.
-- **Alacritty**: not installed on Linux — use Windows Terminal, or install
-  Alacritty for Windows separately (it reads `%APPDATA%\alacritty`, not the
-  symlinked config).
+- **Alacritty**: `init.zsh` installs the *Windows* build via winget and
+  configures it to launch straight into WSL. The config is **generated**, not
+  symlinked:
+
+  | | |
+  |---|---|
+  | Source of truth | `alacritty/theme.toml` (shared colours) + `alacritty/windows.toml` (Windows overrides) |
+  | Generated to | `%APPDATA%\alacritty\alacritty.toml` |
+  | By | `bin/alacritty-windows-sync`, run from `init.zsh` and on interactive shell startup |
+
+  A symlink is not possible: one created from WSL onto `/mnt/c` is an LX
+  reparse point that native Windows apps cannot follow, and a Windows-native
+  symlink into `\\wsl.localhost` needs admin *and* makes Alacritty's config
+  read depend on the WSL VM already running — at cold boot that risks losing
+  `[terminal.shell]` and dropping you into `cmd.exe`.
+
+  The practical consequence: after a `git pull`, the Windows config updates on
+  your **next shell**, not instantly as on macOS. Run
+  `alacritty-windows-sync --force` to apply it immediately.
+
+  An existing hand-written `%APPDATA%\alacritty\alacritty.toml` is copied to
+  `alacritty.toml.pre-dotfiles.bak` before being replaced.
 - **Console login session**: WSL runs systemd (`systemd=true` in
   `/etc/wsl.conf`), which logs you into a console tty on every boot in
   addition to your terminal. That extra shell sources `zshrc`, so tmux
@@ -402,10 +431,10 @@ Sessions auto-save every 10 minutes via tmux-continuum and auto-restore when tmu
 
 Two indicators surface the state of running Claude Code CLI instances:
 
-- **Global count** (status-right): `󰚩 N waiting · M working` — turns red when any instance is waiting for input (permission prompt or idle). Refreshes every 5 seconds.
+- **Global count** (status-right): ` N waiting · M working` — turns red when any instance is waiting for input (permission prompt or idle). Refreshes every 5 seconds.
 - **Per-window highlight**: the window name turns red+bold the instant a Claude instance in that window is waiting for input (pushed directly by the hook, no polling delay).
 
-Both are driven by Claude Code hooks configured in `~/.claude/settings.json` (managed via `private/believ/claude-settings.json`). The hooks invoke `claude-statusbar-hook` on each event; tmux reads state from `~/.claude/statusbar/` via `claude-statusbar-status`.
+Both are driven by Claude Code hooks configured in `~/.claude/settings.json`. The hooks invoke `claude-statusbar-hook` on each event; tmux reads state from `~/.claude/statusbar/` via `claude-statusbar-status`.
 
 ## File Structure
 
@@ -424,8 +453,12 @@ dotfiles/
 ├── tmux.conf           # Tmux configuration
 ├── bin/                # Helper scripts (symlinked to ~/.local/bin)
 │   ├── claude-statusbar-hook    # Claude Code hook writer
-│   └── claude-statusbar-status  # Tmux status-right reader
-├── alacritty.toml      # Alacritty terminal config
+│   ├── claude-statusbar-status  # Tmux status-right reader
+│   └── alacritty-windows-sync   # Generates the Windows Alacritty config (WSL)
+├── alacritty.toml      # Alacritty config for macOS / native Linux
+├── alacritty/
+│   ├── theme.toml         # Catppuccin palette, shared by all platforms
+│   └── windows.toml       # Windows overrides (WSL shell, decorations, size)
 ├── starship.toml       # Starship prompt config
 ├── gitignore_global    # Global git ignore patterns
 ├── .gitignore          # Repo-specific ignores

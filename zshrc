@@ -34,12 +34,24 @@ done
 # define a fallback if zsh/wsl.zsh is missing (a partial checkout, or mid-rebase
 # while ~/.zshrc is symlinked into the repo) — otherwise every prompt errors.
 (( $+functions[_wsl_console_login] )) || _wsl_console_login() { return 1 }
+(( $+functions[_is_wsl] )) || _is_wsl() { return 1 }
 
 # Starship prompt
 command -v starship &>/dev/null && eval "$(starship init zsh)"
 
 # Private extensions (gitignored)
 [[ -f ~/Dev/dotfiles/private/zshrc ]] && source ~/Dev/dotfiles/private/zshrc
+
+# Keep the Windows Alacritty config in step with this repo. The Windows side
+# cannot symlink into WSL (see the script's header), so a `git pull` lands on
+# the next shell rather than instantly. Cheap: the script stamp-checks and
+# returns before any Windows interop when nothing has changed.
+# _is_wsl gates it: the script is symlinked on every OS but can only ever
+# no-op off WSL, and without this every macOS shell and tmux pane forks bash
+# for nothing.
+if [[ -o interactive ]] && _is_wsl && [ -x ~/.local/bin/alacritty-windows-sync ] && ! _wsl_console_login; then
+  ~/.local/bin/alacritty-windows-sync --quiet
+fi
 
 # Tmux auto-attach. Skipped in IDE terminals, non-interactive shells, and WSL's
 # console login session (see zsh/wsl.zsh for why that one matters).
