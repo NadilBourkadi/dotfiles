@@ -51,14 +51,6 @@ _find_claude_pid() {
     return 1
 }
 
-# Bail rather than writing a pid the reader is guaranteed to reject. Writing 0
-# is worse than writing nothing: claude-statusbar-status deletes the state file
-# and unsets @claude_status, so the indicator appears and then vanishes on its
-# own — and any previously good state for this session is destroyed with it.
-# This happens legitimately, e.g. SessionStart firing before Claude Code has
-# written sessions/<PID>.json.
-CPID="$(_find_claude_pid)" || exit 0
-case "$CPID" in ''|*[!0-9]*) exit 0 ;; esac
 # macOS date lacks %3N (milliseconds) — use seconds * 1000 instead
 NOW="$(( $(date +%s) * 1000 ))"
 
@@ -78,6 +70,19 @@ case "$EVENT" in
         ;;
 esac
 
+# Resolved here, not earlier: SessionEnd teardown below must run even when the
+# walk fails, or a state file recording a still-live pid is never purged and
+# the indicator shows a phantom session for the life of the tmux server.
+#
+# An unresolvable pid means writing nothing at all. Writing 0 would be worse:
+# claude-statusbar-status deletes such a file and unsets @claude_status, so the
+# indicator appears and then vanishes on its own, taking any good state for
+# this session with it. This happens legitimately — SessionStart fires before
+# Claude Code has written sessions/<PID>.json.
+CPID="$(_find_claude_pid)" || CPID=""
+case "$CPID" in *[!0-9]*) CPID="" ;; esac
+[ -n "$CPID" ] || STATE=""
+
 # Write state file atomically (temp + mv, no flock on macOS)
 if [ -n "$STATE" ]; then
     TMP="$DIR/.$SID.$$.tmp"
@@ -93,7 +98,9 @@ if [ -n "$STATE" ]; then
     && mv -f "$TMP" "$DIR/$SID.json" 2>/dev/null
 fi
 
-# Push per-window tmux flag (instant highlight, no status-interval delay)
+# Push per-window tmux flag (instant highlight, no status-interval delay).
+# With no state file written there is nothing for the reader to purge, so the
+# flag would never be cleared — hence it is only set alongside a written state.
 if [ -n "$PANE" ] && command -v tmux >/dev/null 2>&1; then
     if [ "$STATE" = "waiting" ]; then
         tmux set-option -w -t "$PANE" @claude_status waiting 2>/dev/null
