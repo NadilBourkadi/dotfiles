@@ -1,0 +1,39 @@
+# Windows-specific Alacritty settings, layered on top of theme.toml.
+#
+# Not used directly: bin/alacritty-windows-sync concatenates theme.toml and
+# this file into a single self-contained config at
+# %APPDATA%\alacritty\alacritty.toml.
+#
+# It is concatenated rather than `import`ed because the Windows Alacritty
+# cannot read this repo without going over \\wsl.localhost, which would make
+# startup depend on the WSL VM already being up.
+
+[font]
+# Lower than the macOS 15.5, which is a retina value. Windows Terminal's
+# default on this display (2048x1152 @ 125% scaling) is 12, which reads
+# oversized in Alacritty; 11 gives a 232x64 grid.
+size = 11
+
+[font.normal]
+# Same family as macOS. The Mono variant was tried while chasing the wrapped
+# status line, but the cause was the icons' codepoints (see tmux.conf), and
+# Mono ships wider metrics — ~9.6px per cell against ~8.8px at the same size,
+# which visibly stretches the text.
+family = "Hack Nerd Font"
+
+[window]
+# Buttonless/Transparent are macOS-only.
+decorations = "Full"
+startup_mode = "Maximized"
+opacity = 0.95
+dynamic_padding = false
+
+[window.padding]
+x = 0
+y = 0
+
+[terminal.shell]
+# Launch straight into WSL rather than PowerShell. --cd ~ starts in the Linux
+# home; zshrc then auto-attaches tmux.
+program = "wsl.exe"
+args = ["--distribution", "@DISTRO@", "--cd", "~"]

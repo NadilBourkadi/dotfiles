@@ -43,8 +43,10 @@ typeset -A file_symlinks=(
   [gitignore_global]=~/.gitignore_global
   [starship.toml]=~/.config/starship.toml
   [alacritty.toml]=~/.config/alacritty/alacritty.toml
+  [alacritty/theme.toml]=~/.config/alacritty/theme.toml
   [bin/claude-statusbar-hook]=~/.local/bin/claude-statusbar-hook
   [bin/claude-statusbar-status]=~/.local/bin/claude-statusbar-status
+  [bin/alacritty-windows-sync]=~/.local/bin/alacritty-windows-sync
 )
 
 for src dest in "${(@kv)file_symlinks}"; do
@@ -53,7 +55,13 @@ for src dest in "${(@kv)file_symlinks}"; do
   ln -sf "$DOTFILES_DIR/$src" "$dest"
   echo "${GREEN}Done${NC}"
 done
-chmod +x "$DOTFILES_DIR"/bin/claude-statusbar-* 2>/dev/null
+# One chmod per file, each guarded: zsh aborts the *whole* command when any
+# glob matches nothing, so combining these would let a missing sync script
+# silently skip chmod'ing the statusbar hooks — which Claude Code then cannot
+# execute, and the tmux indicator never appears.
+for f in claude-statusbar-hook claude-statusbar-status alacritty-windows-sync; do
+  [[ -f "$DOTFILES_DIR/bin/$f" ]] && chmod +x "$DOTFILES_DIR/bin/$f"
+done
 
 # Directory symlinks (must rm -f first to avoid circular symlink)
 typeset -A dir_symlinks=(
@@ -93,6 +101,21 @@ echo -n "Configuring git global settings... "
 git config --global core.excludesfile ~/.gitignore_global
 git config --global core.autocrlf false
 echo "${GREEN}Done${NC}"
+
+# alacritty.toml uses `[general] import`, added in Alacritty 0.14. Neither OS
+# branch upgrades an existing install (macOS skips when the app is present,
+# Linux never installs it at all), and an unsupported import fails silently —
+# the terminal just comes up with the default palette. So warn instead.
+check_alacritty_import_support() {
+  local bin="$1" ver
+  [[ -x "$bin" ]] || return 0
+  ver="$("$bin" --version 2>/dev/null | awk '{print $2}')"
+  [[ -n "$ver" ]] || return 0
+  if ! printf '0.14.0\n%s\n' "$ver" | sort -V -C; then
+    echo "  Warning: Alacritty $ver is older than 0.14 — '[general] import' is unsupported,"
+    echo "  so the Catppuccin colours in alacritty/theme.toml will not load. Upgrade Alacritty."
+  fi
+}
 
 # ─────────────────────────────────────────────────────────────
 # Package installation
@@ -149,6 +172,19 @@ elif [[ "$OSTYPE" == "linux"* ]]; then
 
   if _is_wsl; then
     echo "Note: WSL — install 'Hack Nerd Font' on Windows and select it in your terminal profile (see README)"
+    # Installs Alacritty on the Windows side and writes its config. The script
+    # always exits 0 internally, but that only helps once it runs — guard the
+    # invocation too, so a missing or non-executable file cannot abort the
+    # bootstrap under set -e before the remaining setup steps.
+    if [[ -x "$DOTFILES_DIR/bin/alacritty-windows-sync" ]]; then
+      "$DOTFILES_DIR/bin/alacritty-windows-sync" --install --force || true
+    else
+      echo "  bin/alacritty-windows-sync missing or not executable, skipping"
+    fi
+  else
+    # Native Linux: Alacritty is never installed here, but alacritty.toml is
+    # still symlinked, so a distro package predating 0.14 loses the palette.
+    check_alacritty_import_support "$(command -v alacritty 2>/dev/null)"
   fi
 
   # Make zsh the login shell (macOS already defaults to zsh).
@@ -168,6 +204,7 @@ fi
 if [[ "$OSTYPE" == "darwin"* ]]; then
   if [[ -d /Applications/Alacritty.app ]]; then
     echo "Alacritty already installed, ${GREEN}skipping${NC}"
+    check_alacritty_import_support /Applications/Alacritty.app/Contents/MacOS/alacritty
   else
     ALACRITTY_JSON=$(curl -sL https://api.github.com/repos/alacritty/alacritty/releases/latest)
     if command -v jq &>/dev/null; then

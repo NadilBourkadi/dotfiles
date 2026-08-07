@@ -137,6 +137,25 @@ Currently on **Neovim 0.12.4**; config targets **0.11+** with breaking API chang
   only the immediate parent, so a shell nested below the console shell isn't
   recognised — the safer way to be wrong, since a false positive silently
   denies tmux to a terminal you are actually using.
+- **Windows-side config cannot be symlinked from WSL.** `ln -s` onto `/mnt/c`
+  appears to succeed and looks like a symlink to `ls`, but it creates an
+  `IO_REPARSE_TAG_LX_SYMLINK` reparse point that only WSL understands — a
+  native Windows app reading it gets an `IOException`. The reverse (a Windows
+  symlink into `\\wsl.localhost`) is readable but needs admin, since Developer
+  Mode is off, and makes the app depend on the WSL VM being up. So anything
+  Windows needs from this repo has to be **generated/copied** across, as
+  `bin/alacritty-windows-sync` does. Note the cost: resolving `%APPDATA%` via
+  `cmd.exe` is a ~200ms interop launch, which is why that script stamp-checks
+  before doing anything on a shell-startup call.
+- `winget` works over interop via `powershell.exe -NoProfile -Command "winget
+  ..."`, but **must** be given `--source winget` — the default includes
+  `msstore`, which aborts with "source agreements were not agreed to".
+- `cmd.exe` warns when its cwd is a WSL path; run it from `/mnt/c` (`cd /mnt/c
+  && cmd.exe /c ...`) and strip `\r` from its output.
+- Alacritty for Windows is a GUI-subsystem binary: `--help` and config errors
+  do **not** reach a redirected stdout/stderr from WSL. Use
+  `Start-Process -RedirectStandardOutput` to capture output, and validate
+  config files with a TOML parser rather than by running it.
 - Use `_is_wsl` (same file) for "am I on WSL?" — never open-code it. It matches
   the kernel string case-insensitively (WSL1 reports `Microsoft`, some builds
   `MICROSOFT`) and falls back to `/run/WSL`, so a custom kernel set via
