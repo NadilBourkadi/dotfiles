@@ -57,10 +57,10 @@ OVERLAY='#6c7086'
 if [ "$waiting" -gt 0 ]; then
     extra=""
     [ "$working" -gt 0 ] && extra=" · ${working} working"
-    printf '#[fg=%s bold]󰚩 %d waiting%s #[fg=%s]| ' \
+    printf '#[fg=%s bold] %d waiting%s #[fg=%s]| ' \
         "$RED" "$waiting" "$extra" "$OVERLAY"
 else
-    printf '#[fg=%s]󰚩 %d working #[fg=%s]| ' \
+    printf '#[fg=%s] %d working #[fg=%s]| ' \
         "$GREEN" "$working" "$OVERLAY"
 fi
 
