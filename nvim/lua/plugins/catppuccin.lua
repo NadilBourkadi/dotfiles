@@ -10,29 +10,22 @@ return {
       flavour = "mocha",
       transparent_background = true,
       term_colors = true,
-      integrations = {
-        bufferline = true,
-        dressing = true,
-        gitsigns = true,
-        indent_blankline = {
-          enabled = true,
-        },
-        nvimtree = true,
-        treesitter = true,
-        telescope = {
-          enabled = true,
-        },
-        native_lsp = {
-          enabled = true,
-          underlines = {
-            errors = { "undercurl" },
-            hints = { "undercurl" },
-            warnings = { "undercurl" },
-            information = { "undercurl" },
-          },
+      -- Must be passed explicitly: catppuccin tests the raw user table for
+      -- this key before merging its own defaults, so the documented default
+      -- of `true` never actually enables detection.
+      auto_integrations = true,
+      -- Replaces the removed `integrations.native_lsp`; underlines default
+      -- to "underline" upstream.
+      lsp_styles = {
+        underlines = {
+          errors = { "undercurl" },
+          hints = { "undercurl" },
+          warnings = { "undercurl" },
+          information = { "undercurl" },
+          ok = { "undercurl" },
         },
       },
     })
-    vim.cmd.colorscheme("catppuccin")
+    vim.cmd.colorscheme("catppuccin-nvim")
   end,
 }
