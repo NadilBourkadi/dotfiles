@@ -63,6 +63,11 @@ say() { [ "$QUIET" -eq 1 ] || echo "$@"; }
 # Failures here are never fatal: this is a convenience layer on top of a
 # working WSL setup, and init.zsh runs under `set -e`.
 bail() { say "alacritty-windows-sync: $1"; exit 0; }
+# For conditions that stall the sync until a human intervenes. --quiet (which
+# zshrc uses on every shell) must not hide those, or the sync dies silently
+# and config changes stop reaching Windows with nothing to explain why.
+warn() { echo "alacritty-windows-sync: $1" >&2; }
+halt() { warn "$1"; exit 0; }
 
 BANNER="# GENERATED FILE — DO NOT EDIT."
 
@@ -141,7 +146,10 @@ trap 'rm -f "$TMP"' EXIT
 # Checking the section header or even `program` would pass a config cut off
 # before the args, leaving Alacritty to launch wsl.exe bare: Windows' default
 # distro, in the Windows working directory.
-grep -q "^args = .*\"$DISTRO\"" "$TMP" || bail "generated config is incomplete, refusing to publish"
+# grep -F: the distro name is free-form, so a regex metacharacter in it (a
+# bracket is legal in a `wsl --import` name) would silently stop matching a
+# perfectly good config and bail on every run.
+grep -qF -- "\"--distribution\", \"$DISTRO\"" "$TMP" || bail "generated config is incomplete, refusing to publish"
 
 # ── Fast path: compare against the last known destination ────────────────────
 #
@@ -173,23 +181,29 @@ DEST="$DEST_DIR/alacritty.toml"
 # ── Install Alacritty (opt-in) ───────────────────────────────────────────────
 
 if [ "$INSTALL" -eq 1 ]; then
-  PROGRAM_FILES="$(cd /mnt/c && cmd.exe /c 'echo %ProgramFiles%' 2>/dev/null </dev/null | tr -d '\r\n')"
+  # Both scopes: winget installs per-user into %LOCALAPPDATA%\Programs unless
+  # elevated. Checking only %ProgramFiles% would report a working user-scope
+  # install as missing and re-run winget on every bootstrap.
+  ALACRITTY_EXE=""
+  for var in ProgramFiles LOCALAPPDATA; do
+    win="$(cd /mnt/c && cmd.exe /c "echo %$var%" 2>/dev/null </dev/null | tr -d '\r\n')"
+    case "$win" in ?:\\*) ;; *) continue ;; esac
+    for sub in Alacritty Programs/Alacritty; do
+      cand="$(wslpath -u "$win")/$sub/alacritty.exe"
+      [ -x "$cand" ] && { ALACRITTY_EXE="$cand"; break 2; }
+    done
+  done
   need_install=0
-  case "$PROGRAM_FILES" in
-    # Unresolvable, or installed somewhere else (a user-scope winget install
-    # lands outside %ProgramFiles%): assume present rather than reinstalling on
-    # every bootstrap. Only a resolvable path with nothing there triggers it.
-    ?:\\*) [ -x "$(wslpath -u "$PROGRAM_FILES")/Alacritty/alacritty.exe" ] || need_install=1
-           ALACRITTY_EXE="$(wslpath -u "$PROGRAM_FILES")/Alacritty/alacritty.exe" ;;
-  esac
+  [ -n "$ALACRITTY_EXE" ] || need_install=1
   # A pre-existing install is never upgraded, and [terminal.shell] only exists
-  # in 0.13+ (it was top-level `shell` before). Without this the bootstrap
-  # reports success and every launch opens cmd.exe instead of WSL.
-  if [ "$need_install" -eq 0 ] && [ -x "${ALACRITTY_EXE:-}" ]; then
+  # in 0.14+ — the same release that moved `import` under [general]. In 0.13
+  # the key was still top-level `shell`, so 0.13.x silently ignores ours and
+  # every launch opens cmd.exe instead of WSL.
+  if [ -n "$ALACRITTY_EXE" ] && [ -x "$ALACRITTY_EXE" ]; then
     ver="$("$ALACRITTY_EXE" --version 2>/dev/null | tr -d '\r' | awk '{print $2}')"
-    if [ -n "$ver" ] && ! printf '0.13.0\n%s\n' "$ver" | sort -V -C; then
-      say "  Warning: Windows Alacritty $ver predates 0.13 — [terminal.shell] is ignored,"
-      say "  so it will open cmd.exe instead of WSL. Upgrade: winget upgrade Alacritty.Alacritty"
+    if [ -n "$ver" ] && ! printf '0.14.0\n%s\n' "$ver" | sort -V -C; then
+      warn "Windows Alacritty $ver predates 0.14 — [terminal.shell] is ignored,"
+      warn "so it will open cmd.exe instead of WSL. Upgrade: winget upgrade Alacritty.Alacritty"
     fi
   fi
   if [ "$need_install" -eq 1 ]; then
@@ -212,7 +226,7 @@ mkdir -p "$DEST_DIR" || bail "could not create $DEST_DIR"
 if [ -f "$DEST" ] && ! head -n1 "$DEST" | grep -qF "$BANNER"; then
   backup="$DEST.pre-dotfiles.bak"
   if [ -e "$backup" ]; then
-    bail "$DEST is not ours and $backup already exists — refusing to overwrite; move or delete one of them"
+    halt "$DEST is not ours and $backup already exists — refusing to overwrite; move or delete one of them"
   fi
   cp "$DEST" "$backup" || bail "could not back up the existing $DEST"
   say "Backed up your existing Alacritty config to ${APPDATA_WIN}\\alacritty\\$(basename "$backup")"
