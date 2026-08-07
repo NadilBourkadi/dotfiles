@@ -119,6 +119,14 @@ The bootstrap works unchanged inside a WSL Ubuntu distro. Windows-side specifics
 
   An existing hand-written `%APPDATA%\alacritty\alacritty.toml` is copied to
   `alacritty.toml.pre-dotfiles.bak` before being replaced.
+- **Status-line icons must stay out of the Plane-15 private use area.**
+  Alacritty allocates two cells for U+F0000+ codepoints while tmux counts one,
+  so a right-aligned status line renders wider than reserved, spills past the
+  right edge and wraps — leaving a copy behind on every refresh. The font
+  variant is not the lever (Alacritty decides width from the codepoint, so
+  `Hack Nerd Font Mono` does not help); use basic-plane equivalents
+  (U+E000-U+F8FF) instead. Windows Terminal hides the mismatch by clamping
+  glyphs to the cell grid, which is why this only shows up in Alacritty.
 - **Console login session**: WSL runs systemd (`systemd=true` in
   `/etc/wsl.conf`), which logs you into a console tty on every boot in
   addition to your terminal. That extra shell sources `zshrc`, so tmux

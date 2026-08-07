@@ -11,7 +11,7 @@ return {
         border = "rounded",
       },
       hint_enable = true,
-      hint_prefix = "󰏪 ",
+      hint_prefix = " ",
       floating_window = true,
       floating_window_above_cur_line = true,
       toggle_key = "<C-s>",
