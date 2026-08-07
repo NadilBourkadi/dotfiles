@@ -233,6 +233,18 @@ Currently on **Neovim 0.12.4**; config targets **0.11+** with breaking API chang
   Note the startup branch (`> 1`) is stricter than the config-reload branch
   (`> client count`), so a manual `prefix + r` can mask the bug for that
   server's lifetime — always test from a cold server start.
+- **Claude Code runs hook commands through a shell**, so `$PPID` inside a hook
+  script is that shell (observed: `sh` -> `bash` -> `claude`), *not* Claude.
+  `claude-statusbar-hook` walks up the process tree until a pid has a matching
+  `~/.claude/sessions/<PID>.json`. Recording the wrong pid fails silently and
+  confusingly: the hook writes its state file fine, then
+  `claude-statusbar-status` sees a pid with no live session, treats it as
+  stale, and deletes it within one `status-interval` — so the indicator never
+  appears and the state dir looks empty every time you check.
+- Adding hooks to `settings.json` does not affect a running session — they load
+  at session start. To prove a hook fires, prefix its command with a sentinel
+  (`echo fired >> /tmp/x; ...`) and trigger the event; if the sentinel does not
+  appear the config is not loaded, and if it does the script itself is at fault.
 - `~/.claude/sessions/<PID>.json` is the liveness source for Claude Code instances. Each file contains a `pid` field matching the filename stem. Cross-check with `kill -0 <pid>` to detect dead processes. If the sessions directory is absent, no Claude instance can be running — bail out rather than treating all state as stale.
 
 ## Neovim Plugin Notes
