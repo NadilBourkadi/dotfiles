@@ -27,9 +27,38 @@ SID="$("$JQ" -r '.session_id // empty' <<<"$INPUT" 2>/dev/null)"
 
 CWD="$("$JQ" -r '.cwd // empty' <<<"$INPUT" 2>/dev/null)"
 PANE="${TMUX_PANE:-}"
-# $PPID is the Claude process — Claude Code invokes hooks directly (no intermediate
-# shell), so $PPID is the Claude PID and matches sessions/<PID>.json for liveness
-CPID="${PPID:-0}"
+
+# Find the Claude PID by walking up the process tree until one has a matching
+# sessions/<PID>.json. NOT $PPID: Claude Code runs hook commands through a
+# shell, so the parent is that shell (observed: sh -> bash -> claude). Getting
+# this wrong is silent — claude-statusbar-status treats a pid with no live
+# session as stale and deletes the state file within one status-interval, so
+# the indicator simply never appears.
+# ps rather than /proc: this script also runs on macOS.
+#
+# Cross-checks liveness with kill -0, exactly as claude-statusbar-status does:
+# session files outlive their process, so a recycled PID could otherwise match
+# a dead session and produce state the reader will not count.
+_find_claude_pid() {
+    local p="${PPID:-0}" i
+    for i in 1 2 3 4 5 6 7 8; do
+        case "$p" in ''|0|1) return 1 ;; esac
+        if [ -f "$HOME/.claude/sessions/$p.json" ] && kill -0 "$p" 2>/dev/null; then
+            printf '%s' "$p"; return 0
+        fi
+        p="$(ps -o ppid= -p "$p" 2>/dev/null | tr -cd '0-9')"
+    done
+    return 1
+}
+
+# Bail rather than writing a pid the reader is guaranteed to reject. Writing 0
+# is worse than writing nothing: claude-statusbar-status deletes the state file
+# and unsets @claude_status, so the indicator appears and then vanishes on its
+# own — and any previously good state for this session is destroyed with it.
+# This happens legitimately, e.g. SessionStart firing before Claude Code has
+# written sessions/<PID>.json.
+CPID="$(_find_claude_pid)" || exit 0
+case "$CPID" in ''|*[!0-9]*) exit 0 ;; esac
 # macOS date lacks %3N (milliseconds) — use seconds * 1000 instead
 NOW="$(( $(date +%s) * 1000 ))"
 

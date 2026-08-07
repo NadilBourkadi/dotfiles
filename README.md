@@ -444,6 +444,20 @@ Two indicators surface the state of running Claude Code CLI instances:
 
 Both are driven by Claude Code hooks configured in `~/.claude/settings.json`. The hooks invoke `claude-statusbar-hook` on each event; tmux reads state from `~/.claude/statusbar/` via `claude-statusbar-status`.
 
+Three things must all be true, and **each fails silently**:
+
+1. **`jq` installed** — `claude-statusbar-hook` exits 0 without it (`brew bundle`).
+2. **`~/.local/bin/claude-statusbar-{hook,status}` symlinked** — `init.zsh` does
+   this; a missing script makes tmux's `#()` render as empty rather than error.
+3. **Hooks present in `~/.claude/settings.json`** — on work machines these come
+   from `private/believ/claude-settings.json`; without a `private/` directory
+   add them directly. Events: `PreToolUse` (async), `Notification`, `Stop`,
+   `SessionStart`, `UserPromptSubmit`, `SessionEnd`, each running
+   `$HOME/.local/bin/claude-statusbar-hook <EventName>`.
+
+Hooks load at session start, so a newly added hook needs `/hooks` or a restart.
+Verify with `ls ~/.claude/statusbar/` — one JSON file per live session.
+
 ## File Structure
 
 ```
