@@ -218,6 +218,39 @@ Using **Neovim 0.11+** with breaking API changes:
 
 ## Neovim Plugin Notes
 
+### catppuccin
+Upstream made several breaking renames that **fail silently** — nothing errors,
+the highlights just stop being applied. Symptoms show up as "the colours look
+slightly off", so check these first after a catppuccin bump:
+
+- The lualine (and barbecue) theme module is named **`catppuccin-nvim`**, not
+  `catppuccin` (upstream #979). The old name makes lualine fall back to its
+  `auto` theme. The explanatory message goes to lualine's notices buffer
+  (`:LualineNotices`); `:messages` only gets a generic "there are some issues
+  with your config" warning, and only via a `defer_fn` ~2s after startup that
+  fires at most once — so an early `:messages` check looks clean.
+- The **colorscheme** is also `catppuccin-nvim` (upstream #977, done because
+  Neovim 0.12 ships a builtin `colors/catppuccin.vim`). The plugin still has a
+  `colors/catppuccin.lua`, so today the old name works only because the lazy
+  plugin dir precedes `$VIMRUNTIME` on the runtimepath. Use the new name.
+- `bufferline` is no longer an `integrations` key — it moved to
+  `require("catppuccin.special.bufferline").get_theme()`, passed as bufferline's
+  `highlights` option.
+- `native_lsp` is gone; diagnostic underline/virtual-text styling is now the
+  **top-level `lsp_styles`** option. Its `underlines` default to `underline`,
+  so `undercurl` must be set there explicitly.
+- `treesitter` and `dressing` integration modules were removed outright — those
+  keys are now dead. Anything under `integrations` with no matching module in
+  `lua/catppuccin/groups/integrations/` is skipped by a bare `pcall` in
+  `lib/mapper.lua`, with no warning. That directory is the source of truth for
+  which keys are still real.
+- `default_integrations` was removed (#1019). `auto_integrations` replaces it,
+  but the default shown in the README is a trap: `init.lua` tests
+  `user_conf.auto_integrations == true` on the **raw user table, before**
+  defaults are merged, so it does nothing unless you pass it explicitly. Do not
+  assume detection is on and delete the `integrations` block — pass
+  `auto_integrations = true` yourself.
+
 ### nvim-ufo (folding)
 Requires: `foldcolumn = "0"`, `foldlevel = 99`, `foldlevelstart = 99`, `foldenable = true`
 
