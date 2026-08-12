@@ -24,17 +24,43 @@ All changes follow this workflow — no exceptions:
    but not so numerous as to bloat the log. Squash fixups, reorder for
    logical flow, and write clear final messages. Do this proactively —
    present the user with a clean branch, don't ask permission first.
-4. **Self-review.** After rebasing, invoke the `/code-review` skill
-   (with the appropriate language parameter, e.g. `generic`, `python`,
-   `react-web`) to review your own work. The skill runs as a sub-agent
-   and returns a review — it does not make changes itself. Once you
-   receive the review, use your own judgment to action any comments at
-   `medium` severity or above, committing the fixes without asking for
-   user input. For `low` and `question` items, fix them if the right
-   answer is obvious; otherwise leave them for the user. Then run
-   `/code-review` a second time and action findings the same way. Do
-   not ask for permission between passes — the entire cycle (review →
-   fix → review → fix) should run to completion autonomously.
+4. **Self-review.** After rebasing, review your own work with the
+   **built-in `/code-review` skill at `medium` effort**. There is no
+   language parameter any more — that was the old custom skill.
+
+   **Invoke it as a skill, never via the `Workflow` tool.** The
+   code-review *workflow* only defines `high`/`xhigh`/`max`: passing it
+   `medium` or `low` does not lower the effort, it silently falls back
+   to `high` **and** re-reads your argument as a free-form review
+   target, so you get the full agent fan-out plus a junk instruction in
+   every prompt. `medium` and `low` exist only on the inline path, which
+   runs in-context without that fan-out. Call the skill and let it route.
+
+   `medium` is the standing level for *every* change here. Only go to
+   `high` if the user asks explicitly — it burns far more tokens without
+   finding more of what actually breaks this repo.
+
+   **Loop, terminating on severity — cap two passes.** This repo's
+   changes are small; the loop exists because fix code is the
+   least-reviewed code there is, not to grind:
+
+   ```
+   pass 1:  review the whole change   ->  apply  ->  commit
+   pass 2:  review the FIX COMMITS only (/code-review medium <sha>)
+   STOP when a pass returns no high and no medium findings.
+   CAP: two passes. Going further needs a reason said out loud.
+   ```
+
+   **Terminate on severity, never on emptiness.** A review always finds
+   something, so "loop until it comes back clean" never terminates.
+   `low` and `question` findings do **not** re-trigger a pass — batch
+   them into one sweep after the loop ends, and prefer the minimal edit
+   (a comment over a rename, a docstring over a refactor).
+
+   Action `medium` and above without asking. For `low`/`question`, fix
+   them if the right answer is obvious; otherwise leave them for the
+   user. **The condition decides — do not ask whether to run the next
+   pass.** The whole cycle runs to completion autonomously.
 5. **Push and open a PR.** Push the branch and create a pull request on
    GitHub using `gh pr create`. Include a short summary and a test plan.
    Do this automatically — do not ask for permission to push or create
