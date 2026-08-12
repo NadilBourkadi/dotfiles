@@ -204,6 +204,7 @@ Currently on **Neovim 0.12.4**; config targets **0.11+** with breaking API chang
 - `core/options.lua` — Editor options
 - `core/keymaps.lua` — Global keybindings
 - `core/utils.lua` — Shared utilities (root-finding, Poetry venv cache with TTL, nvim-tree state)
+- `core/icons.lua` — Demotes icon glyphs to the basic multilingual plane
 - `core/test-signs.lua` — Pytest output parser and gutter signs (TermClose-driven)
 - `plugins/*.lua` — One file per plugin, keymaps inside plugin config, `<cmd>...<CR>` syntax
 
@@ -315,6 +316,80 @@ slightly off", so check these first after a catppuccin bump:
   own colours, expect a last-writer-wins clash and pin that one key to
   `false`. Dump `require("catppuccin").options.integrations` to see the live
   set.
+
+### Icon widths (mini.icons, render-markdown, which-key, nvim-tree)
+These ship icon sets largely in the **Plane-15 private use area** (U+F0000+),
+which Alacritty renders two cells wide while Neovim and tmux count one — so
+every icon pushes the rest of its line a column right. `core/icons.lua` holds
+the rule and the helpers. mini.icons and render-markdown are swept wholesale;
+which-key is part swept, part hand-written (with a startup assertion covering
+the hand-written half); nvim-tree's two glyphs are hand-overridden. Points that
+cost time:
+
+- **UAX #11 does not say Plane-15 is Wide.** It classes U+F0000+ as
+  *Ambiguous*, the same as the basic-plane PUA that Alacritty draws in one
+  cell, so the two-cell behaviour is Alacritty's own choice. Don't repeat the
+  "it's East Asian Wide" explanation — the authority is the CSI 6n measurement
+  in commit `5b34a5c`, not the standard.
+- **Neither `ambiwidth` nor `setcellwidths()` is the lever.** `ambiwidth=double`
+  looks right *because* the range is Ambiguous, but it applies to every
+  ambiguous codepoint, so box drawing, bullets and em dashes go to two cells
+  while Alacritty still draws them in one — worse than the original bug.
+  `setcellwidths({{0xF0000,0xFFFFD,2}})` makes Neovim agree with Alacritty but
+  *disagree with tmux*, which is Neovim's actual terminal. The mismatch is at
+  the tmux↔Alacritty boundary, so the only cure is to not emit those
+  codepoints.
+- **Sweep sections, not whole default tables.** A plugin's `setup()` merges
+  user config over its defaults, so passing back a full swept copy pins
+  today's value for every unrelated option — upstream can never change one
+  again. `icons.demoted_sections()` returns only the top-level sections that
+  actually held an out-of-plane glyph.
+- **Verify icon changes under a real pty, never headless.** `nvim --headless`
+  does not drain `vim.schedule` before `qa!`, so anything a plugin defers to
+  `VimEnter`/`schedule_wrap` never runs — a headless probe then reads the
+  pre-deferred state and reports a fix that does not exist. which-key was
+  measured "clean" headlessly while a real session still had
+  `icons.keys.Space = U+F1050`. Use
+  `script -qec "nvim -c 'source probe.lua' file" /dev/null` with the probe
+  behind a `vim.defer_fn`. A `loaded = false` reading is the tell.
+- **which-key needs a single `setup()` call.** Its deferred `load()` closes
+  over the opts of the call that scheduled it, and the first one to run
+  rebuilds options as `defaults + preset + its own opts`, then sets
+  `M.loaded` so later loads return early — so a second `setup()` is silently
+  discarded. Opts are merged last, so one call's overrides do survive.
+  Separately, `icons.get()` always falls back to the built-in
+  `which-key.icons.rules`; passing `icons.rules` only adds a table consulted
+  *first*, so those glyphs must be demoted in place (or the whole feature
+  turned off with `icons.rules = false`). And the built-in plugin specs
+  (`which-key/plugins/marks.lua`, `registers.lua`) set `mapping.icon`
+  directly, which bypasses the rules entirely — mutate those modules too, or
+  `'` and `"` still pop up a two-cell glyph.
+- **`render-markdown`'s heading `signs` are the worst offender**, because they
+  sit in the two-cell `signcolumn`: the overflow shifts the entire line, which
+  is what makes a markdown table's header stop lining up with its body.
+- Write glyphs as `\u{XXXX}` escapes. The codepoint is the constrained thing,
+  and literal private-use bytes get silently stripped by some tooling — a
+  stripped glyph becomes `""`, which fails as an empty icon, not an error.
+- **Verify a replacement codepoint is in the font before using it.** Several
+  obvious geometric candidates (U+2610/2611 ballot boxes, U+2726-2738 stars)
+  are *absent* from Hack Nerd Font; a missing glyph falls back to another font
+  whose metrics reintroduce the overlap. Check with `fontTools`:
+  `TTFont(<HackNerdFont-Regular.ttf>).getBestCmap()` — on WSL the font that
+  matters is the Windows-side one under `%LOCALAPPDATA%\Microsoft\Windows\Fonts`.
+- **`mini.icons` overrides are keyed per category, and the category is not the
+  one you expect.** `md`/`lua`/`py` are *not* in `MiniIcons.list("extension")` —
+  they resolve through the `filetype` table — so a loop that only overrides
+  names returned by `list()` silently misses them. Overrides for names absent
+  from `list()` do register, so apply curated entries unconditionally.
+- **`MiniIcons.list("default")` returns the other *category names***
+  (`directory`, `lsp`, `os`, …), not icon names, and its entries are each
+  category's fallback icon. A sweep that keys the replacement off the category
+  being iterated gives all seven the same glyph — which silently makes every
+  unknown directory render as a file, so files and folders stop being
+  distinguishable in the tree.
+- There is no accessor for mini.icons' defaults, so reading them means
+  `setup()` → inspect → `setup(overrides)`. Re-setup is supported and the
+  whole sweep costs ~1.5 ms.
 
 ### nvim-ufo (folding)
 Requires: `foldcolumn = "0"`, `foldlevel = 99`, `foldlevelstart = 99`, `foldenable = true`
