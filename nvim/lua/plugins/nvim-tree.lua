@@ -4,9 +4,9 @@
 return {
   "nvim-tree/nvim-tree.lua",
   lazy = false,
-  dependencies = {
-    { "echasnovski/mini.icons", opts = {} },
-  },
+  -- mini.icons is configured in plugins/init.lua (it mocks nvim-web-devicons,
+  -- which is what nvim-tree asks for). Naming it here only orders the load.
+  dependencies = { "echasnovski/mini.icons" },
   config = function()
     local map = vim.keymap.set
     local opts = { noremap = true, silent = true }
@@ -28,6 +28,11 @@ return {
         group_empty = true,
         icons = {
           padding = " ",
+          -- Both default to Plane-15 glyphs -- see core/icons.lua.
+          glyphs = {
+            hidden = "\u{EAE7}", -- cod-eye_closed
+            bookmark = "\u{F02E}", -- fa-bookmark
+          },
           show = {
             file = true,
             folder = true,

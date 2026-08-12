@@ -5,7 +5,47 @@ return {
     "nvim-treesitter/nvim-treesitter",
   },
   config = function()
-    require("render-markdown").setup({})
+    local icons = require("core.icons")
+    local rm = require("render-markdown")
+
+    -- Every icon render-markdown ships is Plane-15, which Alacritty renders
+    -- two cells wide against Neovim's one -- see core/icons.lua. The sign is
+    -- the worst of them: it sits in the two-cell sign column, so its overflow
+    -- shifts the whole line and a table's header stops lining up with its
+    -- body. Sweep the defaults, then name the ones worth keeping distinct.
+    --
+    -- Only the sections that actually carry an icon are passed back in.
+    -- setup() merges user config over the defaults, so handing it a full copy
+    -- would pin today's values for every unrelated option too -- upstream
+    -- could never change one again.
+    local swept = icons.demoted_sections(rm.default, "\u{F05A}") -- fa-info_circle
+    rm.setup(vim.tbl_deep_extend("force", swept, {
+      heading = {
+        -- One marker per level, matching the bullet style. There is no h1-h6
+        -- set outside Plane-15, so these are geometric shapes.
+        icons = {
+          "\u{25C9} ", -- ◉
+          "\u{25CB} ", -- ○
+          "\u{25CF} ", -- ●
+          "\u{25A0} ", -- ■
+          "\u{25C6} ", -- ◆
+          "\u{25C7} ", -- ◇
+        },
+        signs = { "\u{F4E0} " }, -- oct-heading
+      },
+      checkbox = {
+        checked = { icon = "\u{E63F} " }, -- seti-checkbox
+        unchecked = { icon = "\u{E640} " }, -- seti-checkbox_unchecked
+      },
+      link = {
+        hyperlink = "\u{EB15} ", -- cod-link
+        email = "\u{F0E0} ", -- fa-envelope
+        image = "\u{F03E} ", -- fa-picture_o
+      },
+      -- Cells are padded to the widest in the column by default, so a table
+      -- holding one very long cell wraps every row over many screen lines.
+      pipe_table = { cell = "trimmed" },
+    }))
 
     local preview_dir = "/tmp/nvim-md-preview"
     local previewed_path = nil

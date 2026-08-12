@@ -119,14 +119,29 @@ The bootstrap works unchanged inside a WSL Ubuntu distro. Windows-side specifics
 
   An existing hand-written `%APPDATA%\alacritty\alacritty.toml` is copied to
   `alacritty.toml.pre-dotfiles.bak` before being replaced.
-- **Status-line icons must stay out of the Plane-15 private use area.**
-  Alacritty allocates two cells for U+F0000+ codepoints while tmux counts one,
-  so a right-aligned status line renders wider than reserved, spills past the
-  right edge and wraps — leaving a copy behind on every refresh. The font
-  variant is not the lever (Alacritty decides width from the codepoint, so
-  `Hack Nerd Font Mono` does not help); use basic-plane equivalents
-  (U+E000-U+F8FF) instead. Windows Terminal hides the mismatch by clamping
-  glyphs to the cell grid, which is why this only shows up in Alacritty.
+- **Icons must stay out of the Plane-15 private use area.**
+  Alacritty allocates two cells for U+F0000+ codepoints while tmux and Neovim
+  both count one. There is no standard to appeal to — UAX #11 calls that range
+  *Ambiguous*, exactly like the basic-plane PUA that Alacritty draws in one
+  cell — so the behaviour is Alacritty's own, established here by a CSI 6n
+  probe. The font variant is not the lever either (Alacritty decides width from
+  the codepoint, so `Hack Nerd Font Mono` does not help); use basic-plane
+  equivalents (U+E000-U+F8FF) instead. Windows Terminal hides the mismatch by
+  clamping glyphs to the cell grid, which is why this only shows up in
+  Alacritty. It bites in two places:
+  - **tmux status line** — right-aligned, so it renders wider than reserved,
+    spills past the right edge and wraps, leaving a copy behind on every
+    refresh.
+  - **Neovim** — every such glyph pushes the rest of its line a column right,
+    so markdown table borders stop lining up with their header and file-tree
+    names sit at ragged columns. `nvim/lua/core/icons.lua` holds the helpers.
+    mini.icons and render-markdown have their defaults swept through it, so
+    glyphs upstream adds later are caught; which-key is part swept (its icon
+    rules and plugin specs) and part hand-written (the 24 key labels), and
+    nvim-tree's two offenders are hand-overridden in `plugins/nvim-tree.lua`.
+    The hand-written parts are *not* future-proof — which-key at least warns
+    at startup if a Plane-15 key glyph reappears. See the module header for
+    why `ambiwidth` and `setcellwidths()` are both the wrong lever.
 - **Console login session**: WSL runs systemd (`systemd=true` in
   `/etc/wsl.conf`), which logs you into a console tty on every boot in
   addition to your terminal. That extra shell sources `zshrc`, so tmux
@@ -491,6 +506,7 @@ dotfiles/
         │   ├── options.lua     # Editor options
         │   ├── keymaps.lua     # Global keybindings
         │   ├── utils.lua       # Shared utilities (root-finding, Poetry venv, nvim-tree state)
+        │   ├── icons.lua       # Keeps icon glyphs out of the Plane-15 private use area
         │   └── test-signs.lua  # Pytest output parser and gutter signs
         └── plugins/        # Plugin configurations
             ├── init.lua
