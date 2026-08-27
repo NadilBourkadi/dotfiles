@@ -236,11 +236,11 @@ Currently on **Neovim 0.12.4**; config targets **0.11+** with breaking API chang
    `.claude-code-*` dirs in `/opt/homebrew/lib/node_modules/@anthropic-ai/`
    that block all future updates with `ENOTEMPTY`. The `zshrc` cleans these
    up on shell startup.
-7. **Claude Code auto-update strips execute bit**: The auto-updater's
-   "local update method" downloads and places `claude.exe` directly, bypassing
-   `install.cjs`'s `chmodSync(dest, 0o755)`. The result is a non-executable
-   binary — symptom is `zsh: permission denied: claude`. The `zshrc` detects
-   and fixes this at shell startup with `chmod +x`.
+7. **Claude Code auto-update strips execute bit**: Some auto-update paths
+   leave `claude.exe` non-executable — symptom is `zsh: permission denied:
+   claude`. The `zshrc` detects and fixes this at shell startup with
+   `chmod +x`. If the binary ends up owned by `macadmin` after a `sudo npm`
+   accident, `chmod` will fail and a warning is printed to stderr.
 8. **Interactive rebase on hook-symlinked files**: If a file being rebased is
    symlinked from `~/.local/bin/` and wired as a Claude Code hook, conflict
    markers in that file will cause every subsequent tool call to fail with a
