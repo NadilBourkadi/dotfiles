@@ -12,8 +12,9 @@ export NVM_DIR="$HOME/.nvm"
 
 # Clean up stale temp dirs left by failed Claude Code auto-updates (causes ENOTEMPTY on next attempt)
 [[ -d /opt/homebrew/lib/node_modules/@anthropic-ai ]] && rm -rf /opt/homebrew/lib/node_modules/@anthropic-ai/.claude-code-* 2>/dev/null
-# Fix missing execute bit on claude.exe — the auto-updater's local download path bypasses
-# install.cjs's chmodSync(dest, 0o755), leaving the binary non-executable after some updates.
+# Fix missing execute bit on claude.exe — the auto-updater can leave the binary non-executable
+# after some updates, causing "zsh: permission denied: claude". macOS Homebrew path only;
+# safely a no-op on Linux (different Homebrew prefix) via the -f guard.
 _cc_exe=/opt/homebrew/lib/node_modules/@anthropic-ai/claude-code/bin/claude.exe
 [[ -f "$_cc_exe" && ! -x "$_cc_exe" ]] && { chmod +x "$_cc_exe" || echo "[zshrc] warning: could not restore +x on $_cc_exe — check ownership (run: ls -l $_cc_exe)" >&2; }
 unset _cc_exe
