@@ -12,6 +12,11 @@ export NVM_DIR="$HOME/.nvm"
 
 # Clean up stale temp dirs left by failed Claude Code auto-updates (causes ENOTEMPTY on next attempt)
 [[ -d /opt/homebrew/lib/node_modules/@anthropic-ai ]] && rm -rf /opt/homebrew/lib/node_modules/@anthropic-ai/.claude-code-* 2>/dev/null
+# Fix missing execute bit on claude.exe — the auto-updater's local download path bypasses
+# install.cjs's chmodSync(dest, 0o755), leaving the binary non-executable after some updates.
+_cc_exe=/opt/homebrew/lib/node_modules/@anthropic-ai/claude-code/bin/claude.exe
+[[ -f "$_cc_exe" && ! -x "$_cc_exe" ]] && chmod +x "$_cc_exe" 2>/dev/null
+unset _cc_exe
 
 # Dotfiles bootstrap
 alias dotfiles='zsh ~/Dev/dotfiles/init.zsh'
