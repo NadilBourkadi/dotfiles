@@ -18,7 +18,7 @@ export NVM_DIR="$HOME/.nvm"
 # Fix missing execute bit on claude.exe — the auto-updater's local download path bypasses
 # install.cjs's chmodSync(dest, 0o755), leaving the binary non-executable after some updates.
 _cc_exe=/opt/homebrew/lib/node_modules/@anthropic-ai/claude-code/bin/claude.exe
-[[ -f "$_cc_exe" && ! -x "$_cc_exe" ]] && chmod +x "$_cc_exe" 2>/dev/null
+[[ -f "$_cc_exe" && ! -x "$_cc_exe" ]] && { chmod +x "$_cc_exe" || echo "[zshrc] warning: could not restore +x on $_cc_exe — check ownership (run: ls -l $_cc_exe)" >&2; }
 unset _cc_exe
 
 # Dotfiles bootstrap
