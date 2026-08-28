@@ -1,0 +1,19 @@
+# WSL2 VM settings — copied (not symlinked; Windows can't read WSL symlinks)
+# to %USERPROFILE%\.wslconfig by init.zsh. After editing, re-run init.zsh
+# (nothing syncs it on shell startup), then `wsl --shutdown` to apply.
+#
+# Context: the VM has livelocked repeatedly when a runaway process (a 14GB
+# python3, a 14GB Claude Code worker) exhausted all RAM and the default 4GB
+# swap — the kernel OOM killer fired too late and the whole VM thrashed until
+# a hard `wsl --shutdown`. earlyoom (installed by init.zsh) is the first line
+# of defence; these settings reduce the pressure that gets it there.
+
+[wsl2]
+# Default swap is 25% of RAM (4GB here) — a single large process fills it and
+# leaves the kernel no room to page before the thrash starts.
+swap=8GB
+
+[experimental]
+# Return freed page-cache memory to Windows instead of holding the balloon,
+# so Windows-side pressure doesn't compound a WSL-side spike.
+autoMemoryReclaim=gradual
