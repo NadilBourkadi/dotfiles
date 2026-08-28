@@ -182,6 +182,14 @@ Currently on **Neovim 0.12.4**; config targets **0.11+** with breaking API chang
   do **not** reach a redirected stdout/stderr from WSL. Use
   `Start-Process -RedirectStandardOutput` to capture output, and validate
   config files with a TOML parser rather than by running it.
+- **"WSL crashed" is usually an OOM livelock, not a crash.** A runaway process
+  (seen: a 14GB python3, a 14GB Claude Code worker) exhausts RAM + the default
+  4GB swap and the VM thrashes until `wsl --shutdown`. Diagnose with
+  `journalctl -b -1 | grep -i "out of memory"` — a journal "corrupted or
+  uncleanly shut down" message on the next boot is the tell that the VM died
+  hard. Guards: `earlyoom` (apt, via init.zsh) and repo-root `wslconfig`
+  copied to `%USERPROFILE%\.wslconfig` by init.zsh (applies only after
+  `wsl --shutdown`).
 - Use `_is_wsl` (same file) for "am I on WSL?" — never open-code it. It matches
   the kernel string case-insensitively (WSL1 reports `Microsoft`, some builds
   `MICROSOFT`) and falls back to `/run/WSL`, so a custom kernel set via

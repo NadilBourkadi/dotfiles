@@ -119,6 +119,17 @@ The bootstrap works unchanged inside a WSL Ubuntu distro. Windows-side specifics
 
   An existing hand-written `%APPDATA%\alacritty\alacritty.toml` is copied to
   `alacritty.toml.pre-dotfiles.bak` before being replaced.
+- **OOM protection**: a runaway process can exhaust the VM's RAM and swap
+  faster than the kernel OOM killer reacts, livelocking WSL until a
+  `wsl --shutdown`. Two guards, both set up by `init.zsh`:
+  - `earlyoom` (apt) kills the largest process while there is still ~10%
+    memory/swap headroom, before the thrash starts.
+  - `wslconfig` is **copied** (same symlink caveat as Alacritty) to
+    `%USERPROFILE%\.wslconfig` — larger swap plus `autoMemoryReclaim`. A
+    pre-existing hand-written `.wslconfig` is backed up once to
+    `.wslconfig.pre-dotfiles.bak`. Unlike the Alacritty config there is no
+    shell-startup sync: after editing `wslconfig`, re-run `init.zsh`, then
+    `wsl --shutdown` to apply.
 - **Icons must stay out of the Plane-15 private use area.**
   Alacritty allocates two cells for U+F0000+ codepoints while tmux and Neovim
   both count one. There is no standard to appeal to — UAX #11 calls that range
@@ -493,6 +504,7 @@ dotfiles/
 │   ├── claude-statusbar-status  # Tmux status-right reader
 │   └── alacritty-windows-sync   # Generates the Windows Alacritty config (WSL)
 ├── alacritty.toml      # Alacritty config for macOS / native Linux
+├── wslconfig           # WSL2 VM settings, copied to %USERPROFILE%\.wslconfig
 ├── alacritty/
 │   ├── theme.toml         # Catppuccin palette, shared by all platforms
 │   └── windows.toml       # Windows overrides (WSL shell, decorations, size)

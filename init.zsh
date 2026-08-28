@@ -134,9 +134,17 @@ elif [[ "$OSTYPE" == "linux"* ]]; then
   # System packages Homebrew on Linux needs (bubblewrap is recommended by
   # the Homebrew installer for sandboxed source builds), plus wl-clipboard
   # for WSLg/Wayland clipboard integration
+  apt_pkgs=(build-essential bubblewrap curl file procps wl-clipboard)
+  # earlyoom: userspace OOM killer — the kernel one fires too late under
+  # WSL2 and the VM livelocks first (Ubuntu enables the service on install).
+  # WSL-only: native Linux already runs systemd-oomd and would not want
+  # surprise SIGTERMs during a big build.
+  if _is_wsl; then
+    apt_pkgs+=(earlyoom)
+  fi
   if command -v apt-get &>/dev/null; then
     apt_missing=()
-    for pkg in build-essential bubblewrap curl file procps wl-clipboard; do
+    for pkg in "${apt_pkgs[@]}"; do
       # dpkg-query status check: `dpkg -s` wrongly passes for removed-but-
       # not-purged (rc state) packages
       dpkg-query -W -f='${db:Status-Status}' "$pkg" 2>/dev/null | grep -qx installed || apt_missing+=("$pkg")
@@ -147,7 +155,7 @@ elif [[ "$OSTYPE" == "linux"* ]]; then
       sudo apt-get install -y "${apt_missing[@]}"
     fi
   else
-    echo "apt-get not found — install Homebrew prerequisites manually: build-essential bubblewrap curl file procps (and wl-clipboard on WSL)"
+    echo "apt-get not found — install Homebrew prerequisites manually: ${apt_pkgs[*]}"
   fi
 
   # Homebrew on Linux — same Brewfile as macOS (casks are guarded with OS.mac?)
@@ -180,6 +188,36 @@ elif [[ "$OSTYPE" == "linux"* ]]; then
       "$DOTFILES_DIR/bin/alacritty-windows-sync" --install --force || true
     else
       echo "  bin/alacritty-windows-sync missing or not executable, skipping"
+    fi
+
+    # Copy wslconfig to %USERPROFILE%\.wslconfig — swap size and memory
+    # reclaim for the WSL2 VM. Copied, not symlinked: Windows cannot read
+    # WSL symlinks (see CLAUDE.md). Rerunning init.zsh IS the sync
+    # mechanism — nothing refreshes the Windows copy on shell startup.
+    # cmd.exe: from PATH like alacritty-windows-sync (interop may be off),
+    # run from a Windows path, </dev/null so it cannot swallow queued
+    # terminal input, output carries \r. || true: set -e must not abort
+    # the bootstrap when interop is unavailable (e.g. container on WSL).
+    win_profile=""
+    if command -v cmd.exe &>/dev/null; then
+      win_profile=$(cd /mnt/c && cmd.exe /c "echo %USERPROFILE%" </dev/null 2>/dev/null | tr -d '\r') || true
+    fi
+    if [[ "$win_profile" == [A-Za-z]:\\* ]] && win_profile_wsl=$(wslpath "$win_profile" 2>/dev/null) && [[ -d "$win_profile_wsl" ]]; then
+      wslconfig_dest="$win_profile_wsl/.wslconfig"
+      if ! cmp -s "$DOTFILES_DIR/wslconfig" "$wslconfig_dest" 2>/dev/null; then
+        # Preserve a hand-written .wslconfig once, like alacritty-windows-sync
+        if [[ -f "$wslconfig_dest" && ! -f "$wslconfig_dest.pre-dotfiles.bak" ]] && \
+           ! grep -q "copied (not symlinked" "$wslconfig_dest" 2>/dev/null; then
+          cp "$wslconfig_dest" "$wslconfig_dest.pre-dotfiles.bak" || true
+        fi
+        if cp "$DOTFILES_DIR/wslconfig" "$wslconfig_dest" 2>/dev/null; then
+          print -r -- "  Updated $wslconfig_dest — run 'wsl --shutdown' from Windows to apply"
+        else
+          print -r -- "  Copy to $wslconfig_dest failed — copy wslconfig there manually"
+        fi
+      fi
+    else
+      echo "  Could not resolve %USERPROFILE% — copy wslconfig to it manually as .wslconfig"
     fi
   else
     # Native Linux: Alacritty is never installed here, but alacritty.toml is
