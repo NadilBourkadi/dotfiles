@@ -9,6 +9,7 @@ brew "lazygit"
 brew "tree-sitter-cli"
 brew "pandoc"
 brew "gh"
+brew "awscli"
 brew "harlequin"
 brew "unzip" if OS.linux?  # minimal Ubuntu lacks it; Mason needs it for zip-packaged tools
 
