@@ -149,6 +149,16 @@ Currently on **Neovim 0.12.4**; config targets **0.11+** with breaking API chang
   terminal draws it on a fixed cell grid — the symptom is spaced-out text
   ("Cl aude Code"). Check with `fc-match "Hack Nerd Font"`; it must not say
   `NotoSans`.
+- **sshd keeps the FIRST value it reads**, and `sshd_config` `Include`s
+  `sshd_config.d/*.conf` at the top in lexical order. The hardening drop-in is
+  therefore `01-dotfiles.conf`; a `99-` name silently loses to a distro or
+  cloud-init file that sets `PasswordAuthentication yes`. `init.zsh` only
+  installs it once `~/.ssh/authorized_keys` is non-empty — otherwise
+  key-only login would lock out the remote access before a key exists.
+  Ubuntu 24.04+ runs sshd via `ssh.socket`, so `systemctl reload ssh` fails
+  while the service is idle; use `try-reload-or-restart`.
+- SSH logins reach tmux through the `zshrc` auto-attach (`tmux attach ||
+  tmux new-session`, needs a tty), not through any sshd setting.
 - On WSL the Nerd Font must be installed on the **Windows** side (the
   terminal renders there); `fonts-hack` via apt does nothing useful.
 - WSL clipboard: WSLg Wayland + `wl-clipboard` (apt) — no win32yank needed.
