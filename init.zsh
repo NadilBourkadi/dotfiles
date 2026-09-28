@@ -223,6 +223,27 @@ elif [[ "$OSTYPE" == "linux"* ]]; then
     # Native Linux: Alacritty is never installed here, but alacritty.toml is
     # still symlinked, so a distro package predating 0.14 loses the palette.
     check_alacritty_import_support "$(command -v alacritty 2>/dev/null)"
+
+    # Hack Nerd Font: the macOS cask has no Linux equivalent, and without it
+    # fontconfig silently substitutes a proportional font, which a terminal
+    # then draws on a fixed cell grid ("Cl aude"). Per-user install, keyed
+    # off fc-list so reruns are no-ops.
+    if ! command -v fc-cache &>/dev/null; then
+      echo "fontconfig not found — skipping Hack Nerd Font install"
+    elif ! fc-list 2>/dev/null | grep -q "Hack Nerd Font"; then
+      echo -n "Installing Hack Nerd Font... "
+      font_dir="$HOME/.local/share/fonts/HackNerdFont"
+      font_tmp="$(mktemp -d)"
+      if curl -fsSL https://github.com/ryanoasis/nerd-fonts/releases/latest/download/Hack.tar.xz -o "$font_tmp/Hack.tar.xz" \
+         && mkdir -p "$font_dir" \
+         && tar -xJf "$font_tmp/Hack.tar.xz" -C "$font_dir" --wildcards 'HackNerdFont-*.ttf'; then
+        fc-cache -f "$font_dir" || echo "fc-cache failed — run it manually"
+        echo "${GREEN}Done${NC}"
+      else
+        echo "failed — install Hack Nerd Font manually from https://www.nerdfonts.com/font-downloads"
+      fi
+      rm -rf "$font_tmp"
+    fi
   fi
 
   # Make zsh the login shell (macOS already defaults to zsh).

@@ -143,6 +143,12 @@ Currently on **Neovim 0.12.4**; config targets **0.11+** with breaking API chang
   `~/.nvm`, loaded by `zshrc`). The nvm installer must run with
   `PROFILE=/dev/null` or it appends loader lines to `~/.zshrc`, which is a
   symlink into this repo — dirtying the working tree.
+- On native Linux there is no font cask, so `init.zsh` downloads Hack Nerd Font
+  from the nerd-fonts GitHub release into `~/.local/share/fonts`. A missing font
+  **fails silently**: fontconfig substitutes proportional Noto Sans, and the
+  terminal draws it on a fixed cell grid — the symptom is spaced-out text
+  ("Cl aude Code"). Check with `fc-match "Hack Nerd Font"`; it must not say
+  `NotoSans`.
 - On WSL the Nerd Font must be installed on the **Windows** side (the
   terminal renders there); `fonts-hack` via apt does nothing useful.
 - WSL clipboard: WSLg Wayland + `wl-clipboard` (apt) — no win32yank needed.
