@@ -81,7 +81,7 @@ Files under `private/` (gitignored) are symlinked separately if the directory ex
 - **Starship** - Cross-shell prompt
 - **Lazygit** - Terminal UI for git
 - **Harlequin** - Terminal SQL IDE (PostgreSQL, MySQL, SQLite, DuckDB)
-- **Hack Nerd Font** - Icons in Neovim (macOS only — on WSL install it on Windows, see below)
+- **Hack Nerd Font** - Icons in Neovim (macOS: Homebrew cask; native Linux: downloaded to `~/.local/share/fonts` by `init.zsh`; WSL: install it on Windows, see below)
 - **nvm + Node.js LTS** - Via the nvm installer script, not Homebrew (needed by copilot.vim and Mason's npm-based servers)
 - **Zinit** - Zsh plugin manager (auto-installs on first shell launch)
 - **TPM** - Tmux Plugin Manager (press `prefix + I` to install plugins)
