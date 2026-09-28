@@ -72,6 +72,7 @@ Files under `private/` (gitignored) are symlinked separately if the directory ex
 ### Auto-installed by init.zsh (both macOS and Linux)
 - **Alacritty** - Terminal emulator (macOS only)
 - **Tmux** - Terminal multiplexer
+- **OpenSSH server** - Remote access to the tmux session (native Linux only, via apt; see [Remote access](#remote-access-ssh-into-tmux))
 - **Neovim** (0.11+) - Primary editor
 - **tree-sitter-cli** - Required by nvim-treesitter
 - **ripgrep** - Fast searching for Telescope
@@ -461,6 +462,24 @@ Run `nvim` after setup - lazy.nvim will automatically install all plugins.
 
 Sessions auto-save every 10 minutes via tmux-continuum and auto-restore when tmux starts. Nvim sessions are restored via persistence.nvim.
 
+### Remote access (SSH into tmux)
+
+On native Linux `init.zsh` installs `openssh-server`. An interactive login
+lands in the running tmux session (the `zshrc` auto-attach), mirrored with the
+local terminal; `scp`/`rsync`/`ssh host cmd` have no tty and skip it.
+
+1. Run `init.zsh` on the server. While `~/.ssh/authorized_keys` is empty,
+   password login stays on — it is needed to bootstrap the first key.
+2. From the machine you connect from: `ssh-copy-id <user>@<hostname>.local`
+   (mDNS name via avahi; use the IP if `.local` does not resolve).
+3. Rerun `init.zsh`. With a key present it copies `sshd-hardening.conf` to
+   `/etc/ssh/sshd_config.d/01-dotfiles.conf` (key-only, no root login).
+
+If the connection times out on Wi-Fi, check for AP/client isolation on the
+router. For a stable address, give the machine a DHCP reservation — it has a
+different IP on wired and wireless.
+
+
 ### Claude Code status indicators
 
 Two indicators surface the state of running Claude Code CLI instances:
@@ -505,6 +524,7 @@ dotfiles/
 │   └── alacritty-windows-sync   # Generates the Windows Alacritty config (WSL)
 ├── alacritty.toml      # Alacritty config for macOS / native Linux
 ├── wslconfig           # WSL2 VM settings, copied to %USERPROFILE%\.wslconfig
+├── sshd-hardening.conf # Key-only sshd drop-in, copied to /etc/ssh/sshd_config.d/ (native Linux)
 ├── alacritty/
 │   ├── theme.toml         # Catppuccin palette, shared by all platforms
 │   └── windows.toml       # Windows overrides (WSL shell, decorations, size)

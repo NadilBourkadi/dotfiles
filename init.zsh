@@ -141,6 +141,9 @@ elif [[ "$OSTYPE" == "linux"* ]]; then
   # surprise SIGTERMs during a big build.
   if _is_wsl; then
     apt_pkgs+=(earlyoom)
+  else
+    # openssh-server: remote access to the tmux session (see README)
+    apt_pkgs+=(openssh-server)
   fi
   if command -v apt-get &>/dev/null; then
     apt_missing=()
@@ -243,6 +246,42 @@ elif [[ "$OSTYPE" == "linux"* ]]; then
         echo "failed — install Hack Nerd Font manually from https://www.nerdfonts.com/font-downloads"
       fi
       rm -rf "$font_tmp"
+    fi
+
+    # SSH server hardening. Key-only login is gated on authorized_keys having
+    # a key: enabling it first would lock out the remote access it protects,
+    # and ssh-copy-id needs password login to bootstrap the first key.
+    ssh_dropin=/etc/ssh/sshd_config.d/01-dotfiles.conf
+    if [[ -s "$HOME/.ssh/authorized_keys" ]]; then
+      if ! sudo cmp -s "$DOTFILES_DIR/sshd-hardening.conf" "$ssh_dropin" 2>/dev/null; then
+        echo -n "Enabling key-only SSH login... "
+        sudo install -m 644 -o root -g root "$DOTFILES_DIR/sshd-hardening.conf" "$ssh_dropin"
+        # Validate before reload so a bad drop-in cannot take sshd down.
+        # sshd -t needs /run/sshd, which is normally made at first service
+        # start. try-reload-or-restart is a no-op while the socket-activated
+        # unit is idle, and the next start reads the file anyway.
+        sudo mkdir -p /run/sshd
+        if sudo sshd -t; then
+          if sudo systemctl try-reload-or-restart ssh; then
+            echo "${GREEN}Done${NC}"
+          else
+            echo
+            echo "  reload failed — run: sudo systemctl restart ssh"
+          fi
+        else
+          sudo rm -f "$ssh_dropin"
+          echo "failed — sshd rejected the config, drop-in removed (password login stays on)"
+        fi
+      fi
+    else
+      echo "Note: ~/.ssh/authorized_keys is empty, so SSH password login is still on."
+      echo "  From the machine you will connect from: ssh-copy-id $USER@$(hostname).local"
+      echo "  then rerun init.zsh to switch to key-only login."
+    fi
+    # ufw ships disabled on Ubuntu Desktop; if it has been turned on it
+    # would drop port 22 silently
+    if command -v ufw &>/dev/null && sudo ufw status 2>/dev/null | grep -q "^Status: active"; then
+      sudo ufw allow OpenSSH >/dev/null || echo "ufw allow OpenSSH failed — open port 22 manually"
     fi
   fi
 
