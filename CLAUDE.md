@@ -260,6 +260,24 @@ Currently on **Neovim 0.12.4**; config targets **0.11+** with breaking API chang
    markers in that file will cause every subsequent tool call to fail with a
    syntax error. Don't use `git rebase -i` to squash commits that touch those
    files. Use `git reset --soft <base>` + a single new commit instead.
+9. **A hit-enter prompt in a background nvim leaks memory without bound.** Any
+   message too long for the command line (seen: lualine's "issues with your
+   config" notice, NvimTree's git-timeout notice) blocks the main loop on
+   "Press ENTER" until a key is pressed. tmux-continuum restores a dozen nvims
+   at once, most in panes nobody looks at, so they sit blocked for days while
+   events queue behind them: three servers reached 10 GB, 4 GB and 1 GB with
+   near-zero RSS (it was all swapped/compressed -- `ps` RSS hides this; use
+   `top -o mem` or `footprint <pid>`). Symptom: `nvim --embed` ignores RPC
+   (`--remote-expr` hangs) and `sample <pid>` shows `wait_return`. Guarded by
+   `messagesopt = "wait:3000,..."` in `core/options.lua`; don't remove it.
+   Test it with an attached UI (`nvim_ui_attach` on an `--embed` child, then
+   read `nvim_get_mode().blocking`) -- a headless run never prompts.
+10. **`nvim/lazy-lock.json` is gitignored**, so plugin pins are per machine. A
+    config change that depends on an upstream rename (e.g. catppuccin's
+    `catppuccin-nvim`) does not reach a machine whose lock still pins the old
+    commit, and fails silently: lualine fell back to `auto` and raised the
+    notice above. After such a change run `:Lazy update <plugin>` on every
+    machine.
 
 ## Tmux Gotchas
 
