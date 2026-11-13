@@ -49,6 +49,9 @@ return {
       git = {
         enable = true,
         ignore = false,
+        -- Default is 400ms; `git status` in a large monorepo exceeds it, and
+        -- five timeouts disable git integration with a blocking message.
+        timeout = 2000,
       },
       actions = {
         open_file = {
