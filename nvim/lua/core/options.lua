@@ -68,6 +68,12 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
+-- Never park the main loop on a hit-enter prompt. A message too long for the
+-- command line (any vim.notify warning at startup) otherwise blocks until a
+-- key is pressed, which in a background tmux pane is never -- and events keep
+-- queuing meanwhile. That grew idle nvim servers to 10 GB.
+opt.messagesopt = "wait:3000,history:500"
+
 -- Auto-reload files changed externally
 opt.autoread = true
 vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold" }, {
