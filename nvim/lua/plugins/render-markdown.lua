@@ -59,7 +59,8 @@ pre code { background: none; padding: 0; }
 blockquote { border-left: 4px solid #ddd; margin-left: 0; padding-left: 16px; color: #666; }
 table { border-collapse: collapse; width: 100%; }
 th, td { border: 1px solid #ddd; padding: 8px 12px; text-align: left; }
-th { background: #f4f4f4; }]]
+th { background: #f4f4f4; }
+img { max-width: 100%; height: auto; }]]
 
     local function html_path_for(abs)
       local hash = vim.fn.sha256(abs)
