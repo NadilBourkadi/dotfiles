@@ -66,28 +66,71 @@ th { background: #f4f4f4; }]]
       return preview_dir .. "/" .. hash:sub(1, 12) .. ".html"
     end
 
-    --- Convert a markdown file to HTML preview. Returns the output path, or nil on error.
-    local function generate_html(abs)
-      local body = vim.fn.system("pandoc -f gfm -t html " .. vim.fn.shellescape(abs))
-      if vim.v.shell_error ~= 0 then
-        vim.notify("pandoc failed: " .. body, vim.log.levels.ERROR)
-        return nil
-      end
-      local html = "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><style>\n"
-        .. css
-        .. "\n</style></head><body>"
-        .. body
-        .. "</body></html>"
-      vim.fn.mkdir(preview_dir, "p")
-      local out = html_path_for(abs)
-      local f = io.open(out, "w")
-      if not f then
-        vim.notify("Failed to write " .. out, vim.log.levels.ERROR)
-        return nil
-      end
-      f:write(html)
+    -- Minimal page shell: pandoc's default template would add its own CSS and
+    -- demand a title. Standalone mode is still needed for --embed-resources.
+    local template = "<!DOCTYPE html><html><head><meta charset=\"utf-8\">"
+      .. "$for(header-includes)$$header-includes$$endfor$</head><body>$body$</body></html>\n"
+
+    local jobs = {} -- markdown path -> latest in-flight pandoc run
+
+    local function write_file(path, contents)
+      local f = io.open(path, "w")
+      if not f then return false end
+      f:write(contents)
       f:close()
-      return out
+      return true
+    end
+
+    --- Convert a markdown file to an HTML preview. Runs pandoc asynchronously --
+    --- --embed-resources fetches remote images, which must not block the editor
+    --- on every save -- and calls on_done(out) once the page is written.
+    --- Images are inlined as data URIs (resolved relative to the markdown file), so
+    --- they render from the preview dir and survive copy-paste into other tools.
+    local function generate_html(abs, on_done)
+      vim.fn.mkdir(preview_dir, "p")
+      local template_path = preview_dir .. "/template.html"
+      local style_path = preview_dir .. "/style.html"
+      if not write_file(template_path, template) or not write_file(style_path, "<style>\n" .. css .. "\n</style>") then
+        vim.notify("Failed to write preview support files in " .. preview_dir, vim.log.levels.ERROR)
+        return
+      end
+
+      local out = html_path_for(abs)
+      local cmd = {
+        "pandoc", "-f", "gfm", "-t", "html",
+        "--standalone", "--embed-resources",
+        "--template", template_path,
+        "-H", style_path,
+        "--resource-path", vim.fn.fnamemodify(abs, ":h"),
+        "-o", out,
+        abs,
+      }
+      -- A run stuck fetching a remote image can finish after a newer one, so
+      -- kill the previous run for this file and ignore whatever it reports.
+      if jobs[abs] then jobs[abs]:kill("sigterm") end
+      local job
+      job = vim.system(cmd, { text = true }, vim.schedule_wrap(function(res)
+        if jobs[abs] ~= job then return end
+        jobs[abs] = nil
+        local stderr = vim.trim(res.stderr or "")
+        if res.code ~= 0 then
+          vim.notify("pandoc failed: " .. stderr, vim.log.levels.ERROR)
+          return
+        end
+        if stderr ~= "" then
+          -- e.g. an image that couldn't be fetched; the page is still written.
+          -- Keep only pandoc's [WARNING] lines -- an HTTP failure adds a long
+          -- error dump after each one.
+          local warnings = {}
+          for line in stderr:gmatch("[^\n]+") do
+            if line:match("^%[WARNING%]") then table.insert(warnings, line) end
+          end
+          vim.notify("pandoc: " .. (#warnings > 0 and table.concat(warnings, "\n") or stderr:match("[^\n]+")),
+            vim.log.levels.WARN)
+        end
+        if on_done then on_done(out) end
+      end))
+      jobs[abs] = job
     end
 
     vim.keymap.set("n", "<leader>mp", "<cmd>RenderMarkdown toggle<CR>", { desc = "Toggle markdown preview" })
@@ -99,10 +142,12 @@ th { background: #f4f4f4; }]]
       end
 
       local abs = vim.fn.fnamemodify(src, ":p")
-      local out = generate_html(abs)
-      if not out then return end
+      if previewed_path == abs then
+        generate_html(abs)
+        return
+      end
 
-      if previewed_path ~= abs then
+      generate_html(abs, function(out)
         local ok, err = pcall(vim.ui.open, out)
         if not ok then
           vim.notify("Failed to open browser: " .. tostring(err), vim.log.levels.ERROR)
@@ -119,7 +164,7 @@ th { background: #f4f4f4; }]]
             generate_html(abs)
           end,
         })
-      end
+      end)
     end, { desc = "Preview markdown as HTML in browser" })
   end,
 }
